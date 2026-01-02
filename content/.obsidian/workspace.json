@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "todo.md",
+                "file": "news/2025/a-new-year-test.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "todo"
+              "title": "a-new-year-test"
             }
           }
         ],
@@ -109,7 +109,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "todo.md",
+                "file": "news/2025/a-new-year-test.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -119,7 +119,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for todo"
+              "title": "Backlinks for a-new-year-test"
             }
           },
           {
@@ -128,12 +128,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "todo.md",
+                "file": "news/2025/a-new-year-test.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from todo"
+              "title": "Outgoing links from a-new-year-test"
             }
           },
           {
@@ -171,13 +171,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "todo.md",
+                "file": "news/2025/a-new-year-test.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of todo"
+              "title": "Outline of a-new-year-test"
             }
           }
         ]
@@ -200,8 +200,8 @@
   },
   "active": "487e57037567bd59",
   "lastOpenFiles": [
-    "news/2025/a-new-year-test.md",
     "todo.md",
+    "news/2025/a-new-year-test.md",
     "_templates/news.md",
     "news/2025",
     "news/New folder",

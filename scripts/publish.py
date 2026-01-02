@@ -3,10 +3,17 @@
 publish.py
 - If PATH is a file: print frontmatter + decisions (single mode)
 - If PATH is a directory: scan all *.md recursively and print grouped decisions (bulk mode)
+- Optional: --json for machine-readable output
+
+Important:
+- In bulk mode, we skip any directories that start with "_" or "." under the scan root.
+  This prevents scanning editor-only and template folders like:
+    content/_templates, content/_references, content/.obsidian, content/.trash
 
 Usage:
-  python publish.py path/to/article.md
-  python publish.py content --now "2025-12-31 21:00" --tz "Europe/Copenhagen"
+  python3 scripts/publish.py content/news
+  python3 scripts/publish.py content --now "2025-12-31 21:00"
+  python3 scripts/publish.py content --json
 """
 
 from __future__ import annotations
@@ -14,7 +21,7 @@ from __future__ import annotations
 import argparse
 import os
 import sys
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
@@ -175,7 +182,13 @@ def decide(frontmatter: Dict[str, Any], now: datetime, tzname: str) -> Decisions
 
 
 def iter_markdown_files(root: str) -> Iterable[str]:
-    for dirpath, _, filenames in os.walk(root):
+    """
+    Walk root recursively and yield *.md, but skip any directory whose name starts
+    with "_" or "." (templates, references, editor state, trash).
+    """
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = [d for d in dirnames if not (d.startswith("_") or d.startswith("."))]
+
         for fn in filenames:
             if fn.lower().endswith(".md"):
                 yield os.path.join(dirpath, fn)
@@ -215,7 +228,24 @@ def relpath(path: str, base: str) -> str:
         return path
 
 
-def print_bulk(results: List[BulkResult], base: str) -> int:
+def print_bulk(results: List[BulkResult], base: str, as_json: bool = False) -> int:
+    if as_json:
+        import json
+
+        payload = []
+        for r in results:
+            payload.append(
+                {
+                    "path": relpath(r.path, base),
+                    "ok": r.ok,
+                    "error": r.error,
+                    "frontmatter": r.frontmatter,
+                    "decisions": r.decisions.__dict__ if r.decisions else None,
+                }
+            )
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
+        return 1 if any(not r.ok for r in results) else 0
+
     publish_now: List[BulkResult] = []
     scheduled_later: List[BulkResult] = []
     drafts_review: List[BulkResult] = []
@@ -267,11 +297,22 @@ def print_bulk(results: List[BulkResult], base: str) -> int:
             if it.error:
                 print(f"  error: {it.error}")
 
-    # Exit code: 0 if no problems, 1 if problems exist
     return 1 if problems else 0
 
 
-def print_single(fm: Dict[str, Any], d: Decisions, now: datetime) -> None:
+def print_single(fm: Dict[str, Any], d: Decisions, now: datetime, as_json: bool = False, path: str = "") -> None:
+    if as_json:
+        import json
+
+        payload = {
+            "path": path,
+            "now": now.isoformat(),
+            "frontmatter": fm,
+            "decisions": d.__dict__,
+        }
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
+        return
+
     print("== Frontmatter summary ==")
     print(f"id:          {fm.get('id')}")
     print(f"title:       {fm.get('title')}")
@@ -312,6 +353,7 @@ def main() -> int:
         default="",
         help='Override "now" (e.g. "2025-12-31 20:00"). If omitted, uses current time in --tz.',
     )
+    ap.add_argument("--json", action="store_true", help="Output machine-readable JSON")
     args = ap.parse_args()
 
     zone = dttz.gettz(args.tz)
@@ -332,21 +374,31 @@ def main() -> int:
         base = target
         files = list(iter_markdown_files(target))
         if not files:
-            print("No .md files found.")
+            if args.json:
+                import json
+
+                print(json.dumps([], indent=2, ensure_ascii=False))
+            else:
+                print("No .md files found.")
             return 0
 
         results = [evaluate_file(p, now=now, tzname=args.tz) for p in files]
-        return print_bulk(results, base=base)
+        return print_bulk(results, base=base, as_json=args.json)
 
     # Single file mode
     md = read_text(target)
     fm, _ = split_frontmatter(md)
     if not fm:
-        print("No valid frontmatter found.")
+        if args.json:
+            import json
+
+            print(json.dumps({"path": target, "ok": False, "error": "No valid frontmatter found."}, indent=2))
+        else:
+            print("No valid frontmatter found.")
         return 1
 
     d = decide(fm, now=now, tzname=args.tz)
-    print_single(fm, d, now=now)
+    print_single(fm, d, now=now, as_json=args.json, path=target)
     return 0
 
 
