@@ -1,1 +1,24 @@
-[]
+{
+  "202512310318-stormwind-quiet-evening": {
+    "path": "news/2025/a-new-year-test.md",
+    "title": "Testing New Year",
+    "section": "news",
+    "publish_at": "2025-12-31 20:00",
+    "recorded_at": "2026-01-04T23:13:20Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1457564971608182848",
+        "starter_message_id": "1457564971608182848",
+        "posted_at": "2026-01-05T02:42:49Z"
+      },
+      "announce": {
+        "message_id": "1457564975739441294",
+        "posted_at": "2026-01-05T02:42:49Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_post",
+      "at": "2026-01-05T02:42:49Z"
+    }
+  }
+}

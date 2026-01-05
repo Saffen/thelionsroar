@@ -4,39 +4,24 @@
     "type": "split",
     "children": [
       {
-        "id": "e6f2ed236be40d7d",
+        "id": "59e31ea6e96e6915",
         "type": "tabs",
         "children": [
           {
-            "id": "cc0b65c1878f2381",
+            "id": "d0823973de318fb1",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "news/2025/a-new-year-test.md",
+                "file": "_references/publish_announce.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "a-new-year-test"
-            }
-          },
-          {
-            "id": "487e57037567bd59",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "news/2025/a-new-year-test.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "a-new-year-test"
+              "title": "publish_announce"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -109,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "news/2025/a-new-year-test.md",
+                "file": "_references/frontmatter-guide.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -119,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for a-new-year-test"
+              "title": "Backlinks for frontmatter-guide"
             }
           },
           {
@@ -128,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "news/2025/a-new-year-test.md",
+                "file": "_references/frontmatter-guide.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from a-new-year-test"
+              "title": "Outgoing links from frontmatter-guide"
             }
           },
           {
@@ -171,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "news/2025/a-new-year-test.md",
+                "file": "_references/frontmatter-guide.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of a-new-year-test"
+              "title": "Outline of frontmatter-guide"
             }
           }
         ]
@@ -198,9 +183,10 @@
       "bases:Create new base": false
     }
   },
-  "active": "487e57037567bd59",
+  "active": "d0823973de318fb1",
   "lastOpenFiles": [
-    "todo.md",
+    "_references/todo.md",
+    "_references/publish-decision-matrix.md",
     "news/2025/a-new-year-test.md",
     "_templates/news.md",
     "news/2025",
