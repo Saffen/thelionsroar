@@ -64,18 +64,15 @@
 
     {% if ticker_items and ticker_items|length > 0 %}
       <div class="ticker">
-        <div class="container ticker-inner">
-          <span class="ticker-label">Breaking News</span>
-          <div class="ticker-track" aria-label="Breaking headlines">
-            {% for t in ticker_items %}
-              <span class="ticker-item">{{ t }}</span>
-              {% if not loop.last %}
-                <span class="ticker-sep">·</span>
-              {% endif %}
-            {% endfor %}
+      <div class="container ticker-inner">
+        <span class="ticker-label">Breaking News</span>
+        <div class="ticker-track" aria-label="Breaking headlines">
+          <div id="dynamic-ticker">
+            <span class="ticker-item">Henter seneste nyt...</span>
           </div>
         </div>
       </div>
+    </div>
     {% endif %}
   </header>
 
@@ -135,6 +132,8 @@
   });
 })();
 </script>
+<script src="{{ site.base_url }}/assets/js/widgets.js" defer></script>
+
 
 </body>
 </html>

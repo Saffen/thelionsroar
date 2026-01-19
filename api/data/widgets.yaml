@@ -1,0 +1,26 @@
+# thelionsroar/api/data/widgets.yaml
+zones:
+  article-rail-left:
+    - id: "nav-widget"
+      type: "navigation"
+      title: "Sections"
+      data:
+        - { label: "Home", href: "/" }
+        - { label: "News", href: "/news/" }
+        - { label: "Opinion", href: "/opinion/" }
+        - { label: "Culture", href: "/culture/" }
+
+    - id: "breaking-news"
+      type: "ticker"
+      title: "Live News"
+      data:
+        - "Defias Brotherhood spotted near Northshire!"
+        - "New trade tariffs announced by the House of Nobles."
+        - "Stormwind Library hosting lore night this Friday."
+
+    - id: "weekly-poll"
+      type: "poll"
+      title: "Weekly Poll"
+      data:
+        question: "Hvem er din favorit-leder?"
+        options: ["Anduin Wrynn", "Thrall", "Jaina Proudmoore"]
