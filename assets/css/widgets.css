@@ -14,12 +14,11 @@
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    /* Vi beholder guld-farven for identitet, men justerer rammen */
-    color: #ffd700; 
+    color: var(--accent-gold); /* Bruger nu variablen */
     border-bottom: 2px solid var(--line-strong);
     padding-bottom: 0.6rem;
     margin-bottom: 1.2rem;
-    font-weight: 700;
+    font-weight: 800; /* Gør den lidt tungere for at hjælpe tydeligheden */
 }
 
 /* Navigation Links */
@@ -42,7 +41,7 @@
 }
 
 .widget-nav-list a:hover {
-    color: #ffd700;
+    color: var(--accent-gold); /* Guld ved hover */
     padding-left: 4px;
     text-decoration: none;
 }
@@ -53,7 +52,7 @@
     line-height: 1.5;
     color: var(--ink);
     margin-bottom: 1rem;
-    border-left: 3px solid #ffd700;
+    border-left: 3px solid var(--accent-gold); /* Guld-streg i tickeren */
     padding-left: 0.8rem;
 }
 
@@ -87,4 +86,7 @@
 
 .btn-small:hover {
     background: var(--line);
+}
+:root[data-theme="dark"] .widget-title {
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }

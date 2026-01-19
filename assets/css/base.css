@@ -6,11 +6,11 @@
   --line-strong:#bdbdb2;
   --shade:#f1f1ea;
   --accent:#1b1b1b;
+  --accent-gold: #b8860b; /* En dybere "Dark Goldenrod" for bedre læsbarhed på lyst */
   --max:1120px;
   --serif: Georgia, "Times New Roman", Times, serif;
   --sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
 }
-
 /* Dark theme variables */
 :root[data-theme="dark"]{
   --ink:#f3f0e8;
@@ -20,6 +20,7 @@
   --line-strong:#3a3d44;
   --shade:#181a1f;
   --accent:#f3f0e8;
+  --accent-gold: #ffd700; /* Den klare guld der popper på mørk baggrund */
 }
 
 *{ box-sizing:border-box; }
