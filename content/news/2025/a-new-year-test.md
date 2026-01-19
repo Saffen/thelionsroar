@@ -7,7 +7,7 @@ priority: normal
 authors:
   - Hardhy Lester
 teaser: An oddly calm night raises more questions than answers
-publish_at: 2025-12-31 20:00
+publish_at: 31-12-2025 20:30
 status: scheduled
 discord_announce: true
 tags:

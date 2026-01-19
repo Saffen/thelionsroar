@@ -8,6 +8,7 @@ import yaml
 import markdown
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import re
+from datetime import datetime
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -132,8 +133,22 @@ def build_news_article_context(frontmatter: dict, md_body: str, body_html: str, 
     article = dict(frontmatter)
     article["html_body"] = body_html
     article["authors_display"] = ", ".join(authors)
-    article["date_iso"] = publish_at
-    article["date_display"] = publish_at
+    publish_at_raw = str(frontmatter.get("publish_at", "")).strip()
+
+    # We keep the raw string for backend/iso purposes
+    article["date_iso"] = publish_at_raw
+    
+    try:
+        # Parse the new format: dd-mm-yyyy HH:MM
+        dt = datetime.strptime(publish_at_raw, "%d-%m-%Y %H:%M")
+        
+        # Format to: "12 December (2025)"
+        # %B automatically uses English month names in most environments
+        article["date_display"] = dt.strftime("%d %B (%Y)")
+    except ValueError:
+        # Fallback to raw string if parsing fails
+        article["date_display"] = publish_at_raw
+        
     article["tags"] = tag_objs
     article["section_label"] = section_label
     article["word_count"] = word_count
