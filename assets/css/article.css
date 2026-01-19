@@ -1,0 +1,155 @@
+/* =========================
+   Article page layout
+   Matches templates/article.html
+   ========================= */
+
+/* Grid: left rail + center article */
+.article-grid{
+  display:grid;
+  grid-template-columns: 260px minmax(0, 780px);
+  gap:18px;
+  padding:20px 0;
+  align-items:start;
+}
+
+/* Left rail is intentionally empty, but must reserve space */
+.rail-left{
+  border:1px solid var(--line);
+  background:transparent;
+  min-height:520px;
+}
+
+/* Tablet + mobile: no rail, no columns */
+@media (max-width: 900px){
+  .article-grid{ grid-template-columns: 1fr; }
+  .rail-left{ display:none; }
+}
+
+/* =========================
+   Article header + media
+   ========================= */
+
+/* Keep default feature-body padding from base.css (16px).
+   Do NOT reduce it, otherwise credit/title feel cramped. */
+.feature-article .feature-body{
+  padding-top:16px;
+}
+
+/* Hero image container from base.css already has height and border.
+   Ensure image fills the slot. */
+.feature-article .feature-media img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+/* Credit line under image, consistent with byline */
+.feature-article .image-credit{
+  display:block;
+  margin:0;
+  padding:8px 12px;
+  font-family:var(--sans);
+  font-size:11px;
+  line-height:1.25;
+  color:var(--muted);
+  border-top:1px solid var(--line);
+  background:transparent;
+}
+
+/* Title spacing for article pages */
+.feature-title-article{
+  margin:0 0 10px;
+}
+
+/* Byline should not add extra vertical gaps */
+.article-byline{
+  margin:0;
+}
+
+/* Rule spacing under byline */
+.rule-article{
+  margin:14px 0;
+}
+
+/* =========================
+   Article body: newspaper columns
+   Only apply columns to .article-body, nothing else.
+   ========================= */
+
+.article-body{
+  font-size:16px;
+  color:inherit;
+}
+
+/* Paragraph rhythm inside columns */
+.article-body p{
+  margin:0 0 1em;
+}
+.article-body p:first-child{
+  margin-top:0;
+}
+
+/* Avoid awkward breaks in columns */
+.article-body h2,
+.article-body blockquote,
+.article-body ul,
+.article-body ol{
+  break-inside:avoid;
+}
+
+/* Headings inside article body */
+.article-body h2{
+  font-family:var(--sans);
+  font-size:14px;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+  margin:18px 0 8px;
+}
+
+/* Blockquotes */
+.article-body blockquote{
+  margin:16px 0;
+  padding:10px 12px;
+  border-left:3px solid var(--line-strong);
+  background:var(--shade);
+}
+.article-body blockquote p{ margin:0; }
+
+/* Newspaper columns.
+   Key: scope tightly to .article-body.newspaper-columns */
+.article-body.newspaper-columns{
+  column-gap:32px;
+  column-rule:1px solid var(--line);
+}
+
+/* Per-article column count (set in template) */
+.article-body.newspaper-columns.columns-2{ column-count:2; }
+.article-body.newspaper-columns.columns-3{ column-count:3; }
+
+/* Collapse columns on tablet/mobile */
+@media (max-width: 900px){
+  .article-body.newspaper-columns{
+    column-count:1;
+    column-rule:none;
+  }
+}
+
+/* =========================
+   Dark mode specifics
+   ========================= */
+
+:root[data-theme="dark"] .article-body{
+  color:var(--ink);
+}
+
+:root[data-theme="dark"] .feature-article .image-credit{
+  color:var(--muted);
+  border-top-color:var(--line);
+}
+.feature-article .image-credit{
+  border-left:1px solid var(--line);
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  margin-top:-1px;
+}

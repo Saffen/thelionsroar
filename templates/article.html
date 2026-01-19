@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="article-grid" style="padding-top:20px;">
+    {# Left rail: intentionally empty, for later JS widgets #}
+    <aside
+      class="rail rail-left"
+      aria-label="Article rail"
+      data-widget-zone="article-rail-left"
+      style="min-height:520px;"
+    ></aside>
+
+    {# Center column: the article #}
+    <section class="article-center" aria-label="Article content">
+      <article class="feature feature-article">
+        {# Hero image #}
+        {% if article.image and article.image.src %}
+          <div class="feature-media">
+  <img
+    src="{{ site.base_url }}{{ article.image.src }}"
+    alt=""
+    loading="lazy"
+  />
+</div>
+
+{% if article.image.credit or article.image.source %}
+  <div class="image-credit">
+    {% if article.image.credit %}{{ article.image.credit }}{% endif %}
+    {% if article.image.source %}<span class="byline-sep">·</span>{{ article.image.source }}{% endif %}
+  </div>
+{% endif %}
+          </div>
+        {% endif %}
+
+        <div class="feature-body">
+          {% if article.kicker %}
+            <div class="kicker">{{ article.kicker }}</div>
+          {% endif %}
+
+          <h1 class="feature-title feature-title-article">
+            {{ article.title }}
+          </h1>
+
+          {% if article.teaser %}
+            <p class="feature-dek">{{ article.teaser }}</p>
+          {% endif %}
+
+          <div class="byline article-byline">
+            {% if article.authors_display %}
+              <span class="byline-item">By {{ article.authors_display }}</span>
+            {% endif %}
+
+            {% if article.reading_time_minutes and article.reading_time_minutes > 0 %}
+              <span class="byline-sep">·</span>
+              <span class="byline-item">{{ article.reading_time_minutes }} min read</span>
+            {% endif %}
+
+            {% if article.date_iso or article.date_display %}
+              <span class="byline-sep">·</span>
+              <time class="byline-item" datetime="{{ article.date_iso }}">{{ article.date_display }}</time>
+            {% endif %}
+
+            {% if article.tags and article.tags|length > 0 %}
+              <span class="byline-sep">·</span>
+              <span class="byline-item">
+                Tags:
+                {% for tag in article.tags %}
+                  <a href="{{ tag.url }}">{{ tag.label }}</a>{% if not loop.last %}, {% endif %}
+                {% endfor %}
+              </span>
+            {% endif %}
+          </div>
+
+          <hr class="rule rule-article" />
+
+          {# Newspaper columns: 2 by default, 3 if article.columns == 3 #}
+          {% set col_count = article.columns if article.columns in [2,3] else 2 %}
+          <div class="article-body newspaper-columns columns-{{ col_count }}">
+            {{ article.html_body | safe }}
+          </div>
+        </div>
+      </article>
+
+      {% if related and related|length > 0 %}
+        <section class="section-block" aria-label="Related articles">
+          <div class="section-head">
+            <h2 class="section-title">Related</h2>
+            <a class="section-link" href="{{ related_more_url }}">More in {{ article.section_label }}</a>
+          </div>
+
+          <div class="teaser-grid">
+            {% for a in related %}
+              <article class="teaser">
+                <h3 class="teaser-title"><a href="{{ a.url }}">{{ a.title }}</a></h3>
+                <p class="teaser-text">{{ a.teaser }}</p>
+                <div class="teaser-meta">By {{ a.authors_display }} · {{ a.date_display }}</div>
+              </article>
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+    </section>
+  </section>
+{% endblock %}

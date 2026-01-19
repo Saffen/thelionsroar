@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="frontgrid" aria-label="Front page lead">
+    <aside class="rail rail-left" aria-label="Recent news">
+      <h2 class="rail-title">{{ home.left_rail_title }}</h2>
+
+      {% for a in home.left_rail_articles %}
+        <article class="rail-item">
+          <h3 class="rail-headline"><a href="{{ a.url }}">{{ a.title }}</a></h3>
+          <div class="rail-meta">{{ a.authors_display }} · {{ a.date_display }}</div>
+        </article>
+      {% endfor %}
+
+      {% if home.left_rail_more_title %}
+        <div class="rail-divider"></div>
+        <h2 class="rail-title">{{ home.left_rail_more_title }}</h2>
+
+        {% for a in home.left_rail_more_articles %}
+          <article class="rail-item">
+            <h3 class="rail-headline"><a href="{{ a.url }}">{{ a.title }}</a></h3>
+            <div class="rail-meta">{{ a.authors_display }} · {{ a.date_display }}</div>
+          </article>
+        {% endfor %}
+      {% endif %}
+    </aside>
+
+    <section class="lead" aria-label="Main feature">
+      <article class="feature">
+        <div class="feature-media" role="img" aria-label="Main feature image"></div>
+
+        <div class="feature-body">
+          {% if home.main_feature.kicker %}
+            <div class="kicker">{{ home.main_feature.kicker }}</div>
+          {% endif %}
+
+          <h1 class="feature-title">
+            <a href="{{ home.main_feature.url }}">{{ home.main_feature.title }}</a>
+          </h1>
+
+          {% if home.main_feature.dek %}
+            <p class="feature-dek">{{ home.main_feature.dek }}</p>
+          {% endif %}
+
+          <div class="byline">
+            <span class="byline-item">By {{ home.main_feature.authors_display }}</span>
+            <span class="byline-sep">·</span>
+            <time class="byline-item" datetime="{{ home.main_feature.date_iso }}">{{ home.main_feature.date_display }}</time>
+            {% if home.main_feature.tags and home.main_feature.tags|length > 0 %}
+              <span class="byline-sep">·</span>
+              <span class="byline-item">
+                Tags:
+                {% for tag in home.main_feature.tags %}
+                  <a href="{{ tag.url }}">{{ tag.label }}</a>{% if not loop.last %}, {% endif %}
+                {% endfor %}
+              </span>
+            {% endif %}
+          </div>
+        </div>
+      </article>
+
+      <section class="section-block" aria-label="Top of section teasers">
+        <div class="section-head">
+          <h2 class="section-title">{{ home.top_teasers_title }}</h2>
+          <a class="section-link" href="{{ home.top_teasers_more_url }}">More</a>
+        </div>
+
+        <div class="teaser-grid">
+          {% for a in home.top_teasers %}
+            <article class="teaser">
+              <h3 class="teaser-title"><a href="{{ a.url }}">{{ a.title }}</a></h3>
+              <p class="teaser-text">{{ a.teaser }}</p>
+              <div class="teaser-meta">By {{ a.authors_display }} · {{ a.date_display }}</div>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+    </section>
+
+    <aside class="rail rail-right" aria-label="Sidebar widgets and small cards">
+      <section class="widget">
+        <h2 class="widget-title">Popular Articles</h2>
+
+        {% for a in home.popular_articles %}
+          <article class="mini-card">
+            <div class="mini-thumb" aria-hidden="true"></div>
+            <div class="mini-body">
+              <h3 class="mini-title"><a href="{{ a.url }}">{{ a.title }}</a></h3>
+              <div class="mini-meta">By {{ a.authors_display }} · {{ a.date_display }}</div>
+            </div>
+          </article>
+        {% endfor %}
+      </section>
+
+      <section class="widget">
+        <h2 class="widget-title">About</h2>
+        <p class="widget-text">{{ home.about_text }}</p>
+      </section>
+
+      <section class="widget">
+        <h2 class="widget-title">Discord</h2>
+        <p class="widget-text">{{ home.discord_text }}</p>
+        <a class="button" href="{{ home.discord_url }}">Join on Discord</a>
+      </section>
+
+      <section class="widget">
+        <h2 class="widget-title">Upcoming Events</h2>
+        <ul class="widget-list">
+          {% for e in home.events %}
+            <li><strong>{{ e.date }}</strong> · {{ e.title }}</li>
+          {% endfor %}
+        </ul>
+      </section>
+
+      <section class="widget">
+        <h2 class="widget-title">Popular Tags</h2>
+        <div class="tags">
+          {% for tag in home.popular_tags %}
+            <a class="tag" href="{{ tag.url }}">{{ tag.label }}</a>
+          {% endfor %}
+        </div>
+      </section>
+    </aside>
+  </section>
+
+  <hr class="rule" />
+
+  <section class="belowfold" aria-label="Section blocks">
+    {% for block in home.section_blocks %}
+      <section class="triptych">
+        <div class="section-head">
+          <h2 class="section-title">{{ block.title }}</h2>
+          <a class="section-link" href="{{ block.more_url }}">More</a>
+        </div>
+
+        <div class="card-row">
+          {% for a in block.articles %}
+            <article class="card">
+              <div class="card-media" aria-hidden="true"></div>
+              <h3 class="card-title"><a href="{{ a.url }}">{{ a.title }}</a></h3>
+              <p class="card-text">{{ a.teaser }}</p>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+    {% endfor %}
+  </section>
+{% endblock %}

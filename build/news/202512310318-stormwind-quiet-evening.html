@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Testing New Year | The Lion&#39;s Roar</title>
+  <link rel="stylesheet" href="/assets/css/base.css" />
+
+  
+    <link rel="stylesheet" href="/assets/css/article.css" />
+  
+
+
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="masthead">
+    <div class="masthead-top container">
+      <div class="masthead-left">
+        <div class="mini-meta"></div>
+        <div class="social-dots" aria-label="Social links">
+          <span class="dot" title="Discord"></span>
+          <span class="dot" title="Twitter/X"></span>
+          <span class="dot" title="YouTube"></span>
+          <span class="dot" title="Instagram"></span>
+        </div>
+      </div>
+
+      <div class="masthead-center">
+        <div class="brand">The Lion&#39;s Roar</div>
+        <div class="tagline">Reporting from Stormwind and beyond</div>
+      </div>
+
+      <div class="masthead-right">
+        <div class="mini-meta"></div>
+        <button class="theme-toggle" type="button" aria-label="Toggle theme">
+  Theme
+</button>
+
+      </div>
+    </div>
+
+    <nav class="nav-bar" aria-label="Primary">
+      <div class="container nav-inner">
+        <button class="nav-toggle" aria-label="Menu" aria-expanded="false" type="button">
+          ☰
+        </button>
+
+        <ul class="nav-links">
+          
+            <li><a href="/">Home</a></li>
+          
+            <li><a href="/news/">News</a></li>
+          
+            <li><a href="/opinion/">Opinion</a></li>
+          
+            <li><a href="/culture/">Culture</a></li>
+          
+        </ul>
+
+        <div class="nav-meta">
+          
+        </div>
+      </div>
+    </nav>
+
+    
+  </header>
+
+  <main id="main" class="container">
+    
+  <section class="article-grid" style="padding-top:20px;">
+    
+    <aside
+      class="rail rail-left"
+      aria-label="Article rail"
+      data-widget-zone="article-rail-left"
+      style="min-height:520px;"
+    ></aside>
+
+    
+    <section class="article-center" aria-label="Article content">
+      <article class="feature feature-article">
+        
+        
+          <div class="feature-media">
+  <img
+    src="/assets/images/stormwind-night.jpg"
+    alt=""
+    loading="lazy"
+  />
+</div>
+
+
+  <div class="image-credit">
+    L. Greycandle
+    <span class="byline-sep">·</span>Lion&#39;s Roar archives
+  </div>
+
+          </div>
+        
+
+        <div class="feature-body">
+          
+
+          <h1 class="feature-title feature-title-article">
+            Testing New Year
+          </h1>
+
+          
+            <p class="feature-dek">An oddly calm night raises more questions than answers</p>
+          
+
+          <div class="byline article-byline">
+            
+              <span class="byline-item">By Hardhy Lester</span>
+            
+
+            
+              <span class="byline-sep">·</span>
+              <span class="byline-item">1 min read</span>
+            
+
+            
+              <span class="byline-sep">·</span>
+              <time class="byline-item" datetime="2025-12-31 20:00">2025-12-31 20:00</time>
+            
+
+            
+              <span class="byline-sep">·</span>
+              <span class="byline-item">
+                Tags:
+                
+                  <a href="/tags/stormwind/">stormwind</a>, 
+                
+                  <a href="/tags/city-watch/">city-watch</a>, 
+                
+                  <a href="/tags/newyear/">newyear</a>
+                
+              </span>
+            
+          </div>
+
+          <hr class="rule rule-article" />
+
+          
+          
+          <div class="article-body newspaper-columns columns-2">
+            <p>The lamps along the Trade District were lit early this evening, not out of necessity,
+but out of habit. Guards reported no disturbances, merchants closed on time, and even
+the gryphon roosts were quieter than usual.</p>
+<p>Whether this calm marks the beginning of a peaceful winter stretch, or merely the pause
+before something louder, remains to be seen.</p>
+          </div>
+        </div>
+      </article>
+
+      
+    </section>
+  </section>
+
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <div>© The Lion&#39;s Roar</div>
+        <div class="footer-links">
+          
+            <a href="/about/">About</a>
+          
+            <a href="/contact/">Contact</a>
+          
+            <a href="/privacy/">Privacy</a>
+          
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      const btn = document.querySelector(".nav-toggle");
+      const links = document.querySelector(".nav-links");
+      if (!btn || !links) return;
+
+      btn.addEventListener("click", () => {
+        const open = links.classList.toggle("is-open");
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+    })();
+  </script>
+  <script>
+(function () {
+  const root = document.documentElement;
+  const key = "lr-theme";
+
+  function apply(theme) {
+    if (theme) root.setAttribute("data-theme", theme);
+    else root.removeAttribute("data-theme");
+  }
+
+  const saved = localStorage.getItem(key);
+  if (saved === "dark" || saved === "light") {
+    apply(saved);
+  } else {
+    const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    apply(prefersDark ? "dark" : "light");
+  }
+
+  const btn = document.querySelector(".theme-toggle");
+  if (!btn) return;
+
+  btn.addEventListener("click", () => {
+    const current = root.getAttribute("data-theme") || "light";
+    const next = current === "dark" ? "light" : "dark";
+    apply(next);
+    localStorage.setItem(key, next);
+  });
+})();
+</script>
+
+</body>
+</html>

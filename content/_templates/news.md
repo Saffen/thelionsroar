@@ -20,5 +20,6 @@ image:
 kicker:
 correction_of:
 editor_note:
+template: news_article
 ---
 Write the article body here.

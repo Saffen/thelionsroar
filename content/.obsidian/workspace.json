@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "_references/publish_announce.md",
+                "file": "news/2025/a-new-year-test.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "publish_announce"
+              "title": "a-new-year-test"
             }
           }
         ]
@@ -185,13 +185,14 @@
   },
   "active": "d0823973de318fb1",
   "lastOpenFiles": [
-    "_references/todo.md",
-    "_references/publish-decision-matrix.md",
-    "news/2025/a-new-year-test.md",
     "_templates/news.md",
+    "news/2025/a-new-year-test.md",
+    "_references/frontmatter-guide.md",
+    "_references/todo.md",
+    "_references/publish_announce.md",
+    "_references/publish-decision-matrix.md",
     "news/2025",
     "news/New folder",
-    "_references/frontmatter-guide.md",
     "scripts/publish.py",
     "scripts/New Text Document.txt",
     "scripts",

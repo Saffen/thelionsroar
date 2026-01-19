@@ -22,6 +22,7 @@ image:
 kicker:
 correction_of:
 editor_note:
+template: news_article
 ---
 The lamps along the Trade District were lit early this evening, not out of necessity,
 but out of habit. Guards reported no disturbances, merchants closed on time, and even
