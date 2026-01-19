@@ -19,8 +19,8 @@ const widgetRenderers = {
     poll: (w) => {
         if (!w.data) return '';
         return `<form class="poll-widget"><p>${w.data.question}</p>` +
-            w.data.options.map(opt => `<label><input type="radio" name="${w.id}"> ${opt}</label>`).join('<br>') +
-            `<br><button type="button" class="btn-small">Stem</button></form>`;
+            w.data.options.map(opt => `<label><input type="radio" name="${w.id}"> ${opt}</label>`).join('') +
+            `<button type="button" class="btn-small">Vote</button></form>`;
     }
 };
 

@@ -22,5 +22,5 @@ zones:
       type: "poll"
       title: "Weekly Poll"
       data:
-        question: "Hvem er din favorit-leder?"
+        question: "Who is your favorite leader?"
         options: ["Anduin Wrynn", "Thrall", "Jaina Proudmoore"]

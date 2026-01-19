@@ -19,6 +19,20 @@
     padding-bottom: 0.6rem;
     margin-bottom: 1.2rem;
     font-weight: 800; /* Gør den lidt tungere for at hjælpe tydeligheden */
+    position: relative;
+    text-align: center; /* Klassisk centreret overskrift */
+    border-bottom: 1px solid var(--line-strong);
+}
+.widget-title::after {
+    content: "◈"; 
+    position: absolute;
+    bottom: -9px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--shade);
+    padding: 0 10px;
+    color: var(--accent-gold);
+    font-size: 14px;
 }
 
 /* Navigation Links */

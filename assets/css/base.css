@@ -6,7 +6,7 @@
   --line-strong:#bdbdb2;
   --shade:#f1f1ea;
   --accent:#1b1b1b;
-  --accent-gold: #b8860b; /* En dybere "Dark Goldenrod" for bedre læsbarhed på lyst */
+  --accent-gold: #b8860b; 
   --max:1120px;
   --serif: Georgia, "Times New Roman", Times, serif;
   --sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
@@ -20,7 +20,30 @@
   --line-strong:#3a3d44;
   --shade:#181a1f;
   --accent:#f3f0e8;
-  --accent-gold: #ffd700; /* Den klare guld der popper på mørk baggrund */
+  --accent-gold: #ffd700;
+}
+/* Immersive theme variables */
+:root[data-theme="immersive"] {
+  --paper: #e8dfc4;
+  --ink: #3a2f26;
+  --muted: #7d6b5d;
+  --line: #c4b49d;
+  --line-strong: #a69277;
+  --shade: #dfd3b6;
+  --accent-gold: #8b4513;
+}
+
+/* Specifikke rettelser til Immersive layout */
+:root[data-theme="immersive"] .masthead {
+  border-bottom: 4px double var(--line-strong);
+  background: var(--paper);
+}
+
+:root[data-theme="immersive"] body {
+  background-color: var(--paper);
+  /* En simpel gradient der giver dybde uden at lave "flise-gitter" eller regnbue-støj */
+  background-image: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.05) 100%);
+  background-attachment: fixed;
 }
 
 *{ box-sizing:border-box; }
@@ -183,10 +206,6 @@ a:hover{ text-decoration:underline; }
   background:transparent;
 }
 
-:root[data-theme="dark"] .theme-toggle{
-  background:transparent;
-}
-
 /* Ticker */
 .ticker{
   border-bottom:1px solid var(--line);
@@ -261,11 +280,6 @@ a:hover{ text-decoration:underline; }
   font-size:11px;
   color:var(--muted);
 }
-.rail-divider{
-  height:1px;
-  background:var(--line);
-  margin:12px 0;
-}
 
 /* Feature */
 .feature-media{
@@ -298,14 +312,6 @@ a:hover{ text-decoration:underline; }
   font-size:30px;
   line-height:1.12;
 }
-.feature-dek{
-  margin:0 0 10px;
-  color:#222;
-  font-size:15px;
-}
-:root[data-theme="dark"] .feature-dek{
-  color:var(--ink);
-}
 
 .byline{
   font-family:var(--sans);
@@ -313,23 +319,6 @@ a:hover{ text-decoration:underline; }
   color:var(--muted);
 }
 .byline a{ text-decoration:underline; }
-.byline-sep{ padding:0 6px; color:var(--line-strong); }
-
-/* Tags */
-.tags{ display:flex; flex-wrap:wrap; gap:8px; }
-.tag{
-  display:inline-block;
-  border:1px solid var(--line);
-  background:var(--shade);
-  padding:4px 8px;
-  border-radius:999px;
-  font-family:var(--sans);
-  font-size:12px;
-  color:#333;
-}
-:root[data-theme="dark"] .tag{
-  color:var(--ink);
-}
 
 /* Shared blocks */
 .section-head{
@@ -346,127 +335,63 @@ a:hover{ text-decoration:underline; }
   text-transform:uppercase;
   font-family:var(--sans);
 }
-.section-link{
-  font-family:var(--sans);
-  font-size:12px;
-  color:var(--muted);
+
+/* Theme Toggle (Fastholdt 3-state version her i bunden) */
+.theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: block;
 }
 
-/* Widgets + mini cards */
-.widget{
-  padding:10px 0;
-  border-bottom:1px solid var(--line);
-}
-.widget:last-child{ border-bottom:none; }
-.widget-title{
-  margin:0 0 8px;
-  font-family:var(--sans);
-  text-transform:uppercase;
-  letter-spacing:0.04em;
-  font-size:13px;
-}
-.widget-text{
-  margin:0;
-  font-size:13px;
-  color:#222;
-}
-:root[data-theme="dark"] .widget-text{
-  color:var(--ink);
+.toggle-track {
+  width: 78px; 
+  height: 26px;
+  background-color: var(--line-strong);
+  border-radius: 13px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  transition: background-color 0.3s ease;
 }
 
-.widget-list{
-  margin:0;
-  padding-left:16px;
-  font-family:var(--sans);
-  font-size:12px;
-  color:var(--muted);
+.sun-icon { color: #f59e0b; z-index: 1; }
+.news-icon { color: var(--muted); z-index: 1; }
+.moon-icon { color: var(--muted); z-index: 1; }
+
+.toggle-thumb {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: #fff;
+  border-radius: 50%;
+  top: 3px;
+  left: 3px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  z-index: 2;
 }
 
-.button{
-  display:inline-block;
-  margin-top:10px;
-  padding:8px 10px;
-  border:1px solid var(--ink);
-  background:#fff;
-  font-family:var(--sans);
-  font-size:12px;
-  text-transform:uppercase;
-  letter-spacing:0.04em;
-}
-:root[data-theme="dark"] .button{
-  background:transparent;
-}
+/* Positioner for den hvide cirkel */
+:root[data-theme="light"] .toggle-thumb { transform: translateX(0); }
+:root[data-theme="immersive"] .toggle-thumb { transform: translateX(26px); }
+:root[data-theme="dark"] .toggle-thumb { transform: translateX(52px); }
 
-.mini-card{
-  display:grid;
-  grid-template-columns: 58px 1fr;
-  gap:10px;
-  align-items:center;
-  padding:10px 0;
-  border-top:1px solid var(--line);
-}
-.mini-card:first-of-type{ border-top:none; }
-.mini-thumb{
-  width:58px; height:44px;
-  border:1px solid var(--line);
-  background:linear-gradient(135deg, #e9e9e2, #f7f7f2);
-}
-:root[data-theme="dark"] .mini-thumb{
-  background:linear-gradient(135deg, #1a1c21, #121318);
-}
-.mini-title{
-  margin:0;
-  font-size:14px;
-  line-height:1.2;
-}
-.mini-meta{
-  font-family:var(--sans);
-  font-size:11px;
-  color:var(--muted);
-  margin-top:3px;
-}
+/* Theme-specific tweaks */
+:root[data-theme="immersive"] .toggle-track { background-color: #c4b49d; }
+:root[data-theme="immersive"] .news-icon { color: #8b4513; }
+:root[data-theme="dark"] .moon-icon { color: #f3f0e8; }
 
-/* Below fold */
-.rule{
-  border:none;
-  border-top:2px solid var(--line-strong);
-  margin:16px 0 12px;
-}
-
-.triptych{ padding:14px 0; }
-
-.card-row{
-  display:grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap:14px;
-}
-
-.card{
-  padding:12px;
-}
-
-.card-media{
-  height:120px;
-  border:1px solid var(--line);
-  background:linear-gradient(135deg, #e9e9e2, #f7f7f2);
-  margin-bottom:10px;
-}
-:root[data-theme="dark"] .card-media{
-  background:linear-gradient(135deg, #1a1c21, #121318);
-}
-
-.card-title{
-  margin:0 0 6px;
-  font-size:16px;
-  line-height:1.2;
-}
-.card-text{
-  margin:0;
-  font-size:13px;
-  color:#222;
-}
-:root[data-theme="dark"] .card-text{
-  color:var(--ink);
+:root[data-theme="immersive"] body {
+    background-color: var(--paper);
+    /* Dette skaber et "korn-lag" af sort/hvide prikker, der aldrig fejler */
+    background-image: 
+        radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.08) 100%),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)' opacity='0.15'/%3E%3C/svg%3E");
+    background-attachment: fixed;
 }
 
 /* Footer */
@@ -483,106 +408,9 @@ a:hover{ text-decoration:underline; }
   justify-content:space-between;
   gap:12px;
 }
-.footer-links{ display:flex; gap:12px; }
-.footer a{ text-decoration:underline; }
 
 /* Responsive shell */
-@media (max-width: 1040px){
-  .brand{ font-size:38px; }
-}
-
 @media (max-width: 900px){
   .masthead-top{ grid-template-columns: 1fr; text-align:center; }
   .masthead-left,.masthead-right{ align-items:center; }
-  .masthead-right{ align-items:center; }
-
-  .card-row{ grid-template-columns: 1fr; }
-}
-
-@media (max-width: 720px){
-  .nav-toggle{ display:inline-flex; align-items:center; justify-content:center; }
-
-  .nav-links{
-    display:none;
-    flex-direction:column;
-    gap:10px;
-    padding:10px 0 0;
-  }
-  .nav-links.is-open{ display:flex; }
-
-  .brand{ font-size:32px; }
-  .feature-title{ font-size:26px; }
-}
-.theme-toggle {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-}
-
-.toggle-track {
-    width: 60px;
-    height: 30px;
-    background-color: #333; /* Mørk farve som i image_066020.png */
-    border-radius: 15px;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 6px;
-    transition: background-color 0.3s;
-}
-
-/* Ikon farver */
-.sun-icon { color: #ffd700; z-index: 1; }
-.moon-icon { color: #888; z-index: 1; }
-
-/* Ny Theme Toggle Styling */
-.theme-toggle {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  display: block;
-}
-
-.toggle-track {
-  width: 52px;
-  height: 26px;
-  background-color: var(--line-strong); /* Bruger dine variabler */
-  border-radius: 13px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 6px;
-  transition: background-color 0.3s ease;
-}
-
-.sun-icon { color: #f59e0b; z-index: 1; }
-.moon-icon { color: var(--muted); z-index: 1; }
-
-.toggle-thumb {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  background-color: #fff;
-  border-radius: 50%;
-  top: 3px;
-  left: 3px;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-}
-
-/* Flyt cirklen når dark theme er aktivt */
-:root[data-theme="dark"] .toggle-thumb {
-  transform: translateX(26px);
-}
-
-:root[data-theme="dark"] .toggle-track {
-  background-color: var(--line);
-}
-
-:root[data-theme="dark"] .moon-icon {
-  color: #f3f0e8;
 }
