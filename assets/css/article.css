@@ -127,11 +127,18 @@
 .article-body.newspaper-columns.columns-2{ column-count:2; }
 .article-body.newspaper-columns.columns-3{ column-count:3; }
 
-/* Collapse columns on tablet/mobile */
 @media (max-width: 900px){
-  .article-body.newspaper-columns{
-    column-count:1;
-    column-rule:none;
+  .article-grid{ 
+    display: flex;
+    flex-direction: column; /* Stabler dem ovenpå hinanden */
+  }
+  .rail-left{ 
+    display: block; /* Sørg for at den er synlig */
+    width: 100%;
+    order: 2; /* Flytter widgets under artiklen */
+    min-height: auto;
+    border: none;
+    margin-top: 2rem;
   }
 }
 

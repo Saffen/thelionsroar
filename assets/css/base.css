@@ -182,16 +182,6 @@ a:hover{ text-decoration:underline; }
   background:transparent;
 }
 
-/* Theme toggle button */
-.theme-toggle{
-  font-family:var(--sans);
-  font-size:12px;
-  border:1px solid var(--line);
-  background:#fff;
-  color:var(--ink);
-  padding:6px 10px;
-  border-radius:8px;
-}
 :root[data-theme="dark"] .theme-toggle{
   background:transparent;
 }
@@ -521,4 +511,77 @@ a:hover{ text-decoration:underline; }
 
   .brand{ font-size:32px; }
   .feature-title{ font-size:26px; }
+}
+.theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.toggle-track {
+    width: 60px;
+    height: 30px;
+    background-color: #333; /* Mørk farve som i image_066020.png */
+    border-radius: 15px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 6px;
+    transition: background-color 0.3s;
+}
+
+/* Ikon farver */
+.sun-icon { color: #ffd700; z-index: 1; }
+.moon-icon { color: #888; z-index: 1; }
+
+/* Ny Theme Toggle Styling */
+.theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: block;
+}
+
+.toggle-track {
+  width: 52px;
+  height: 26px;
+  background-color: var(--line-strong); /* Bruger dine variabler */
+  border-radius: 13px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px;
+  transition: background-color 0.3s ease;
+}
+
+.sun-icon { color: #f59e0b; z-index: 1; }
+.moon-icon { color: var(--muted); z-index: 1; }
+
+.toggle-thumb {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: #fff;
+  border-radius: 50%;
+  top: 3px;
+  left: 3px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* Flyt cirklen når dark theme er aktivt */
+:root[data-theme="dark"] .toggle-thumb {
+  transform: translateX(26px);
+}
+
+:root[data-theme="dark"] .toggle-track {
+  background-color: var(--line);
+}
+
+:root[data-theme="dark"] .moon-icon {
+  color: #f3f0e8;
 }

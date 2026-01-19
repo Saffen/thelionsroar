@@ -1,0 +1,90 @@
+/* thelionsroar/assets/css/widgets.css */
+
+.widget-card {
+    /* Bruger --shade til baggrund og --line til ramme fra base.css */
+    background: var(--shade); 
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.widget-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    /* Vi beholder guld-farven for identitet, men justerer rammen */
+    color: #ffd700; 
+    border-bottom: 2px solid var(--line-strong);
+    padding-bottom: 0.6rem;
+    margin-bottom: 1.2rem;
+    font-weight: 700;
+}
+
+/* Navigation Links */
+.widget-nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.widget-nav-list li {
+    margin-bottom: 0.6rem;
+}
+
+.widget-nav-list a {
+    color: var(--ink); /* Skifter mellem lys/mørk tekst */
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    display: block;
+}
+
+.widget-nav-list a:hover {
+    color: #ffd700;
+    padding-left: 4px;
+    text-decoration: none;
+}
+
+/* Ticker beskeder */
+.ticker-msg {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--ink);
+    margin-bottom: 1rem;
+    border-left: 3px solid #ffd700;
+    padding-left: 0.8rem;
+}
+
+/* Poll styling */
+.poll-widget p {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--ink);
+}
+
+.poll-widget label {
+    display: block;
+    margin-bottom: 0.6rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.btn-small {
+    background: var(--paper);
+    color: var(--ink);
+    border: 1px solid var(--line-strong);
+    padding: 5px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-family: var(--sans);
+    margin-top: 0.8rem;
+    transition: background 0.2s;
+}
+
+.btn-small:hover {
+    background: var(--line);
+}
