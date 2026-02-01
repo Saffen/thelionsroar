@@ -160,3 +160,28 @@
   border-bottom:1px solid var(--line);
   margin-top:-1px;
 }
+:root[data-theme="immersive"] .article-body p:first-of-type::first-letter {
+  float: left;
+  font-size: 5rem;
+  line-height: 0.8;
+  padding-right: 12px;
+  font-family: var(--serif);
+  font-weight: bold;
+  color: var(--ink);
+  text-transform: uppercase;
+}
+:root[data-theme="immersive"] .article-grid {
+  display: block;
+  max-width: 800px;
+  margin: 0 auto;
+  padding-top: 40px;
+}
+
+:root[data-theme="immersive"] .rail-left {
+  display: none; /* Helt væk i dette tema */
+}
+
+:root[data-theme="immersive"] .feature-article .image-credit {
+    border: 1px solid var(--ink);
+    margin-top: 5px;
+}

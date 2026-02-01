@@ -45,6 +45,20 @@
   background-image: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.05) 100%);
   background-attachment: fixed;
 }
+:root[data-theme="immersive"] .nav-links {
+  display: none; /* Gemmer alle links som standard */
+}
+
+/* Tilføj en lille "Menu" tekst i stedet for bjælken */
+:root[data-theme="immersive"] .nav-inner::before {
+  content: "MENU ☰";
+  font-family: var(--sans);
+  font-size: 11px;
+  cursor: pointer;
+  border: 1px solid var(--ink);
+  padding: 4px 8px;
+  opacity: 0.6;
+}
 
 *{ box-sizing:border-box; }
 html,body{ height:100%; }
@@ -113,16 +127,21 @@ a:hover{ text-decoration:underline; }
 .masthead-right{ align-items:flex-end; }
 
 .brand{
-  font-size:44px;
   letter-spacing:0.06em;
   font-weight:700;
   text-align:center;
+  margin-bottom: -3.6rem;
+}
+
+.brand text {
+  font-size: 44px;
 }
 .tagline{
   text-align:center;
   font-family:var(--sans);
   font-size:12px;
   color:var(--muted);
+  /* margin-top: -3rem;*/
 }
 
 .social-dots{ display:flex; gap:6px; }
@@ -136,17 +155,8 @@ a:hover{ text-decoration:underline; }
   background:transparent;
 }
 
-.barcode{
-  width:120px; height:26px;
-  border:1px solid var(--line);
-  background:
-    repeating-linear-gradient(90deg,#111 0 2px,#fff 2px 4px);
-  opacity:0.55;
-}
-:root[data-theme="dark"] .barcode{
-  opacity:0.35;
-  background:
-    repeating-linear-gradient(90deg,var(--ink) 0 2px, transparent 2px 4px);
+:root[data-theme="dark"] .brand{
+  color: var(--ink);
 }
 
 /* Nav */
@@ -377,21 +387,67 @@ a:hover{ text-decoration:underline; }
 
 /* Positioner for den hvide cirkel */
 :root[data-theme="light"] .toggle-thumb { transform: translateX(0); }
-:root[data-theme="immersive"] .toggle-thumb { transform: translateX(26px); }
-:root[data-theme="dark"] .toggle-thumb { transform: translateX(52px); }
+:root[data-theme="dark"] .toggle-thumb { transform: translateX(26px); }
+:root[data-theme="immersive"] .toggle-thumb { transform: translateX(52px); }
 
 /* Theme-specific tweaks */
 :root[data-theme="immersive"] .toggle-track { background-color: #c4b49d; }
 :root[data-theme="immersive"] .news-icon { color: #8b4513; }
 :root[data-theme="dark"] .moon-icon { color: #f3f0e8; }
 
+/* ==========================================================================
+   RADIKALT IMMERSIVE LAYOUT (1930 Newspaper Style)
+   ========================================================================== */
+
+:root[data-theme="immersive"] {
+  /* Farver præcis fra "THE SOCIETY" referencen */
+  --paper: #f2e8d5;      /* Varm creme/papir */
+  --ink: #3d352e;        /* Mørkebrun blæk */
+  --line-strong: #3d352e;
+  --shade: transparent;  /* Ingen baggrund på kasser */
+}
+
 :root[data-theme="immersive"] body {
-    background-color: var(--paper);
-    /* Dette skaber et "korn-lag" af sort/hvide prikker, der aldrig fejler */
-    background-image: 
-        radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.08) 100%),
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)' opacity='0.15'/%3E%3C/svg%3E");
-    background-attachment: fixed;
+  background-color: var(--paper);
+  background-image: none; /* Fjerner al "støj" og billeder */
+  color: var(--ink);
+}
+
+/* Gør alle containere gennemsigtige, så papiret er ens overalt */
+:root[data-theme="immersive"] .rail,
+:root[data-theme="immersive"] .feature,
+:root[data-theme="immersive"] .section-block,
+:root[data-theme="immersive"] .card,
+:root[data-theme="immersive"] .nav-bar,
+:root[data-theme="immersive"] .masthead {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+:root[data-theme="immersive"] .masthead-top {
+  display: block; /* Fra grid til centreret blok */
+  text-align: center;
+  /*border-top: 3px solid var(--ink);*/
+  /*border-bottom: 1px solid var(--ink);*/
+  padding: 30px 0 10px;
+  margin-top: 20px;
+}
+
+:root[data-theme="immersive"] .brand {
+  font-size: 45px; /* Dominerende titel */
+  text-transform: uppercase;
+  font-family: var(--serif);
+  /* margin-top: -5rem; */
+  /* margin-bottom: -5rem; */
+}
+
+:root[data-theme="immersive"] .tagline {
+  /*border-top: 3px solid var(--ink);*/
+  padding: 2px 0;
+  margin-top: -8rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
 }
 
 /* Footer */
@@ -409,8 +465,19 @@ a:hover{ text-decoration:underline; }
   gap:12px;
 }
 
+
 /* Responsive shell */
 @media (max-width: 900px){
   .masthead-top{ grid-template-columns: 1fr; text-align:center; }
   .masthead-left,.masthead-right{ align-items:center; }
+}
+/* Tilføj/ret dette i din base.css */
+.brand {
+  /* Som standard bruger vi blæk-farven */
+  color: var(--ink); 
+}
+
+:root[data-theme="dark"] .brand {
+  /* Skift til guld i dark mode, hvis det foretrækkes, ellers brug var(--ink) for hvid */
+  color: var(--accent-gold); 
 }

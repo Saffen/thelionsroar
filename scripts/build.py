@@ -84,7 +84,7 @@ def base_context(site_base_url: str) -> dict:
     site = {
         "base_url": site_base_url,
         "name": "The Lion's Roar",
-        "tagline": "Reporting from Stormwind and beyond",
+        "tagline": "An Independant source of news for the discerning reader of Azeroth.",
         "edition_left": "",
         "edition_right": "",
         "edition_pill": "",
