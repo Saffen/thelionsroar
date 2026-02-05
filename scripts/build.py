@@ -94,7 +94,7 @@ def base_context(site_base_url: str) -> dict:
         {"href": f"{site_base_url}/", "label": "Home"},
         {"href": f"{site_base_url}/news/", "label": "News"},
         {"href": f"{site_base_url}/opinion/", "label": "Opinion"},
-        {"href": f"{site_base_url}/culture/", "label": "Culture"},
+        {"href": f"{site_base_url}/events/", "label": "Events"},
     ]
 
     footer_links = [
