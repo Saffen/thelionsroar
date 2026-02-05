@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{{ page_title }}</title>
-  <link rel="stylesheet" href="{{ site.base_url }}/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/newbase.css" />
 {% if extra_css and extra_css|length > 0 %}
   {% for href in extra_css %}
     <link rel="stylesheet" href="{{ href }}" />
@@ -26,6 +26,8 @@
 
       <div class="masthead-center">
         <div class="brand">
+          <div class="brand-icon lion-icon"></div>
+          <div class="brand-text">
           <svg viewBox="0 0 500 140" xmlns="http://www.w3.org/2000/svg">
             <line x1="40" y1="20" x2="460" y2="20" stroke="currentColor" stroke-width="2" />
             <text x="50%" y="45" text-anchor="middle" 
@@ -38,8 +40,9 @@
             </text>
             <line x1="40" y1="70" x2="460" y2="70" stroke="currentColor" stroke-width="2" />
           </svg>
+          <div class="tagline">{{ site.tagline }}</div>
+          </div>
         </div>
-        <div class="tagline">{{ site.tagline }}</div>
       </div>
 
       <div class="masthead-right">
