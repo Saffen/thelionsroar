@@ -1,59 +1,180 @@
 <!DOCTYPE html>
-<html lang="da" data-theme="light">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <title>The Lion's Roar - Admin Editor</title>
     <link rel="stylesheet" href="/assets/css/base.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; height: 80vh; margin-top: 20px; }
-        textarea { width: 100%; height: 100%; font-family: monospace; padding: 15px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); resize: none; }
+        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; height: 65vh; margin-top: 20px; }
+        textarea { width: 100%; height: 100%; font-family: 'Courier New', monospace; padding: 15px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); resize: none; }
         #preview { padding: 20px; border: 1px solid var(--line); background: #fff; overflow-y: auto; }
-        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        input, select { padding: 8px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); }
-        .btn-publish { background: var(--accent-gold); color: #fff; padding: 10px 20px; border: none; cursor: pointer; font-weight: bold; }
+        .form-section { background: #f4f4f4; padding: 20px; border-radius: 4px; margin-bottom: 20px; border: 1px solid #ddd; }
+        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        input, select { padding: 8px; border: 1px solid #ccc; width: 100%; box-sizing: border-box; }
+        label { display: block; font-size: 0.75rem; margin-bottom: 4px; font-weight: bold; text-transform: uppercase; color: #555; }
+        .btn-group { display: flex; gap: 15px; margin-top: 20px; padding-bottom: 40px; }
+        .btn-publish { background: #b3924e; color: #fff; padding: 12px 30px; border: none; cursor: pointer; font-weight: bold; }
+        .btn-preview { background: #444; color: #fff; padding: 12px 30px; border: none; cursor: pointer; font-weight: bold; }
+        .options-row { display: flex; align-items: center; gap: 20px; font-size: 0.8rem; background: #eee; padding: 10px; border-radius: 4px; }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; }
+        .checkbox-item input { width: auto; }
     </style>
 </head>
 <body class="container">
-    <header class="masthead">
-        <h1 class="brand">Admin Editor</h1>
+    <header style="margin-bottom: 20px;">
+        <h1>Lion's Editor</h1>
     </header>
+    
+    <form id="publishForm">
+        <div class="form-section">
+            <div class="form-row">
+                <div style="grid-column: span 2;">
+                    <label for="title">Headline</label>
+                    <input type="text" name="title" id="title" placeholder="Enter article title..." required>
+                </div>
+                <div>
+                    <label for="author">Author</label>
+                    <input list="authors" name="author" id="author" placeholder="Select or type name..." required>
+                    <datalist id="authors">
+                        <option value="Hardhy Lester">
+                        <option value="The Lion's Roar Staff">
+                        <option value="Guest Contributor">
+                    </datalist>
+                </div>
+                <div>
+                    <label for="publish_at">Publish Date & Time</label>
+                    <input type="datetime-local" name="publish_at" id="publish_at" required>
+                </div>
+            </div>
 
-    <form id="publishForm" enctype="multipart/form-data">
-        <div class="form-row">
-            <input type="text" name="title" id="title" placeholder="Artiklens titel..." required>
-            <input type="text" name="author" placeholder="Forfatter" value="Redaktionen">
-            <input type="datetime-local" name="publish_at" id="publish_at">
-            <input type="file" name="image" accept="image/*">
+            <div class="form-row">
+                <div>
+                    <label for="section">Section</label>
+                    <select name="section" id="section">
+                        <option value="news">News</option>
+                        <option value="opinion">Opinion</option>
+                        <option value="events">Events</option>
+                        <option value="lifestyle">Lifestyle</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="type">Article Type</label>
+                    <select name="type" id="type">
+                        <option value="report">Report</option>
+                        <option value="feature">Feature</option>
+                        <option value="interview">Interview</option>
+                        <option value="editorial">Editorial</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="status">Publication Status</label>
+                    <select name="status" id="status">
+                        <option value="scheduled">Scheduled (Auto-Publish)</option>
+                        <option value="draft">Draft (Hidden)</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="tags">Tags (comma separated)</label>
+                    <input type="text" name="tags" id="tags" placeholder="stormwind, tech, politics">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div>
+                    <label for="image">Featured Image</label>
+                    <input type="file" name="image" id="image" accept="image/*">
+                </div>
+                <div>
+                    <label for="image_credit">Image Credit</label>
+                    <input type="text" name="image_credit" id="image_credit" placeholder="Photographer name">
+                </div>
+                <div>
+                    <label for="image_source">Image Source</label>
+                    <input type="text" name="image_source" id="image_source" value="Lion's Roar archives">
+                </div>
+                <div>
+                    <label for="image_type">Visual Category</label>
+                    <select name="image_type" id="image_type">
+                        <option value="illustration">Illustration</option>
+                        <option value="photograph">Photograph</option>
+                        <option value="screenshot">Screenshot</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row" style="margin-top: 10px;">
+                <div style="grid-column: span 3;">
+                    <label for="teaser">Teaser (Short summary)</label>
+                    <input type="text" name="teaser" id="teaser" placeholder="A brief introduction..." required>
+                </div>
+                <div class="options-row">
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="discord_announce" id="discord_announce" checked>
+                        <label for="discord_announce" style="margin: 0;">Announce on Discord</label>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="admin-grid">
-            <textarea name="content" id="content" placeholder="Skriv din Markdown her..."></textarea>
-            <div id="preview" class="article-body"></div>
+            <div class="editor-pane">
+                <label>Body Content (<a href target="_blank" url="https://www.markdownguide.org/basic-syntax/">HELP</a>)</label>
+                <textarea name="content" id="content" placeholder="Type your story here..."></textarea>
+            </div>
+            <div class="preview-pane">
+                <label>Live Preview</label>
+                <div id="preview" class="article-body"></div>
+            </div>
         </div>
 
-        <button type="submit" class="btn-publish" style="margin-top: 20px;">Udgiv til Stage 1 (Source)</button>
+        <div class="btn-group">
+            <button type="button" class="btn-preview" onclick="updatePreview()">Refresh Preview</button>
+            <button type="submit" class="btn-publish">Save Article</button>
+        </div>
     </form>
 
     <script>
-        const content = document.getElementById('content');
-        const preview = document.getElementById('preview');
+        const contentArea = document.getElementById('content');
+        const previewArea = document.getElementById('preview');
         
-        // Live Preview logik
-        content.addEventListener('input', () => {
-            preview.innerHTML = marked.parse(content.value);
-        });
+        function updatePreview() {
+            const rawValue = contentArea.value;
+            previewArea.innerHTML = marked.parse(rawValue);
+        }
 
-        // Sæt standard dato til nu
+        contentArea.addEventListener('input', updatePreview);
+
         document.getElementById('publish_at').value = new Date().toISOString().slice(0, 16);
 
-        // Submit logik
         document.getElementById('publishForm').onsubmit = async (e) => {
             e.preventDefault();
+            
+            const status = document.getElementById('status').value;
+            const confirmMsg = status === 'draft' 
+                ? "Save this as a draft?" 
+                : "Are you sure you want to schedule this article for publication?";
+            
+            if (!confirm(confirmMsg)) return;
+
             const formData = new FormData(e.target);
-            const response = await fetch('/api/admin/publish', { method: 'POST', body: formData });
-            const result = await response.json();
-            alert(result.message);
+            formData.set('discord_announce', document.getElementById('discord_announce').checked);
+            
+            try {
+                const response = await fetch('/api/admin/publish', { 
+                    method: 'POST', 
+                    body: formData 
+                });
+                
+                const result = await response.json();
+                if (response.ok) {
+                    alert("Success: " + result.message);
+                } else {
+                    alert("Error: " + (result.detail || "Failed to save"));
+                }
+            } catch (err) {
+                alert("Network error: Could not reach API");
+            }
         };
     </script>
 </body>

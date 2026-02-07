@@ -10,10 +10,15 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from slugify import slugify
+import markdown
 
-app = FastAPI(title="The Lion's Roar API")
+# IP-lås baseret på dine logs
+ALLOWED_IP = "192.168.0.1"
 
-# --- OPRINDELIG KONFIGURATION OG CORS ---
+# Initialisér app med deaktiveret redirect for at undgå Nginx 404/307 loops
+app = FastAPI(title="The Lion's Roar API", redirect_slashes=False)
+
+# --- CORS ---
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -21,51 +26,63 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Sti til widget data
-DATA_FILE = Path("/app/data/widgets.yaml")
+# Hjælpefunktion til at verificere IP
+def verify_ip(request: Request):
+    forwarded = request.headers.get("X-Forwarded-For")
+    client_ip = forwarded.split(',')[0] if forwarded else request.client.host
+    
+    if client_ip != ALLOWED_IP:
+        print(f"FORBIDDEN ACCESS ATTEMPT FROM: {client_ip}")
+        raise HTTPException(status_code=403, detail=f"Forbidden: Your IP ({client_ip}) is not allowed")
+    return client_ip
 
-def load_data():
-    if not DATA_FILE.exists():
-        return {"zones": {}}
-    with open(DATA_FILE, "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
-
-# Oprindeligt endpoint bevaret
-@app.get("/widgets/config")
-async def get_config():
-    """Returnerer hele YAML-strukturen inklusive 'data' feltet."""
-    return load_data()
-
-# --- SETUP AF TEMPLATES OG ASSETS ---
-# Vi bruger /app prefix da det kører i Docker med de nye mounts
+# Setup af templates og assets
 templates = Jinja2Templates(directory="/app/templates")
 
 if os.path.exists("/app/assets"):
     app.mount("/assets", StaticFiles(directory="/app/assets"), name="assets")
 
-# --- ADMIN PANEL ENDPOINTS ---
+# --- ENDPOINTS ---
 
-@app.get("/api/admin", response_class=HTMLResponse)
+@app.get("/admin", response_class=HTMLResponse)
+@app.get("/admin/", response_class=HTMLResponse)
 async def get_admin_editor(request: Request):
-    """Serverer selve editoren."""
+    verify_ip(request)
     return templates.TemplateResponse("admin_editor.html", {"request": request})
 
-@app.post("/api/admin/publish")
+@app.post("/admin/preview")
+async def admin_preview(request: Request, content: str = Form(...)):
+    verify_ip(request)
+    html_content = markdown.markdown(content, extensions=['extra', 'codehilite'])
+    return JSONResponse({"html": html_content})
+
+@app.post("/admin/publish")
 async def handle_publish(
+    request: Request,
     title: str = Form(...),
     author: str = Form(...),
+    publish_at: str = Form(...),
+    section: str = Form("news"),
+    type: str = Form("report"),
+    status: str = Form("scheduled"),
+    tags: str = Form(""),
+    image_credit: str = Form(""),
+    image_source: str = Form("Lion's Roar archives"),
+    image_type: str = Form("illustration"),
     teaser: str = Form(...),
     content: str = Form(...),
-    publish_at: str = Form(...),
+    discord_announce: bool = Form(True),
     image: UploadFile = File(None)
 ):
+    verify_ip(request)
+    
     try:
-        # 1. Parse dato og generer ID (YYYYMMDDHHMM-slug)
+        # 1. Parse dato og generer ID
         dt = datetime.fromisoformat(publish_at)
         article_id = f"{dt.strftime('%Y%m%d%H%M')}-{slugify(title)}"
         year_folder = dt.strftime('%Y')
         
-        # 2. Håndter billed-upload til mountet volume
+        # 2. Håndter billed-upload
         image_ref = ""
         if image and image.filename:
             ext = os.path.splitext(image.filename)[1].lower()
@@ -78,27 +95,40 @@ async def handle_publish(
             
             image_ref = f"/assets/images/{img_name}"
 
-        # 3. Opbyg Frontmatter (YAML) baseret på projektets standarder
+        # 3. Process Tags (lav tekst om til liste)
+        tag_list = [t.strip() for t in tags.split(",") if t.strip()]
+
+        # 4. Opbyg Frontmatter (YAML) præcis efter dit format
         frontmatter = {
             "id": article_id,
             "title": title,
-            "teaser": teaser,
+            "section": section,
+            "type": type,
             "authors": [author],
+            "teaser": teaser,
             "publish_at": dt.strftime('%d-%m-%Y %H:%M'),
-            "status": "scheduled",
+            "status": status,
+            "discord_announce": discord_announce,
+            "tags": tag_list,
             "image": {
                 "src": image_ref,
-                "alt": title
-            }
+                "credit": image_credit,
+                "source": image_source,
+                "image_type": image_type
+            },
+            "kicker": "",
+            "correction_of": "",
+            "editor_note": "",
+            "template": "news_article"
         }
 
         # Generer Markdown indhold
         md_output = "---\n"
         md_output += yaml.dump(frontmatter, allow_unicode=True, sort_keys=False)
-        md_output += "---\n\n"
+        md_output += "---\n"
         md_output += content
 
-        # 4. Gem filen i mountet content volume
+        # 5. Gem filen i mountet content volume
         save_path = f"/app/content/news/{year_folder}/{article_id}.md"
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         
@@ -107,11 +137,12 @@ async def handle_publish(
 
         return JSONResponse({
             "status": "ok", 
-            "message": f"Artikel '{title}' er gemt: {article_id}.md",
+            "message": f"Article '{title}' saved as {status}: {article_id}.md",
             "id": article_id
         })
 
     except Exception as e:
+        print(f"ERROR: {str(e)}")
         return JSONResponse(
             status_code=500,
             content={"status": "error", "message": str(e)}

@@ -3,7 +3,6 @@ id: 202512310318-stormwind-quiet-evening
 title: Testing New Year
 section: news
 type: report
-priority: normal
 authors:
   - Hardhy Lester
 teaser: An oddly calm night raises more questions than answers
