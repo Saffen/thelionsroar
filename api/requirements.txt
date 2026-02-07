@@ -1,3 +1,7 @@
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
+jinja2
+python-multipart
 pyYAML==6.0.1
+python-slugify
+python-frontmatter

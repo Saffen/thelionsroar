@@ -3,22 +3,22 @@
     "path": "news/2025/a-new-year-test.md",
     "title": "Testing New Year",
     "section": "news",
-    "publish_at": "2025-12-31 20:00",
-    "recorded_at": "2026-01-04T23:13:20Z",
+    "publish_at": "31-12-2025 20:30",
+    "recorded_at": "2026-02-05T05:51:04Z",
     "discord": {
       "forum": {
-        "thread_id": "1457564971608182848",
-        "starter_message_id": "1457564971608182848",
-        "posted_at": "2026-01-05T02:42:49Z"
+        "thread_id": "1468846372798337117",
+        "starter_message_id": "1468846372798337117",
+        "posted_at": "2026-02-05T05:51:04Z"
       },
       "announce": {
-        "message_id": "1457564975739441294",
-        "posted_at": "2026-01-05T02:42:49Z"
+        "message_id": "1468846373997645917",
+        "posted_at": "2026-02-05T05:51:04Z"
       }
     },
     "discord_last_action": {
       "action": "announce_post",
-      "at": "2026-01-05T02:42:49Z"
+      "at": "2026-02-05T05:51:04Z"
     }
   }
 }

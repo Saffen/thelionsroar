@@ -216,18 +216,45 @@ def build_forum_payload(
 def build_announce_payload(
     *,
     title: str,
+    authors: List[str],
+    publish_time: str,
+    teaser: str,
+    image_url: str,
     article_url: str,
     thread_id: str,
 ) -> Dict[str, Any]:
-    # Thread mention makes a clickable link without needing guild id.
+    # Thread mention for the clickable link
     thread_mention = f"<#{thread_id}>" if thread_id else "(thread unavailable)"
-    lines = [f"**{title}**"]
+    
+    author_line = ", ".join([a for a in authors if a]) if authors else ""
+    fields: List[Dict[str, Any]] = []
+    if author_line:
+        fields.append({"name": "By", "value": author_line, "inline": True})
+    if publish_time:
+        fields.append({"name": "Published", "value": publish_time, "inline": True})
+    if thread_id:
+        fields.append({"name": "Discuss", "value": thread_mention, "inline": True})
+
+    desc_parts: List[str] = []
+    if teaser.strip():
+        desc_parts.append(teaser.strip())
     if article_url:
-        lines.append(article_url)
-    lines.append(f"Discuss: {thread_mention}")
+        desc_parts.append(f"[Read on the site]({article_url})")
+    description = "\n\n".join(desc_parts).strip()
+
+    embed: Dict[str, Any] = {
+        "title": title,
+        "description": description,
+        "color": 0x3d352e,  # You can set a custom hex color here (Lions Roar Brown)
+    }
+    if fields:
+        embed["fields"] = fields
+    if image_url:
+        embed["image"] = {"url": image_url}
 
     return {
-        "content": "\n".join(lines),
+        "content": "", # Optional: Add a small text like "@everyone" here if desired
+        "embeds": [embed],
         "allowed_mentions": {"parse": []},
     }
 
@@ -454,15 +481,19 @@ def main() -> int:
             posted_forum += 1
             print(f"Forum thread created: {aid} -> thread_id={thread_id}")
 
-        # Step B: post in announce channel with link to thread (if needed)
+        # Step B: post in announce channel (Updated call)
         if need_announce:
-            # If we just created the thread, thread_id is known. If not, pull from state.
             forum_state = state[aid]["discord"].get("forum")
             if isinstance(forum_state, dict) and not thread_id:
                 thread_id = str(forum_state.get("thread_id") or "").strip()
 
+            # Updated with more arguments to match the pimped layout
             payload = build_announce_payload(
                 title=title,
+                authors=authors,
+                publish_time=publish_time,
+                teaser=teaser,
+                image_url=image_url,
                 article_url=article_url or f"{section}/{year}/{slug}/",
                 thread_id=thread_id,
             )

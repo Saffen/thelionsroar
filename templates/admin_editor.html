@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="da" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <title>The Lion's Roar - Admin Editor</title>
+    <link rel="stylesheet" href="/assets/css/base.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; height: 80vh; margin-top: 20px; }
+        textarea { width: 100%; height: 100%; font-family: monospace; padding: 15px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); resize: none; }
+        #preview { padding: 20px; border: 1px solid var(--line); background: #fff; overflow-y: auto; }
+        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        input, select { padding: 8px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); }
+        .btn-publish { background: var(--accent-gold); color: #fff; padding: 10px 20px; border: none; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body class="container">
+    <header class="masthead">
+        <h1 class="brand">Admin Editor</h1>
+    </header>
+
+    <form id="publishForm" enctype="multipart/form-data">
+        <div class="form-row">
+            <input type="text" name="title" id="title" placeholder="Artiklens titel..." required>
+            <input type="text" name="author" placeholder="Forfatter" value="Redaktionen">
+            <input type="datetime-local" name="publish_at" id="publish_at">
+            <input type="file" name="image" accept="image/*">
+        </div>
+
+        <div class="admin-grid">
+            <textarea name="content" id="content" placeholder="Skriv din Markdown her..."></textarea>
+            <div id="preview" class="article-body"></div>
+        </div>
+
+        <button type="submit" class="btn-publish" style="margin-top: 20px;">Udgiv til Stage 1 (Source)</button>
+    </form>
+
+    <script>
+        const content = document.getElementById('content');
+        const preview = document.getElementById('preview');
+        
+        // Live Preview logik
+        content.addEventListener('input', () => {
+            preview.innerHTML = marked.parse(content.value);
+        });
+
+        // Sæt standard dato til nu
+        document.getElementById('publish_at').value = new Date().toISOString().slice(0, 16);
+
+        // Submit logik
+        document.getElementById('publishForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const response = await fetch('/api/admin/publish', { method: 'POST', body: formData });
+            const result = await response.json();
+            alert(result.message);
+        };
+    </script>
+</body>
+</html>
