@@ -1,0 +1,22 @@
+{
+    "timestamp_utc": "2026-02-12T19:43:43+00:00",
+    "ip": "94.145.252.170",
+    "artist_name": "Axel Vyper",
+    "contact_discord": "larstha",
+    "genre": "Glam rock\/metal",
+    "set_lengths_ok": [
+        "10-15",
+        "20-30"
+    ],
+    "set_length_preferred": "20-30",
+    "set_length_minimum": "15",
+    "accept_short_showcase": "yes",
+    "performance_description": "Total balls out glam metal with Axel Vyper doing his new original material. Everything is totally johnny bravo and focused on being hot and pick up babes and dudes.",
+    "availability": {
+        "fri": "no",
+        "sat": "no",
+        "sun": "late"
+    },
+    "playback_method": "w2g",
+    "performed_before": "no"
+}

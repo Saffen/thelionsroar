@@ -4,16 +4,6 @@ publish.py
 - If PATH is a file: print frontmatter + decisions (single mode)
 - If PATH is a directory: scan all *.md recursively and print grouped decisions (bulk mode)
 - Optional: --json for machine-readable output
-
-Important:
-- In bulk mode, we skip any directories that start with "_" or "." under the scan root.
-  This prevents scanning editor-only and template folders like:
-    content/_templates, content/_references, content/.obsidian, content/.trash
-
-Usage:
-  python3 scripts/publish.py content/news
-  python3 scripts/publish.py content --now "2025-12-31 21:00"
-  python3 scripts/publish.py content --json
 """
 
 from __future__ import annotations
@@ -26,13 +16,13 @@ from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 try:
-    import yaml  # pip install pyyaml
+    import yaml
 except Exception:
     print("ERROR: Missing dependency PyYAML. Install with: pip install pyyaml", file=sys.stderr)
     raise
 
 try:
-    from dateutil import parser as dtparser  # pip install python-dateutil
+    from dateutil import parser as dtparser
     from dateutil import tz as dttz
 except Exception:
     print("ERROR: Missing dependency python-dateutil. Install with: pip install python-dateutil", file=sys.stderr)
@@ -40,26 +30,23 @@ except Exception:
 
 
 FRONTMATTER_DELIM = "---"
+ALLOWED_STATUS = {"draft", "build", "scheduled", "published", "deleted"}
 
 
 def read_text(path: str) -> str:
-    with open(path, "r", encoding="utf-8") as f:
-        return f.read()
+    with open(path, "r", encoding="utf-8") as handle:
+        return handle.read()
 
 
 def split_frontmatter(md: str) -> Tuple[Dict[str, Any], str]:
-    """
-    Returns (frontmatter_dict, body_text). If no valid frontmatter, returns ({}, md).
-    Frontmatter format: first line '---', later line '---' ends it.
-    """
     lines = md.splitlines()
     if not lines or lines[0].strip() != FRONTMATTER_DELIM:
         return {}, md
 
     end_idx = None
-    for i in range(1, len(lines)):
-        if lines[i].strip() == FRONTMATTER_DELIM:
-            end_idx = i
+    for index in range(1, len(lines)):
+        if lines[index].strip() == FRONTMATTER_DELIM:
+            end_idx = index
             break
 
     if end_idx is None:
@@ -72,8 +59,8 @@ def split_frontmatter(md: str) -> Tuple[Dict[str, Any], str]:
         fm = yaml.safe_load(fm_text) or {}
         if not isinstance(fm, dict):
             fm = {}
-    except Exception as e:
-        print(f"ERROR: Failed to parse YAML frontmatter: {e}", file=sys.stderr)
+    except Exception as exc:
+        print(f"ERROR: Failed to parse YAML frontmatter: {exc}", file=sys.stderr)
         fm = {}
 
     return fm, body
@@ -84,31 +71,31 @@ def parse_dt(value: Any, tzname: str) -> Optional[datetime]:
         return None
     if isinstance(value, datetime):
         return value
-    s = str(value).strip()
-    if not s:
+    text = str(value).strip()
+    if not text:
         return None
 
-    dt = dtparser.parse(s)
+    dt = dtparser.parse(text)
     if dt.tzinfo is None:
         zone = dttz.gettz(tzname)
         dt = dt.replace(tzinfo=zone)
     return dt
 
 
-def as_list(v: Any) -> list:
-    if v is None:
+def as_list(value: Any) -> list:
+    if value is None:
         return []
-    if isinstance(v, list):
-        return v
-    return [v]
+    if isinstance(value, list):
+        return value
+    return [value]
 
 
-def is_truthy(v: Any) -> bool:
-    if isinstance(v, bool):
-        return v
-    if v is None:
+def is_truthy(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    if value is None:
         return False
-    return str(v).strip().lower() in {"1", "true", "yes", "y", "on"}
+    return str(value).strip().lower() in {"1", "true", "yes", "y", "on"}
 
 
 @dataclass
@@ -127,8 +114,8 @@ def decide(frontmatter: Dict[str, Any], now: datetime, tzname: str) -> Decisions
 
     title = str(frontmatter.get("title", "")).strip()
     section = str(frontmatter.get("section", "")).strip()
-    authors = [str(a).strip() for a in as_list(frontmatter.get("authors")) if str(a).strip()]
-    tags = [str(t).strip() for t in as_list(frontmatter.get("tags")) if str(t).strip()]
+    authors = [str(author).strip() for author in as_list(frontmatter.get("authors")) if str(author).strip()]
+    tags = [str(tag).strip() for tag in as_list(frontmatter.get("tags")) if str(tag).strip()]
 
     image = frontmatter.get("image") if isinstance(frontmatter.get("image"), dict) else {}
     image_src = str(image.get("src", "")).strip() if image else ""
@@ -136,16 +123,12 @@ def decide(frontmatter: Dict[str, Any], now: datetime, tzname: str) -> Decisions
 
     reasons: List[str] = []
 
-    allowed_status = {"draft", "review", "scheduled", "published", "archived"}
-    if status not in allowed_status:
-        reasons.append(f"Unknown status '{status}' (allowed: {sorted(allowed_status)}).")
+    if status not in ALLOWED_STATUS:
+        reasons.append(f"Unknown status '{status}' (allowed: {sorted(ALLOWED_STATUS)}).")
 
-    should_build = status in {"draft", "review", "scheduled", "published"}
-    if status == "archived":
-        should_build = False
-        reasons.append("Archived content is not built.")
-
+    should_build = status in {"build", "scheduled", "published"}
     should_publish = False
+
     if status == "published":
         should_publish = True
     elif status == "scheduled":
@@ -155,12 +138,15 @@ def decide(frontmatter: Dict[str, Any], now: datetime, tzname: str) -> Decisions
             should_publish = now >= publish_at
             if not should_publish:
                 reasons.append("Not time yet (now < publish_at).")
-    else:
-        reasons.append(f"Status is '{status}', will not publish.")
+    elif status == "build":
+        reasons.append("Build status creates internal output only; it is not public.")
+    elif status == "draft":
+        reasons.append("Draft content is not built or published.")
+    elif status == "deleted":
+        reasons.append("Deleted content is retained internally but hidden from public output.")
 
     should_announce_discord = bool(should_publish and discord_announce)
 
-    # Soft warnings
     if not title:
         reasons.append("Missing title.")
     if not section:
@@ -182,16 +168,11 @@ def decide(frontmatter: Dict[str, Any], now: datetime, tzname: str) -> Decisions
 
 
 def iter_markdown_files(root: str) -> Iterable[str]:
-    """
-    Walk root recursively and yield *.md, but skip any directory whose name starts
-    with "_" or "." (templates, references, editor state, trash).
-    """
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames if not (d.startswith("_") or d.startswith("."))]
-
-        for fn in filenames:
-            if fn.lower().endswith(".md"):
-                yield os.path.join(dirpath, fn)
+        for filename in filenames:
+            if filename.lower().endswith(".md"):
+                yield os.path.join(dirpath, filename)
 
 
 @dataclass
@@ -206,19 +187,19 @@ class BulkResult:
 def evaluate_file(path: str, now: datetime, tzname: str) -> BulkResult:
     try:
         md = read_text(path)
-    except Exception as e:
-        return BulkResult(path=path, ok=False, frontmatter={}, decisions=None, error=f"read failed: {e}")
+    except Exception as exc:
+        return BulkResult(path=path, ok=False, frontmatter={}, decisions=None, error=f"read failed: {exc}")
 
     fm, _ = split_frontmatter(md)
     if not fm:
         return BulkResult(path=path, ok=False, frontmatter={}, decisions=None, error="missing or invalid frontmatter")
 
     try:
-        d = decide(fm, now=now, tzname=tzname)
-    except Exception as e:
-        return BulkResult(path=path, ok=False, frontmatter=fm, decisions=None, error=f"decision failed: {e}")
+        decisions = decide(fm, now=now, tzname=tzname)
+    except Exception as exc:
+        return BulkResult(path=path, ok=False, frontmatter=fm, decisions=None, error=f"decision failed: {exc}")
 
-    return BulkResult(path=path, ok=True, frontmatter=fm, decisions=d)
+    return BulkResult(path=path, ok=True, frontmatter=fm, decisions=decisions)
 
 
 def relpath(path: str, base: str) -> str:
@@ -233,74 +214,78 @@ def print_bulk(results: List[BulkResult], base: str, as_json: bool = False) -> i
         import json
 
         payload = []
-        for r in results:
+        for result in results:
             payload.append(
                 {
-                    "path": relpath(r.path, base),
-                    "ok": r.ok,
-                    "error": r.error,
-                    "frontmatter": r.frontmatter,
-                    "decisions": r.decisions.__dict__ if r.decisions else None,
+                    "path": relpath(result.path, base),
+                    "ok": result.ok,
+                    "error": result.error,
+                    "frontmatter": result.frontmatter,
+                    "decisions": result.decisions.__dict__ if result.decisions else None,
                 }
             )
         print(json.dumps(payload, indent=2, ensure_ascii=False))
-        return 1 if any(not r.ok for r in results) else 0
+        return 1 if any(not result.ok for result in results) else 0
 
     publish_now: List[BulkResult] = []
     scheduled_later: List[BulkResult] = []
-    drafts_review: List[BulkResult] = []
+    build_only: List[BulkResult] = []
+    drafts: List[BulkResult] = []
     published: List[BulkResult] = []
-    archived: List[BulkResult] = []
+    deleted: List[BulkResult] = []
     problems: List[BulkResult] = []
 
-    for r in results:
-        if not r.ok or r.decisions is None:
-            problems.append(r)
+    for result in results:
+        if not result.ok or result.decisions is None:
+            problems.append(result)
             continue
 
-        st = r.decisions.status
-        if st == "archived":
-            archived.append(r)
-        elif st == "published":
-            published.append(r)
-        elif st == "scheduled":
-            if r.decisions.should_publish:
-                publish_now.append(r)
+        status = result.decisions.status
+        if status == "deleted":
+            deleted.append(result)
+        elif status == "published":
+            published.append(result)
+        elif status == "scheduled":
+            if result.decisions.should_publish:
+                publish_now.append(result)
             else:
-                scheduled_later.append(r)
-        elif st in {"draft", "review"}:
-            drafts_review.append(r)
+                scheduled_later.append(result)
+        elif status == "build":
+            build_only.append(result)
+        elif status == "draft":
+            drafts.append(result)
         else:
-            problems.append(r)
+            problems.append(result)
 
     def show_group(title: str, items: List[BulkResult]) -> None:
         print(f"\n== {title} ({len(items)}) ==")
-        for it in sorted(items, key=lambda x: x.path):
-            fm = it.frontmatter or {}
+        for item in sorted(items, key=lambda current: current.path):
+            fm = item.frontmatter or {}
             tid = fm.get("id", "")
             ttitle = fm.get("title", "")
-            print(f"- {relpath(it.path, base)}")
+            print(f"- {relpath(item.path, base)}")
             if tid or ttitle:
                 print(f"  id: {tid}")
                 print(f"  title: {ttitle}")
 
     show_group("PUBLISH NOW", publish_now)
     show_group("SCHEDULED LATER", scheduled_later)
-    show_group("DRAFT/REVIEW", drafts_review)
+    show_group("BUILD ONLY", build_only)
+    show_group("DRAFT", drafts)
     show_group("PUBLISHED", published)
-    show_group("ARCHIVED", archived)
+    show_group("DELETED", deleted)
 
     if problems:
         print(f"\n== PROBLEMS ({len(problems)}) ==")
-        for it in sorted(problems, key=lambda x: x.path):
-            print(f"- {relpath(it.path, base)}")
-            if it.error:
-                print(f"  error: {it.error}")
+        for item in sorted(problems, key=lambda current: current.path):
+            print(f"- {relpath(item.path, base)}")
+            if item.error:
+                print(f"  error: {item.error}")
 
     return 1 if problems else 0
 
 
-def print_single(fm: Dict[str, Any], d: Decisions, now: datetime, as_json: bool = False, path: str = "") -> None:
+def print_single(fm: Dict[str, Any], decisions: Decisions, now: datetime, as_json: bool = False, path: str = "") -> None:
     if as_json:
         import json
 
@@ -308,7 +293,7 @@ def print_single(fm: Dict[str, Any], d: Decisions, now: datetime, as_json: bool 
             "path": path,
             "now": now.isoformat(),
             "frontmatter": fm,
-            "decisions": d.__dict__,
+            "decisions": decisions.__dict__,
         }
         print(json.dumps(payload, indent=2, ensure_ascii=False))
         return
@@ -333,28 +318,24 @@ def print_single(fm: Dict[str, Any], d: Decisions, now: datetime, as_json: bool 
 
     print("== Decisions ==")
     print(f"now:                     {now.isoformat()}")
-    print(f"should_build:            {d.should_build}")
-    print(f"should_publish:          {d.should_publish}")
-    print(f"should_announce_discord: {d.should_announce_discord}")
+    print(f"should_build:            {decisions.should_build}")
+    print(f"should_publish:          {decisions.should_publish}")
+    print(f"should_announce_discord: {decisions.should_announce_discord}")
     print()
 
-    if d.reasons:
+    if decisions.reasons:
         print("== Notes / reasons ==")
-        for r in d.reasons:
-            print(f"- {r}")
+        for reason in decisions.reasons:
+            print(f"- {reason}")
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("path", help="Path to a markdown file OR a directory to scan recursively")
-    ap.add_argument("--tz", default="Europe/Copenhagen", help="Timezone for naive datetimes")
-    ap.add_argument(
-        "--now",
-        default="",
-        help='Override "now" (e.g. "2025-12-31 20:00"). If omitted, uses current time in --tz.',
-    )
-    ap.add_argument("--json", action="store_true", help="Output machine-readable JSON")
-    args = ap.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("path", help="Path to a markdown file OR a directory to scan recursively")
+    parser.add_argument("--tz", default="Europe/Copenhagen", help="Timezone for naive datetimes")
+    parser.add_argument("--now", default="", help='Override "now" (e.g. "2025-12-31 20:00"). If omitted, uses current time in --tz.')
+    parser.add_argument("--json", action="store_true", help="Output machine-readable JSON")
+    args = parser.parse_args()
 
     zone = dttz.gettz(args.tz)
     if not zone:
@@ -376,29 +357,26 @@ def main() -> int:
         if not files:
             if args.json:
                 import json
-
                 print(json.dumps([], indent=2, ensure_ascii=False))
             else:
                 print("No .md files found.")
             return 0
 
-        results = [evaluate_file(p, now=now, tzname=args.tz) for p in files]
+        results = [evaluate_file(path, now=now, tzname=args.tz) for path in files]
         return print_bulk(results, base=base, as_json=args.json)
 
-    # Single file mode
     md = read_text(target)
     fm, _ = split_frontmatter(md)
     if not fm:
         if args.json:
             import json
-
             print(json.dumps({"path": target, "ok": False, "error": "No valid frontmatter found."}, indent=2))
         else:
             print("No valid frontmatter found.")
         return 1
 
-    d = decide(fm, now=now, tzname=args.tz)
-    print_single(fm, d, now=now, as_json=args.json, path=target)
+    decisions = decide(fm, now=now, tzname=args.tz)
+    print_single(fm, decisions, now=now, as_json=args.json, path=target)
     return 0
 
 

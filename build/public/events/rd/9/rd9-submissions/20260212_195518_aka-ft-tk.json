@@ -1,0 +1,23 @@
+{
+    "timestamp_utc": "2026-02-12T19:55:18+00:00",
+    "ip": "95.146.68.24",
+    "artist_name": "AKA ft. TK",
+    "contact_discord": "queenkhari",
+    "genre": "Pop",
+    "set_lengths_ok": [
+        "20-30",
+        "40-45",
+        "60"
+    ],
+    "set_length_preferred": "40-45",
+    "set_length_minimum": "30 minutes",
+    "accept_short_showcase": "maybe",
+    "performance_description": "AKA are best known for their vibrent, upbeat and magical performances. Often showcasing personal tales or promoting positivity through song. Expect a lot of magical affects and upbeat pop music!",
+    "availability": {
+        "fri": "no",
+        "sat": "before_22",
+        "sun": "no"
+    },
+    "playback_method": "w2g",
+    "performed_before": "yes"
+}

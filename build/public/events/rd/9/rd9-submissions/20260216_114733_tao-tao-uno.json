@@ -1,0 +1,22 @@
+{
+    "timestamp_utc": "2026-02-16T11:47:33+00:00",
+    "ip": "80.208.65.183",
+    "artist_name": "Tao-Tao Uno",
+    "contact_discord": "noiseninja666",
+    "genre": "Drone\/ambient - poetry\/perfromance art",
+    "set_lengths_ok": [
+        "20-30",
+        "40-45"
+    ],
+    "set_length_preferred": "20-30",
+    "set_length_minimum": "20",
+    "accept_short_showcase": "maybe",
+    "performance_description": "Mit IRL main musical solo project, spiced up with IC poetry and perfromance art. This will be a solo act by the way, except for eventual extras, yet to be decided. Examples of music: https:\/\/soundcloud.com\/jacob-laeby\/den-hvide-dod-the-white-death  :::  https:\/\/soundcloud.com\/jacob-laeby\/fjernsind-rubber-spectre-fencepost-elastic2-remix",
+    "availability": {
+        "fri": "all",
+        "sat": "all",
+        "sun": "all"
+    },
+    "playback_method": "w2g",
+    "performed_before": "yes"
+}

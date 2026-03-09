@@ -1,0 +1,23 @@
+{
+    "timestamp_utc": "2026-02-12T21:43:35+00:00",
+    "ip": "82.71.1.109",
+    "artist_name": "Derenly Winterdawn",
+    "contact_discord": "the_arkadian",
+    "genre": "Folk\/classic\/atmospheric harp",
+    "set_lengths_ok": [
+        "10-15",
+        "20-30",
+        "40-45"
+    ],
+    "set_length_preferred": "40-45",
+    "set_length_minimum": "20 minutes",
+    "accept_short_showcase": "maybe",
+    "performance_description": "A virtuoso performance on harp from composer and harpist Derenly Winterdawn, including debuts of new music.",
+    "availability": {
+        "fri": "all",
+        "sat": "all",
+        "sun": "all"
+    },
+    "playback_method": "musician",
+    "performed_before": "yes"
+}

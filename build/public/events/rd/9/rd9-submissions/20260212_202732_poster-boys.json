@@ -1,0 +1,22 @@
+{
+    "timestamp_utc": "2026-02-12T20:27:32+00:00",
+    "ip": "95.146.68.24",
+    "artist_name": "Poster Boys",
+    "contact_discord": "queenkhari",
+    "genre": "Pop",
+    "set_lengths_ok": [
+        "10-15",
+        "20-30"
+    ],
+    "set_length_preferred": "10-15",
+    "set_length_minimum": "15 minutes",
+    "accept_short_showcase": "maybe",
+    "performance_description": "Azeroth's mysterious new Elven boyband boast good voices, good looks, and catchy pop tunes with a hint of edge! Their performances include a lot of magical effects!",
+    "availability": {
+        "fri": "no",
+        "sat": "no",
+        "sun": "all"
+    },
+    "playback_method": "w2g",
+    "performed_before": "no"
+}

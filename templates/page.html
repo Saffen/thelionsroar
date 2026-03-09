@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="article-grid" style="padding-top:20px;">
+    <section class="article-center" aria-label="Page content" style="max-width: 900px; margin: 0 auto;">
+      <article class="feature feature-article">
+        <div class="feature-body">
+          {% if page.kicker %}
+            <div class="kicker">{{ page.kicker }}</div>
+          {% endif %}
+
+          <h1 class="feature-title feature-title-article">{{ page.title }}</h1>
+
+          {% if page.teaser %}
+            <p class="feature-dek">{{ page.teaser }}</p>
+          {% endif %}
+
+          <hr class="rule rule-article" />
+
+          <div class="article-body">
+            {{ page.html_body | safe }}
+          </div>
+        </div>
+      </article>
+    </section>
+  </section>
+{% endblock %}

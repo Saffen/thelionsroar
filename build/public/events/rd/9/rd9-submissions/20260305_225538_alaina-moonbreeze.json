@@ -1,0 +1,23 @@
+{
+    "timestamp_utc": "2026-03-05T22:55:38+00:00",
+    "ip": "87.54.98.145",
+    "artist_name": "Alaina Moonbreeze",
+    "contact_discord": "azura8360",
+    "genre": "Pop\/Dancing music",
+    "set_lengths_ok": [
+        "10-15",
+        "20-30",
+        "40-45"
+    ],
+    "set_length_preferred": "20-30",
+    "set_length_minimum": "20 minutes",
+    "accept_short_showcase": "yes",
+    "performance_description": "A harp, playing some music that will make people dance and stand and enjoy the tunes.",
+    "availability": {
+        "fri": "all",
+        "sat": "after_22",
+        "sun": "all"
+    },
+    "playback_method": "musician",
+    "performed_before": "yes"
+}

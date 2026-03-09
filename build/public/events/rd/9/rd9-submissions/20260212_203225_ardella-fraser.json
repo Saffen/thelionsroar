@@ -1,0 +1,23 @@
+{
+    "timestamp_utc": "2026-02-12T20:32:25+00:00",
+    "ip": "80.189.79.9",
+    "artist_name": "Ardella Fraser",
+    "contact_discord": "Nicalia",
+    "genre": "Generally Pop (quick and slow)",
+    "set_lengths_ok": [
+        "10-15",
+        "20-30",
+        "40-45"
+    ],
+    "set_length_preferred": "20-30",
+    "set_length_minimum": "20 or longer",
+    "accept_short_showcase": "maybe",
+    "performance_description": "Piano focused with emotionally sung lyrics, focused on fun and dancing with a few touchy moments inbetween. (As someone told me once, Ella is the Taylor Swift od AD)",
+    "availability": {
+        "fri": "all",
+        "sat": "all",
+        "sun": "all"
+    },
+    "playback_method": "musician",
+    "performed_before": "yes"
+}

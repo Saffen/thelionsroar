@@ -1,0 +1,23 @@
+{
+    "timestamp_utc": "2026-02-12T17:57:13+00:00",
+    "ip": "90.107.137.51",
+    "artist_name": "Lindalë Dawnsinger and Ephemere",
+    "contact_discord": "lindale_argentdawn",
+    "genre": "Symphonic metal",
+    "set_lengths_ok": [
+        "20-30",
+        "40-45",
+        "60"
+    ],
+    "set_length_preferred": "40-45",
+    "set_length_minimum": "To your discretion but at least 20",
+    "accept_short_showcase": "maybe",
+    "performance_description": "The performance follows the same format as my previous appearance: a narrative concert built as a continuous story told through song. Each piece flows into the next with brief spoken transitions creating a storytelling arc rather than a simple sequence of tracks.\r\n\r\nI have a complete 90 minute concert ready to perform, built as a cohesive journey. The program can be adjusted to some extent in length or structure to suit the event if needed.",
+    "availability": {
+        "fri": "all",
+        "sat": "all",
+        "sun": "all"
+    },
+    "playback_method": "musician",
+    "performed_before": "yes"
+}

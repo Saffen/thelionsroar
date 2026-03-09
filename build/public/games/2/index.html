@@ -1,0 +1,125 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta property="og:title" content="Protect the Outhouse" />
+    <meta property="og:description" content="Protect the Outhouse. Only a single outhouse stands between civilization and catastrophe. Defend it from saboteurs, queue jumpers, druids, murlocs, and every other threat to public decency!" />
+    <meta property="og:image" content="https://thelionsroar.eu/games/2/game2.jpg" /> <meta property="og:url" content="https://thelionsroar.eu/games/2/game2.jpg" /> <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image:alt" content="Protect the Outhouse">
+	
+  <title>Protect the Outhouse</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+</head>
+<body>
+  <main class="page-shell">
+    <section class="game-frame">
+      <header class="hud-bar">
+        <div class="hud-group hud-group-left">
+          <div class="stat-card">
+            <span class="stat-label">Score</span>
+            <strong id="scoreValue">0</strong>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Integrity</span>
+            <strong id="healthValue">100%</strong>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Time</span>
+            <strong id="timeValue">0.0s</strong>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Danger</span>
+            <strong id="waveValue">1</strong>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Best</span>
+            <strong id="bestValue">0</strong>
+          </div>
+        </div>
+        <div class="hud-group hud-group-right">
+          <button id="musicToggle" class="pixel-button button-small" type="button">Music: ON</button>
+        </div>
+      </header>
+
+      <section class="arena-shell">
+        <div class="integrity-panel">
+          <span>Outhouse Integrity</span>
+          <div class="integrity-track">
+            <div id="healthBar" class="integrity-fill"></div>
+          </div>
+        </div>
+
+        <canvas id="gameCanvas" width="960" height="600" aria-label="Protect the Outhouse game area"></canvas>
+
+        <div id="startOverlay" class="overlay visible">
+          <div class="panel panel-large">
+            <p class="eyebrow">Roaring Days 9 Festival Defense</p>
+            <h1>Protect the Outhouse</h1>
+            <p class="flavor-text">
+              Roaring Days approaches, and once again only a single outhouse stands between civilization and catastrophe.
+              Defend it from saboteurs, queue jumpers, druids, murlocs, and every other threat to public decency.
+            </p>
+            <div class="overlay-actions">
+              <button id="startButton" class="pixel-button" type="button">Defend the Throne</button>
+            </div>
+            <section class="leaderboard-panel">
+              <div class="leaderboard-header">
+                <h2>Festival Ledger</h2>
+                <span>Top defenders</span>
+              </div>
+              <ol id="leaderboardList" class="leaderboard-list"></ol>
+            </section>
+          </div>
+        </div>
+
+        <div id="gameOverOverlay" class="overlay">
+          <div class="panel panel-large">
+            <p class="eyebrow">Sanitation Report</p>
+            <h2 id="gameOverTitle">The last outhouse has fallen.</h2>
+            <p id="gameOverText" class="flavor-text">
+              The outhouse has been overrun. Roaring Days is now a sanitation incident.
+            </p>
+            <div class="results-grid">
+              <div class="result-card">
+                <span>Final Score</span>
+                <strong id="finalScoreValue">0</strong>
+              </div>
+              <div class="result-card">
+                <span>Survival Time</span>
+                <strong id="finalTimeValue">0.0s</strong>
+              </div>
+              <div class="result-card">
+                <span>Record</span>
+                <strong id="recordStatus">No</strong>
+              </div>
+            </div>
+            <form id="scoreForm" class="score-form">
+              <label for="playerName">Add your name to the ledger</label>
+              <div class="score-form-row">
+                <input id="playerName" name="playerName" type="text" maxlength="20" minlength="2" placeholder="Festival Hero" autocomplete="nickname" />
+                <button id="submitScoreButton" class="pixel-button" type="submit">Submit Score</button>
+              </div>
+              <p id="submitMessage" class="submit-message"></p>
+            </form>
+            <div class="overlay-actions">
+              <button id="restartButton" class="pixel-button" type="button">Hold the Line Again</button>
+            </div>
+            <section class="leaderboard-panel leaderboard-panel-tight">
+              <div class="leaderboard-header">
+                <h2>Shared Leaderboard</h2>
+                <span>Top sanitation defenders</span>
+              </div>
+              <ol id="gameOverLeaderboard" class="leaderboard-list"></ol>
+            </section>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="game.js"></script>
+</body>
+</html>

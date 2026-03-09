@@ -1,0 +1,21 @@
+{
+    "timestamp_utc": "2026-02-14T09:38:03+00:00",
+    "ip": "31.49.225.248",
+    "artist_name": "Mists of Bamboo",
+    "contact_discord": "Mazzy Bufferpump",
+    "genre": "Folk",
+    "set_lengths_ok": [
+        "20-30"
+    ],
+    "set_length_preferred": "20-30",
+    "set_length_minimum": "20",
+    "accept_short_showcase": "yes",
+    "performance_description": "Traditional Pandaren folk music played on harp and flute.",
+    "availability": {
+        "fri": "no",
+        "sat": "all",
+        "sun": "all"
+    },
+    "playback_method": "musician",
+    "performed_before": "yes"
+}

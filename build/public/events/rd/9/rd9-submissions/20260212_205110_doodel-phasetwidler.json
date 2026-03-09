@@ -1,0 +1,22 @@
+{
+    "timestamp_utc": "2026-02-12T20:51:10+00:00",
+    "ip": "80.208.65.183",
+    "artist_name": "Doodel Phasetwidler",
+    "contact_discord": "noiseninja666",
+    "genre": "spooky\/moody\/eerie but playful magic flute music",
+    "set_lengths_ok": [
+        "10-15",
+        "20-30"
+    ],
+    "set_length_preferred": "10-15",
+    "set_length_minimum": "15",
+    "accept_short_showcase": "yes",
+    "performance_description": "Doodel plays a conjured magic flute of unknown origin that is able to play several voices at the same time. Example: \"Darkmoon Faire Carusel Theme\" (from WoW), and \"This is Halloween\" (from \"A Nightmare Before Christmas\") This flute concert however has lowest priority of the all the performances I might get involved with at this Roaring Days festival though.",
+    "availability": {
+        "fri": "all",
+        "sat": "all",
+        "sun": "all"
+    },
+    "playback_method": "musician",
+    "performed_before": "yes"
+}

@@ -16,7 +16,7 @@ tags:
 image:
   src: /assets/images/stormwind-night.jpg
   credit: L. Greycandle
-  source: Lion's Roar archives
+  source: Lion's Roar archive
   image_type: illustration
 kicker:
 correction_of:

@@ -1,0 +1,124 @@
+﻿.games-landing {
+  padding: 28px 0 36px;
+}
+
+.games-hero {
+  border: 1px solid var(--line);
+  background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(241,241,234,0.92));
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+:root[data-theme="dark"] .games-hero {
+  background: linear-gradient(135deg, rgba(24,26,31,0.96), rgba(18,19,21,0.96));
+}
+
+:root[data-theme="immersive"] .games-hero {
+  background: rgba(251, 247, 240, 0.78);
+  border: 1px solid var(--line);
+}
+
+.games-title {
+  margin: 8px 0 10px;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 1.05;
+}
+
+.games-intro {
+  max-width: 64ch;
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--sans);
+}
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.game-card {
+  border: 1px solid var(--line);
+  background: #fff;
+  overflow: hidden;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+:root[data-theme="dark"] .game-card {
+  background: var(--shade);
+}
+
+:root[data-theme="immersive"] .game-card {
+  background: rgba(255,255,255,0.55);
+}
+
+.game-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.12);
+  border-color: var(--line-strong);
+}
+
+.game-card-link {
+  display: block;
+  text-decoration: none;
+}
+
+.game-card-media {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+  background: var(--shade);
+}
+
+.game-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.game-card-body {
+  padding: 18px;
+}
+
+.game-card-eyebrow {
+  font-family: var(--sans);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.game-card-title {
+  margin: 0 0 8px;
+  font-size: 1.5rem;
+  line-height: 1.15;
+}
+
+.game-card-text {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-family: var(--sans);
+}
+
+.game-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.game-card-cta::after {
+  content: ">";
+}
+
+@media (max-width: 840px) {
+  .games-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="article-grid" style="padding-top:20px;">
+
+  {# Optional hero image, keep or remove #}
+  {# <img class="article-hero" src="/assets/images/roaring-days/rd9-hero.jpg" alt="Roaring Days 9" /> #}
+
+  <div>
+    <p class="article-authorline">Hardhy Media Productions · Roaring Days</p>
+
+    <h1>Roaring Days 9: Artist Application</h1>
+    <p class="article-teaser">
+      April 17–19, 2026 (Friday to Sunday). Curated programming, limited stage capacity.
+    </p>
+
+    <p class="article-byline">
+      Stage hours: Fri 20:00–01:00 · Sat 20:00–01:00 · Sun 20:00–23:00
+    </p>
+
+    <hr />
+
+    <div class="article-content">
+      <h2>Before you apply</h2>
+      <p>
+        Roaring Days 9 is shorter than previous years, which means we cannot guarantee a slot for all applicants.
+        Programming will be curated to create a good flow across the weekend, with a balance of genres, tones, and set lengths.
+      </p>
+      <p>
+        Artists may be offered a <strong>showcase set</strong> (10–15 min), a <strong>standard set</strong> (20–30 min),
+        or a <strong>feature set</strong> (40–45 min), depending on availability and weekend pacing.
+      </p>
+
+      <h2>Application form</h2>
+
+      {# Replace action with your actual endpoint #}
+      <form method="post" action="/events/rd/9/rd9-submit.php" class="form">
+
+        <fieldset>
+          <legend><strong>A. Basic details</strong></legend>
+
+          <p>
+            <label for="artist_name"><strong>Artist / Band name</strong></label><br />
+            <input id="artist_name" name="artist_name" type="text" required autocomplete="off" />
+          </p>
+
+          <p>
+            <label for="contact_discord"><strong>Primary contact (Discord)</strong></label><br />
+            <input id="contact_discord" name="contact_discord" type="text" required placeholder="example: thesaffen" autocomplete="off" />
+          </p>
+
+          <p>
+            <label for="members">Additional members (optional)</label><br />
+            <input id="members" name="members" type="text" placeholder="Names or characters, comma-separated" autocomplete="off" />
+          </p>
+
+          <p>
+            <label for="performance_type"><strong>Performance type</strong></label><br />
+            <select id="performance_type" name="performance_type" required>
+              <option value="" selected disabled>Select one…</option>
+              <option value="music">Music</option>
+              <option value="storytelling">Storytelling / bardic</option>
+              <option value="poetry">Poetry</option>
+              <option value="comedy">Comedy</option>
+              <option value="hybrid">Hybrid</option>
+              <option value="other">Other</option>
+            </select>
+          </p>
+
+          <p>
+            <label for="genre"><strong>Primary genre / style</strong></label><br />
+            <input id="genre" name="genre" type="text" required placeholder="Examples: metal, folk, tavern songs, orchestral, etc." autocomplete="off" />
+          </p>
+
+          <p>
+            <label for="faction">Faction alignment (optional)</label><br />
+            <select id="faction" name="faction">
+              <option value="" selected>Prefer not to say</option>
+              <option value="alliance">Alliance</option>
+              <option value="horde">Horde</option>
+              <option value="neutral">Neutral</option>
+            </select>
+          </p>
+        </fieldset>
+
+        <fieldset>
+          <legend><strong>B. Set length and flexibility</strong></legend>
+
+          <p><strong>Which set lengths are you comfortable performing?</strong><br />
+            <label><input type="checkbox" name="length_ok[]" value="10-15" /> 10–15 min showcase</label><br />
+            <label><input type="checkbox" name="length_ok[]" value="20-30" /> 20–30 min standard</label><br />
+            <label><input type="checkbox" name="length_ok[]" value="40-45" /> 40–45 min feature</label><br />
+            <label><input type="checkbox" name="length_ok[]" value="60" /> 60 min headliner-level</label>
+          </p>
+
+          <p>
+            <label for="length_preferred"><strong>Preferred set length (one choice)</strong></label><br />
+            <select id="length_preferred" name="length_preferred" required>
+              <option value="" selected disabled>Select one…</option>
+              <option value="10-15">10–15 min showcase</option>
+              <option value="20-30">20–30 min standard</option>
+              <option value="40-45">40–45 min feature</option>
+              <option value="60">60 min headliner-level</option>
+            </select>
+          </p>
+
+          <p>
+            <label for="length_minimum"><strong>Minimum viable set length</strong></label><br />
+            <input id="length_minimum" name="length_minimum" type="text" required placeholder="Example: 20 minutes" autocomplete="off" />
+          </p>
+
+          <p>
+            <label for="short_slot_ok"><strong>If space is limited, would you accept a shorter showcase slot?</strong></label><br />
+            <select id="short_slot_ok" name="short_slot_ok" required>
+              <option value="" selected disabled>Select one…</option>
+              <option value="yes">Yes</option>
+              <option value="maybe">Possibly, depending on timing</option>
+              <option value="no">Prefer full-length only</option>
+            </select>
+          </p>
+        </fieldset>
+
+        <fieldset>
+          <legend><strong>C. Availability</strong></legend>
+
+          <p><strong>Friday April 17 (20:00–01:00)</strong><br />
+            <label><input type="radio" name="avail_fri" value="all" required /> Available all evening</label><br />
+            <label><input type="radio" name="avail_fri" value="before_22" /> Available before 22:00</label><br />
+            <label><input type="radio" name="avail_fri" value="after_22" /> Available after 22:00</label><br />
+            <label><input type="radio" name="avail_fri" value="no" /> Not available</label>
+          </p>
+
+          <p><strong>Saturday April 18 (20:00–01:00)</strong><br />
+            <label><input type="radio" name="avail_sat" value="all" required /> Available all evening</label><br />
+            <label><input type="radio" name="avail_sat" value="before_22" /> Available before 22:00</label><br />
+            <label><input type="radio" name="avail_sat" value="after_22" /> Available after 22:00</label><br />
+            <label><input type="radio" name="avail_sat" value="no" /> Not available</label>
+          </p>
+
+          <p><strong>Sunday April 19 (20:00–23:00)</strong><br />
+            <label><input type="radio" name="avail_sun" value="all" required /> Available 20:00–23:00</label><br />
+            <label><input type="radio" name="avail_sun" value="early" /> Only available early (20:00–21:30)</label><br />
+            <label><input type="radio" name="avail_sun" value="late" /> Only available late (21:30–23:00)</label><br />
+            <label><input type="radio" name="avail_sun" value="no" /> Not available</label>
+          </p>
+
+          <p>
+            <label for="notice"><strong>How much notice do you need once scheduled?</strong></label><br />
+            <input id="notice" name="notice" type="text" required placeholder="Example: 48 hours" autocomplete="off" />
+          </p>
+        </fieldset>
+
+        <fieldset>
+          <legend><strong>D. Technical and practical notes</strong></legend>
+
+          <p><strong>Do you need Discord music for your set?</strong><br />
+            <label><input type="radio" name="discord_music" value="yes" required /> Yes</label><br />
+            <label><input type="radio" name="discord_music" value="no" /> No</label>
+          </p>
+
+          <p><strong>Do you need setup time on stage?</strong><br />
+            <label><input type="radio" name="setup_time" value="none" required /> No, I can start immediately</label><br />
+            <label><input type="radio" name="setup_time" value="some" /> Yes, a little (1–3 minutes)</label><br />
+            <label><input type="radio" name="setup_time" value="more" /> Yes, more (please describe below)</label>
+          </p>
+
+          <p>
+            <label for="tech_notes">Technical notes (optional)</label><br />
+            <textarea id="tech_notes" name="tech_notes" rows="4" placeholder="Anything we should know: instruments, props, special needs, etc."></textarea>
+          </p>
+
+          <p><strong>Have you performed at Roaring Days before?</strong><br />
+            <label><input type="radio" name="performed_before" value="yes" required /> Yes</label><br />
+            <label><input type="radio" name="performed_before" value="no" /> No</label>
+          </p>
+        </fieldset>
+
+        <fieldset>
+          <legend><strong>E. Fit and description</strong></legend>
+
+          <p>
+            <label for="pitch"><strong>Why is your act a good fit for Roaring Days 9?</strong></label><br />
+            <textarea id="pitch" name="pitch" rows="5" required placeholder="A short description of your act, tone, and what the audience can expect."></textarea>
+          </p>
+
+          <p>
+            <label for="links">Links (optional)</label><br />
+            <textarea id="links" name="links" rows="3" placeholder="Examples: prior performances, playlists, screenshots, character pages, etc."></textarea>
+          </p>
+        </fieldset>
+
+        <fieldset>
+          <legend><strong>F. Commitment</strong></legend>
+
+          <p>
+            <label>
+              <input type="checkbox" name="commit" value="yes" required />
+              If selected, I commit to performing at my assigned time.
+            </label>
+          </p>
+
+          <p>
+            <label>
+              <input type="checkbox" name="understand_capacity" value="yes" required />
+              I understand that stage capacity is limited and not all applicants can be guaranteed a slot.
+            </label>
+          </p>
+        </fieldset>
+
+        <p>
+          <button type="submit">Submit application</button>
+        </p>
+
+        <p>
+          <small>
+            Privacy: Your application details are used only for Roaring Days 9 programming and logistics.
+          </small>
+        </p>
+
+      </form>
+
+      <hr />
+
+      <h2>What happens next?</h2>
+      <ul>
+        <li>Applications will be reviewed after the signup deadline.</li>
+        <li>Selected artists will receive a proposed day, time window, and set length for confirmation.</li>
+        <li>If we cannot fit everyone, some applicants may be offered a waitlist spot or priority consideration for a future Roaring Days.</li>
+      </ul>
+    </div>
+
+    <p class="article-footer-note">© The Lion's Roar</p>
+  </div>
+
+</section>
+{% endblock %}

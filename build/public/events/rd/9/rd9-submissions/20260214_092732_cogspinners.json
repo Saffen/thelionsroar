@@ -1,0 +1,21 @@
+{
+    "timestamp_utc": "2026-02-14T09:27:32+00:00",
+    "ip": "31.49.225.248",
+    "artist_name": "Cogspinners",
+    "contact_discord": "Mazzy Bufferpump",
+    "genre": "Metal",
+    "set_lengths_ok": [
+        "40-45"
+    ],
+    "set_length_preferred": "40-45",
+    "set_length_minimum": "20",
+    "accept_short_showcase": "yes",
+    "performance_description": "Gnoth, rock ensemble fuelled by rebellion, attitude and unreasonable backstage rider requests.",
+    "availability": {
+        "fri": "all",
+        "sat": "after_22",
+        "sun": "late"
+    },
+    "playback_method": "musician",
+    "performed_before": "yes"
+}

@@ -1,0 +1,23 @@
+{
+    "timestamp_utc": "2026-02-12T18:53:49+00:00",
+    "ip": "80.208.65.183",
+    "artist_name": "Tao-Tao Uno",
+    "contact_discord": "noiseninja666",
+    "genre": "Drone\/ambient - experiemental\/poetry\/performance art\/slow",
+    "set_lengths_ok": [
+        "20-30",
+        "40-45",
+        "60"
+    ],
+    "set_length_preferred": "40-45",
+    "set_length_minimum": "25",
+    "accept_short_showcase": "maybe",
+    "performance_description": "This is basically a showcase for the music my own OOC main musical project, however spiced up with IC lyrics, and far out performance art elements. It is fairly experimental and playful, but atmospheric, immerssive and filmic music. Examples: https:\/\/soundcloud.com\/jacob-laeby\/den-hvide-dod-the-white-death  ... https:\/\/soundcloud.com\/jacob-laeby\/fjernsind-rubber-spectre-fencepost-elastic2-remix",
+    "availability": {
+        "fri": "all",
+        "sat": "all",
+        "sun": "all"
+    },
+    "playback_method": "w2g",
+    "performed_before": "yes"
+}

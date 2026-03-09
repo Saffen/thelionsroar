@@ -1,0 +1,21 @@
+{
+    "timestamp_utc": "2026-02-23T13:15:43+00:00",
+    "ip": "90.201.41.160",
+    "artist_name": "Nelari Tanglemane",
+    "contact_discord": "Katula",
+    "genre": "Simple, live - l",
+    "set_lengths_ok": [
+        "10-15"
+    ],
+    "set_length_preferred": "10-15",
+    "set_length_minimum": "5",
+    "accept_short_showcase": "yes",
+    "performance_description": "Live performance; more about the music than the entertainment.",
+    "availability": {
+        "fri": "all",
+        "sat": "all",
+        "sun": "all"
+    },
+    "playback_method": "musician",
+    "performed_before": "yes"
+}

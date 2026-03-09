@@ -1,0 +1,22 @@
+{
+    "timestamp_utc": "2026-02-12T19:45:45+00:00",
+    "ip": "217.102.152.210",
+    "artist_name": "Vivian Skybreaker",
+    "contact_discord": "shalaira.",
+    "genre": "Faffing around on her piano",
+    "set_lengths_ok": [
+        "10-15",
+        "20-30"
+    ],
+    "set_length_preferred": "10-15",
+    "set_length_minimum": "20ish minutes would be ideal, but I'm ok with 5 mn",
+    "accept_short_showcase": "no",
+    "performance_description": "Anywhere between 15 and 20 minutes would be lovely. I think anything shorter than 15 wouldn't be worth it.\r\nIt's just Viv playing a few classics on her piano in her attempts to raise funds. It's live, and I am not very fast, so don't expect dance-bangers ;)",
+    "availability": {
+        "fri": "all",
+        "sat": "all",
+        "sun": "all"
+    },
+    "playback_method": "musician",
+    "performed_before": "yes"
+}

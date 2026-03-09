@@ -1,0 +1,22 @@
+{
+    "timestamp_utc": "2026-02-14T23:27:43+00:00",
+    "ip": "79.184.241.136",
+    "artist_name": "Two Black Crows",
+    "contact_discord": "amanstwo",
+    "genre": "Metal, folk - slow to medium",
+    "set_lengths_ok": [
+        "20-30",
+        "40-45"
+    ],
+    "set_length_preferred": "20-30",
+    "set_length_minimum": "20",
+    "accept_short_showcase": "yes",
+    "performance_description": "A band focusing on sea and folk-like songs, male and female vocals. Songs may be a bit faster but performances themselves are not filled with effects and showmanship.",
+    "availability": {
+        "fri": "all",
+        "sat": "all",
+        "sun": "all"
+    },
+    "playback_method": "w2g",
+    "performed_before": "no"
+}

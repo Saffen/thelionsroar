@@ -1,0 +1,308 @@
+/* ==========================================================================
+   1. VARIABLER (THEMES)
+   ========================================================================== */
+:root {
+  --ink: #111;
+  --muted: #5a5a5a;
+  --paper: #fbfbf8;
+  --line: #d7d7cf;
+  --line-strong: #bdbdb2;
+  --shade: #f1f1ea;
+  --accent: #1b1b1b;
+  --accent-gold: #b8860b;
+  --accent-gold: #1c1c84; 
+  --max: 1120px;
+  --serif: Georgia, "Times New Roman", Times, serif;
+  --sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
+
+:root[data-theme="dark"] {
+  --ink: #f3f0e8;
+  --muted: #bdb7aa;
+  --paper: #121315;
+  --line: #2a2c31;
+  --line-strong: #3a3d44;
+  --shade: #181a1f;
+  --accent: #f3f0e8;
+  --accent-gold: #ffd700;
+}
+
+:root[data-theme="immersive"] {
+  --paper: #f2e8d5;      /* Varm creme fra "The Society" */
+  --ink: #3d352e;        /* Mørkebrun blæk */
+  --muted: #7d6b5d;
+  --line: #c4b49d;
+  --line-strong: #3d352e;
+  --shade: transparent;
+  --accent-gold: #8b4513;
+}
+
+/* ==========================================================================
+   2. GLOBAL RESET & BASE
+   ========================================================================== */
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  line-height: 1.45;
+}
+
+a { color: inherit; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.container {
+  width: min(var(--max), calc(100% - 32px));
+  margin: 0 auto;
+}
+
+/* ==========================================================================
+   3. MASTHEAD & BRANDING
+   ========================================================================== */
+.masthead {
+  border-bottom: 2px solid var(--line-strong);
+  background: linear-gradient(#fff, var(--paper));
+}
+
+:root[data-theme="dark"] .masthead {
+  background: linear-gradient(#14161a, var(--paper));
+}
+
+.masthead-top {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 18px 0 10px;
+  /* border-bottom: 1px solid var(--line);*/
+}
+
+.masthead-left, .masthead-right {
+  display: flex; flex-direction: column; gap: 10px;
+  font-family: var(--sans); font-size: 12px; color: var(--muted);
+}
+.masthead-right { align-items: flex-end; }
+
+/* Logo & Tagline */
+.brand {
+  display: flex;
+  align-items: center;   /* Centrerer dem vertikalt */
+  justify-content: center; /* Centrerer dem horisontalt i masthead */
+  gap: 20px;            /* Plads mellem løve og tekst */
+  color: var(--ink);
+  margin-bottom: 1rem;  /* Fjern den store negative margin for nu, så vi kan se hvad vi laver */
+}
+
+.brand-icon {
+  flex-shrink: 0;       /* Forhindrer ikonet i at blive mast */
+  width: 50px;         /* Juster størrelsen på løven her */
+  height: 50px;
+  background-color: currentColor; /* Bruger farven fra .brand (var(--ink)) */
+  -webkit-mask-image: url('lion-logo.svg');
+  mask-image: url('lion-logo.svg');
+  mask-size: contain;
+  mask-repeat: no-repeat;
+}
+
+.brand-text {
+  flex-grow: 1;         /* Lad teksten fylde resten af pladsen */
+  max-width: 600px;     /* Sæt en max-bredde så den ikke bliver for voldsom */
+}
+
+.brand-text svg {
+  font-size: 44px;  
+  width: 100%;          /* Sørger for at SVG'en faktisk fylder sin container */
+  height: auto;         /* Bevarer proportionerne */
+  display: block;
+}
+
+.lion-icon {
+    width: 100px;
+    height: 100px;
+    background-color: var(--ink); /* Her styrer du farven med din variabel! */
+    -webkit-mask-image: url('/assets/logo.svg');
+    mask-image: url('/assets/logo.svg');
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    transition: background-color 0.4s;
+}
+:root[data-theme="dark"] .lion-icon {
+    background-color: var(--accent-gold); /* Her styrer du farven med din variabel! */
+}
+:root[data-theme="immersive"] .lion-icon {
+    margin-top: -8rem;
+    background-color: var(--accent-gold); /* Her styrer du farven med din variabel! */
+}
+:root[data-theme="dark"] .brand {
+  color: var(--accent-gold); /* Guld i dark mode */
+}
+:root[data-theme="immersive"] .brand-text {
+  color: var(--accent-gold); /* Guld i dark mode */
+  margin-top: -2rem;
+}
+
+.tagline {
+  text-align: center;
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: -3rem;
+}
+
+.social-dots { display: flex; gap: 6px; }
+.dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  border: 1px solid var(--line-strong); background: #fff;
+}
+:root[data-theme="dark"] .dot { background: transparent; }
+
+/* ==========================================================================
+   4. NAVIGATION & TICKER
+   ========================================================================== */
+.nav-bar { border-bottom: 1px solid var(--line); background: #fff; }
+:root[data-theme="dark"] .nav-bar { background: transparent; }
+
+.nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; gap: 12px; }
+
+.nav-links {
+  list-style: none; padding: 0; margin: 0; display: flex; gap: 18px;
+  font-family: var(--sans); font-size: 13px; text-transform: uppercase;
+}
+.nav-links a { padding: 6px 0; }
+
+.pill {
+  font-family: var(--sans); font-size: 12px; border: 1px solid var(--line);
+  padding: 4px 8px; border-radius: 999px; color: var(--muted); background: #fff;
+}
+:root[data-theme="dark"] .pill { background: transparent; }
+
+.nav-toggle { display: none; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); }
+
+/* Ticker */
+.ticker { border-bottom: 1px solid var(--line); background: var(--shade); }
+.ticker-inner { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+.ticker-label {
+  font-family: var(--sans); font-size: 12px; font-weight: 700; text-transform: uppercase;
+  border: 1px solid var(--line); padding: 3px 8px; background: #fff;
+}
+:root[data-theme="dark"] .ticker-label { background: transparent; }
+
+.ticker-track { overflow: hidden; white-space: nowrap; font-family: var(--sans); font-size: 12px; color: var(--muted); }
+.ticker-item { padding-right: 6px; }
+.ticker-sep { padding: 0 8px; color: var(--line-strong); }
+
+/* ==========================================================================
+   5. COMPONENTS (CARDS & RAILS)
+   ========================================================================== */
+.rail, .feature, .section-block, .card {
+  border: 1px solid var(--line);
+  background: #fff;
+}
+:root[data-theme="dark"] .rail, :root[data-theme="dark"] .feature, 
+:root[data-theme="dark"] .section-block, :root[data-theme="dark"] .card {
+  background: var(--shade);
+}
+
+.rail { padding: 14px; }
+.rail-title { margin: 0 0 10px; font-size: 18px; border-bottom: 2px solid var(--line-strong); padding-bottom: 8px; }
+.rail-item { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.rail-item:last-child { border-bottom: none; }
+.rail-headline { margin: 0; font-size: 14px; line-height: 1.25; font-family: var(--serif); }
+.rail-meta { margin-top: 4px; font-family: var(--sans); font-size: 11px; color: var(--muted); }
+
+/* Feature Media */
+.feature-media { height: 240px; border-bottom: 1px solid var(--line); background: linear-gradient(135deg, #e9e9e2, #f7f7f2); }
+:root[data-theme="dark"] .feature-media { background: linear-gradient(135deg, #1a1c21, #121318); }
+.feature-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.feature-body { padding: 16px 16px 14px; }
+
+.kicker { font-family: var(--sans); text-transform: uppercase; font-size: 11px; color: var(--muted); }
+.feature-title { margin: 6px 0 8px; font-size: 30px; line-height: 1.12; }
+.byline { font-family: var(--sans); font-size: 12px; color: var(--muted); }
+
+.section-head { display: flex; align-items: baseline; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.section-title { margin: 0; font-size: 16px; text-transform: uppercase; font-family: var(--sans); }
+
+/* ==========================================================================
+   6. THEME TOGGLE
+   ========================================================================== */
+.theme-toggle { background: none; border: none; cursor: pointer; padding: 0; display: block; }
+.toggle-track {
+  width: 78px; height: 26px; border-radius: 13px; position: relative;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 8px; transition: background-color 0.3s ease; background-color: var(--line-strong);
+}
+
+.sun-icon { color: #f59e0b; z-index: 1; }
+.news-icon { color: var(--muted); z-index: 1; }
+.moon-icon { color: var(--muted); z-index: 1; }
+
+.toggle-thumb {
+  position: absolute; width: 20px; height: 20px; background-color: #fff; border-radius: 50%;
+  top: 3px; left: 3px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2); z-index: 2;
+}
+
+/* Toggle Positioner (Match JS order: light, dark, immersive) */
+:root[data-theme="light"] .toggle-thumb { transform: translateX(0); }
+:root[data-theme="dark"] .toggle-thumb { transform: translateX(26px); }
+:root[data-theme="immersive"] .toggle-thumb { transform: translateX(52px); }
+
+/* Theme-specific toggle tweaks */
+:root[data-theme="immersive"] .toggle-track { background-color: #c4b49d; }
+:root[data-theme="immersive"] .news-icon { color: #8b4513; }
+:root[data-theme="dark"] .moon-icon { color: #f3f0e8; }
+
+/* ==========================================================================
+   7. IMMERSIVE OVERRIDES (THE SOCIETY LOOK)
+   ========================================================================== */
+:root[data-theme="immersive"] body {
+  background-image: none;
+}
+
+:root[data-theme="immersive"] .masthead,
+:root[data-theme="immersive"] .nav-bar,
+:root[data-theme="immersive"] .rail,
+:root[data-theme="immersive"] .feature,
+:root[data-theme="immersive"] .card,
+:root[data-theme="immersive"] .section-block {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme="immersive"] .masthead {
+  border-bottom: 4px double var(--line-strong) !important;
+}
+
+:root[data-theme="immersive"] .masthead-top {
+  display: block; text-align: center; padding: 30px 0 10px; margin-top: 20px;
+}
+
+:root[data-theme="immersive"] .brand {
+  font-size: 85px; text-transform: uppercase; margin-bottom: -10rem;
+}
+
+:root[data-theme="immersive"] .tagline {
+  padding: 2px 0; margin-top: 1px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px;
+  color: var(--accent-gold);
+}
+
+:root[data-theme="immersive"] .nav-links { display: none; }
+:root[data-theme="immersive"] .nav-inner::before {
+  content: "MENU ☰"; font-family: var(--sans); font-size: 11px; cursor: pointer;
+  border: 1px solid var(--ink); padding: 4px 8px; opacity: 0.6;
+}
+
+/* ==========================================================================
+   8. FOOTER & RESPONSIVE
+   ========================================================================== */
+.footer { border-top: 2px solid var(--line-strong); margin-top: 24px; padding: 16px 0 26px; font-family: var(--sans); font-size: 12px; color: var(--muted); }
+.footer-inner { display: flex; justify-content: space-between; gap: 12px; }
+
+@media (max-width: 900px) {
+  .masthead-top { grid-template-columns: 1fr; text-align: center; }
+  .masthead-left, .masthead-right { align-items: center; }
+}

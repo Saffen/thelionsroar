@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="games-landing" aria-label="Festival games landing page">
+    <section class="games-hero">
+      {% if games_landing.kicker %}
+        <div class="kicker">{{ games_landing.kicker }}</div>
+      {% endif %}
+      <h1 class="games-title">{{ games_landing.title }}</h1>
+      {% if games_landing.intro %}
+        <p class="games-intro">{{ games_landing.intro }}</p>
+      {% endif %}
+    </section>
+
+    <section class="games-grid" aria-label="Available games">
+      {% for game in games %}
+        <article class="game-card">
+          <a class="game-card-link" href="{{ game.href }}">
+            <div class="game-card-media">
+              <img src="{{ game.image_src }}" alt="{{ game.title }} preview" loading="lazy" />
+            </div>
+            <div class="game-card-body">
+              <div class="game-card-eyebrow">{{ game.eyebrow }}</div>
+              <h2 class="game-card-title">{{ game.title }}</h2>
+              <p class="game-card-text">{{ game.description }}</p>
+              <span class="game-card-cta">Play now</span>
+            </div>
+          </a>
+        </article>
+      {% endfor %}
+    </section>
+  </section>
+{% endblock %}

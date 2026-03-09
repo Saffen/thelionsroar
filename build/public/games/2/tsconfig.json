@@ -1,0 +1,12 @@
+﻿{
+  "compilerOptions": {
+    "target": "ES2019",
+    "module": "none",
+    "lib": ["DOM", "ES2019"],
+    "strict": true,
+    "outFile": "game.js",
+    "removeComments": false,
+    "skipLibCheck": true
+  },
+  "include": ["src/game.ts"]
+}

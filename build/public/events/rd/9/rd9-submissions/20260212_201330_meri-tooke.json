@@ -1,0 +1,23 @@
+{
+    "timestamp_utc": "2026-02-12T20:13:30+00:00",
+    "ip": "95.146.68.24",
+    "artist_name": "Meri Tooke",
+    "contact_discord": "queenkhari",
+    "genre": "Metal\/Rock",
+    "set_lengths_ok": [
+        "20-30",
+        "40-45",
+        "60"
+    ],
+    "set_length_preferred": "40-45",
+    "set_length_minimum": "30 minutes",
+    "accept_short_showcase": "maybe",
+    "performance_description": "known for his rebelious nature and singing about his struggles with undeath via the form of rock and metal music, Meri Tooke aims to push the boundaries of the heavier side of music. His performances often include a lot of pyrotechnics and magical affacts.",
+    "availability": {
+        "fri": "all",
+        "sat": "no",
+        "sun": "no"
+    },
+    "playback_method": "w2g",
+    "performed_before": "yes"
+}

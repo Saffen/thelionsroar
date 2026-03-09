@@ -1,0 +1,22 @@
+{
+    "timestamp_utc": "2026-02-12T19:10:19+00:00",
+    "ip": "45.10.153.136",
+    "artist_name": "Leejing Rainblossom",
+    "contact_discord": "lee0263",
+    "genre": "Pop\/upbeat",
+    "set_lengths_ok": [
+        "10-15",
+        "20-30"
+    ],
+    "set_length_preferred": "20-30",
+    "set_length_minimum": "25",
+    "accept_short_showcase": "yes",
+    "performance_description": "Leejing takes the audience on a journey for the ears with her up-beat music that inspires dancing from the audience, building the energy from the first song and ending on the dancing banger of a crowd-pleaser: \"Cocktails\"",
+    "availability": {
+        "fri": "before_22",
+        "sat": "before_22",
+        "sun": "early"
+    },
+    "playback_method": "musician",
+    "performed_before": "yes"
+}

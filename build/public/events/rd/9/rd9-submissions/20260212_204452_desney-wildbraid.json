@@ -1,0 +1,22 @@
+{
+    "timestamp_utc": "2026-02-12T20:44:52+00:00",
+    "ip": "145.53.66.5",
+    "artist_name": "Desney Wildbraid",
+    "contact_discord": "therotis",
+    "genre": "Folk, Tavern, Fast paced",
+    "set_lengths_ok": [
+        "10-15",
+        "20-30"
+    ],
+    "set_length_preferred": "20-30",
+    "set_length_minimum": "10 minutes",
+    "accept_short_showcase": "yes",
+    "performance_description": "A up-beat mix of reels, jigs, and some sung songs mixed between what would mostly be instrumental tunes of Dwarven (Otherwise Irish or Scottish) make!",
+    "availability": {
+        "fri": "before_22",
+        "sat": "all",
+        "sun": "early"
+    },
+    "playback_method": "musician",
+    "performed_before": "no"
+}

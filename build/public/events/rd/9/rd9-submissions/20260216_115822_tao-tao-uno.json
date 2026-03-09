@@ -1,0 +1,22 @@
+{
+    "timestamp_utc": "2026-02-16T11:58:22+00:00",
+    "ip": "80.208.65.183",
+    "artist_name": "Tao-Tao Uno",
+    "contact_discord": "noiseninja666",
+    "genre": "drone\/ambient - Immersive\/Filmic - Poetry and performance art",
+    "set_lengths_ok": [
+        "20-30",
+        "40-45"
+    ],
+    "set_length_preferred": "20-30",
+    "set_length_minimum": "20",
+    "accept_short_showcase": "maybe",
+    "performance_description": "Immersive\/flimic original (this is my IRL main musical project) drone and ambient music, spiced up with IC poetry and perfromance art. This will be a solo show, except for eventual extras\/statister, yet to be decided.\r\n\r\nMusic examples: https:\/\/soundcloud.com\/jacob-laeby\/den-hvide-dod-the-white-death    :::    https:\/\/soundcloud.com\/jacob-laeby\/fjernsind-rubber-spectre-fencepost-elastic2-remix",
+    "availability": {
+        "fri": "all",
+        "sat": "all",
+        "sun": "all"
+    },
+    "playback_method": "w2g",
+    "performed_before": "yes"
+}

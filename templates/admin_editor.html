@@ -2,180 +2,602 @@
 <html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <title>The Lion's Roar - Admin Editor</title>
+    <title>The Lion's Roar - Admin Panel</title>
     <link rel="stylesheet" href="/assets/css/base.css">
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; height: 65vh; margin-top: 20px; }
-        textarea { width: 100%; height: 100%; font-family: 'Courier New', monospace; padding: 15px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); resize: none; }
-        #preview { padding: 20px; border: 1px solid var(--line); background: #fff; overflow-y: auto; }
+        :root {
+            --sidebar-width: 200px;
+            --top-nav-height: 60px;
+        }
+
+        .admin-wrapper { display: flex; flex-direction: column; min-height: 100vh; background: #ede7da; }
+        .top-nav {
+            height: var(--top-nav-height);
+            background: #222;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            justify-content: space-between;
+        }
+        .nav-links { display: flex; gap: 20px; }
+        .nav-links a {
+            color: #ccc;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .nav-links a.active { color: #b3924e; border-bottom: 2px solid #b3924e; }
+        .main-content { flex: 1; overflow-y: auto; padding: 20px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
         .form-section { background: #f4f4f4; padding: 20px; border-radius: 4px; margin-bottom: 20px; border: 1px solid #ddd; }
-        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; min-height: 60vh; margin-top: 10px; }
+        .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .panel { background: white; border: 1px solid #ddd; border-radius: 4px; padding: 16px; }
+        .panel h3 { margin-top: 0; }
+        textarea { width: 100%; height: 100%; min-height: 520px; font-family: Consolas, monospace; padding: 15px; border: 1px solid #c8c0b2; background: white; color: #111; resize: vertical; box-sizing: border-box; }
+        #preview { padding: 20px; border: 1px solid #c8c0b2; background: #fff; overflow-y: auto; min-height: 520px; }
+        .library-table { width: 100%; border-collapse: collapse; background: white; border: 1px solid #ddd; }
+        .library-table th, .library-table td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; vertical-align: top; }
+        .library-table tr:hover { background: #f9f9f9; }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .status-published { background: #d4edda; color: #155724; }
+        .status-scheduled { background: #fff3cd; color: #856404; }
+        .status-draft { background: #e2e3e5; color: #383d41; }
+        .status-build { background: #d1ecf1; color: #0c5460; }
+        .status-deleted { background: #f8d7da; color: #721c24; }
         input, select { padding: 8px; border: 1px solid #ccc; width: 100%; box-sizing: border-box; }
         label { display: block; font-size: 0.75rem; margin-bottom: 4px; font-weight: bold; text-transform: uppercase; color: #555; }
-        .btn-group { display: flex; gap: 15px; margin-top: 20px; padding-bottom: 40px; }
-        .btn-publish { background: #b3924e; color: #fff; padding: 12px 30px; border: none; cursor: pointer; font-weight: bold; }
-        .btn-preview { background: #444; color: #fff; padding: 12px 30px; border: none; cursor: pointer; font-weight: bold; }
-        .options-row { display: flex; align-items: center; gap: 20px; font-size: 0.8rem; background: #eee; padding: 10px; border-radius: 4px; }
-        .checkbox-item { display: flex; align-items: center; gap: 8px; }
-        .checkbox-item input { width: auto; }
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        .btn-primary { background: #b3924e; color: #fff; padding: 10px 18px; border: none; cursor: pointer; font-weight: bold; }
+        .btn-secondary { background: #444; color: #fff; padding: 8px 15px; border: none; cursor: pointer; font-size: 0.85rem; }
+        .btn-danger { background: #8b0000; color: white; padding: 8px 15px; border: none; cursor: pointer; font-size: 0.85rem; }
+        .btn-ghost { background: #f4f4f4; color: #222; padding: 8px 15px; border: 1px solid #bbb; cursor: pointer; font-size: 0.85rem; }
+        .editor-header { display: flex; justify-content: space-between; gap: 20px; align-items: baseline; }
+        .editor-header p { margin: 6px 0 0; color: #5a5a5a; }
+        .flash { display: none; margin-bottom: 20px; padding: 12px 14px; border-radius: 4px; font-weight: 600; }
+        .flash.is-visible { display: block; }
+        .flash-success { background: #d4edda; color: #155724; }
+        .flash-error { background: #f8d7da; color: #721c24; }
+        .flash-info { background: #d1ecf1; color: #0c5460; }
+        .filter-group { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+        .filter-btn.active { background: #b3924e; color: white; border-color: #b3924e; }
+        .muted { color: #666; font-size: 0.9rem; }
+        .small-list { list-style: none; margin: 0; padding: 0; }
+        .small-list li { padding: 8px 0; border-bottom: 1px solid #eee; }
+        .small-list li:last-child { border-bottom: 0; }
+        .empty-state { color: #666; padding: 14px 0; }
+        .action-link { margin-right: 8px; }
+
+        @media (max-width: 1000px) {
+            .admin-grid, .meta-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
-<body class="container">
-    <header style="margin-bottom: 20px;">
-        <h1>Lion's Editor</h1>
-    </header>
-    
-    <form id="publishForm">
-        <div class="form-section">
-            <div class="form-row">
-                <div style="grid-column: span 2;">
-                    <label for="title">Headline</label>
-                    <input type="text" name="title" id="title" placeholder="Enter article title..." required>
-                </div>
-                <div>
-                    <label for="author">Author</label>
-                    <input list="authors" name="author" id="author" placeholder="Select or type name..." required>
-                    <datalist id="authors">
-                        <option value="Hardhy Lester">
-                        <option value="The Lion's Roar Staff">
-                        <option value="Guest Contributor">
-                    </datalist>
-                </div>
-                <div>
-                    <label for="publish_at">Publish Date & Time</label>
-                    <input type="datetime-local" name="publish_at" id="publish_at" required>
-                </div>
-            </div>
+<body class="admin-wrapper">
 
-            <div class="form-row">
-                <div>
-                    <label for="section">Section</label>
-                    <select name="section" id="section">
-                        <option value="news">News</option>
-                        <option value="opinion">Opinion</option>
-                        <option value="events">Events</option>
-                        <option value="lifestyle">Lifestyle</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="type">Article Type</label>
-                    <select name="type" id="type">
-                        <option value="report">Report</option>
-                        <option value="feature">Feature</option>
-                        <option value="interview">Interview</option>
-                        <option value="editorial">Editorial</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="status">Publication Status</label>
-                    <select name="status" id="status">
-                        <option value="scheduled">Scheduled (Auto-Publish)</option>
-                        <option value="draft">Draft (Hidden)</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="tags">Tags (comma separated)</label>
-                    <input type="text" name="tags" id="tags" placeholder="stormwind, tech, politics">
-                </div>
-            </div>
+    <nav class="top-nav">
+        <div style="font-size: 1.2rem; font-weight: bold; color: #b3924e;">LION'S ROAR CMS</div>
+        <div class="nav-links">
+            <a onclick="showTab('editor')" id="tab-link-editor" class="active">Editor</a>
+            <a onclick="showTab('library')" id="tab-link-library">Library</a>
+            <a onclick="showTab('system')" id="tab-link-system">System</a>
+        </div>
+        <div id="connection-status" style="font-size: 0.8rem; color: #888;">Connected as Admin</div>
+    </nav>
 
-            <div class="form-row">
-                <div>
-                    <label for="image">Featured Image</label>
-                    <input type="file" name="image" id="image" accept="image/*">
-                </div>
-                <div>
-                    <label for="image_credit">Image Credit</label>
-                    <input type="text" name="image_credit" id="image_credit" placeholder="Photographer name">
-                </div>
-                <div>
-                    <label for="image_source">Image Source</label>
-                    <input type="text" name="image_source" id="image_source" value="Lion's Roar archives">
-                </div>
-                <div>
-                    <label for="image_type">Visual Category</label>
-                    <select name="image_type" id="image_type">
-                        <option value="illustration">Illustration</option>
-                        <option value="photograph">Photograph</option>
-                        <option value="screenshot">Screenshot</option>
-                    </select>
-                </div>
-            </div>
+    <main class="main-content">
+        <div id="flash" class="flash"></div>
 
-            <div class="form-row" style="margin-top: 10px;">
-                <div style="grid-column: span 3;">
-                    <label for="teaser">Teaser (Short summary)</label>
-                    <input type="text" name="teaser" id="teaser" placeholder="A brief introduction..." required>
-                </div>
-                <div class="options-row">
-                    <div class="checkbox-item">
-                        <input type="checkbox" name="discord_announce" id="discord_announce" checked>
-                        <label for="discord_announce" style="margin: 0;">Announce on Discord</label>
+        <div id="tab-editor" class="tab-content active">
+            <form id="publishForm">
+                <div class="form-section">
+                    <div class="editor-header">
+                        <div>
+                            <h2 id="editor-heading" style="margin: 0;">New article</h2>
+                            <p id="editor-subheading">Create or edit articles without touching the markdown files directly.</p>
+                        </div>
+                        <div class="muted" id="editor-file-label">Unsaved article</div>
+                    </div>
+
+                    <div class="form-row" style="margin-top: 18px;">
+                        <div style="grid-column: span 2;">
+                            <label for="title">Headline</label>
+                            <input type="text" name="title" id="title" placeholder="Enter article title...">
+                        </div>
+                        <div>
+                            <label for="author">Author</label>
+                            <input list="authors" name="author" id="author" placeholder="One or more authors, comma-separated">
+                            <datalist id="authors">
+                                <option value="Hardhy Lester">
+                                <option value="The Lion's Roar Staff">
+                                <option value="Guest Contributor">
+                            </datalist>
+                        </div>
+                        <div>
+                            <label for="publish_at">Publish Date & Time</label>
+                            <input type="datetime-local" name="publish_at" id="publish_at">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div>
+                            <label for="section">Section</label>
+                            <select name="section" id="section">
+                                <option value="news">News</option>
+                                <option value="opinion">Opinion</option>
+                                <option value="events">Events</option>
+                                <option value="lifestyle">Lifestyle</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="type">Article Type</label>
+                            <select name="type" id="type">
+                                <option value="report">Report</option>
+                                <option value="feature">Feature</option>
+                                <option value="interview">Interview</option>
+                                <option value="editorial">Editorial</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="status">Current Status</label>
+                            <select name="status" id="status" disabled>
+                                <option value="draft">Draft</option>
+                                <option value="build">Build</option>
+                                <option value="scheduled">Scheduled</option>
+                                <option value="published">Published</option>
+                                <option value="deleted">Deleted</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="tags">Tags</label>
+                            <input type="text" name="tags" id="tags" placeholder="stormwind, tech, politics">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div>
+                            <label for="image">Image</label>
+                            <input id="image" type="file" name="image" accept="image/*">
+                        </div>
+                        <div>
+                            <label for="image_credit">Credit</label>
+                            <input id="image_credit" type="text" name="image_credit">
+                        </div>
+                        <div>
+                            <label for="image_source">Source</label>
+                            <input id="image_source" type="text" name="image_source" value="Lion's Roar archives">
+                        </div>
+                        <div>
+                            <label for="image_type">Visual Category</label>
+                            <select id="image_type" name="image_type">
+                                <option value="illustration">Illustration</option>
+                                <option value="photograph">Photograph</option>
+                                <option value="screenshot">Screenshot</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 10px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 320px;">
+                            <label for="teaser">Teaser</label>
+                            <input type="text" name="teaser" id="teaser" placeholder="Brief summary...">
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 20px;">
+                            <input type="checkbox" name="discord_announce" id="discord_announce" checked style="width:auto;">
+                            <label for="discord_announce" style="margin: 0;">Discord Announce</label>
+                        </div>
                     </div>
                 </div>
+
+                <div class="admin-grid">
+                    <div>
+                        <label for="content">Markdown Content</label>
+                        <textarea name="content" id="content" placeholder="Write your story..."></textarea>
+                    </div>
+                    <div>
+                        <label>Live Preview</label>
+                        <div id="preview" class="article-body"></div>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" id="btn-save-draft" class="btn-primary" onclick="submitArticleAction('save_draft')">Save Draft</button>
+                    <button type="button" id="btn-save-build" class="btn-secondary" onclick="submitArticleAction('save_build')">Save Build</button>
+                    <button type="button" id="btn-schedule" class="btn-secondary" onclick="submitArticleAction('schedule')">Schedule</button>
+                    <button type="button" id="btn-publish" class="btn-secondary" onclick="submitArticleAction('publish_now')">Publish Now</button>
+                    <button type="button" id="btn-update-live" class="btn-secondary" onclick="submitArticleAction('update_published')" style="display:none;">Update Live Article</button>
+                    <button type="button" class="btn-ghost" onclick="resetEditor()">New Article</button>
+                    <button type="button" class="btn-ghost" onclick="updatePreview()">Refresh Preview</button>
+                </div>
+                <input type="hidden" name="original_filename" id="original_filename">
+            </form>
+
+            <div class="meta-grid">
+                <section class="panel">
+                    <h3>Versions</h3>
+                    <div id="versions-panel" class="empty-state">Version history will appear here for published articles.</div>
+                </section>
+                <section class="panel">
+                    <h3>Activity</h3>
+                    <div id="activity-panel" class="empty-state">Recent article actions will appear here.</div>
+                </section>
             </div>
         </div>
 
-        <div class="admin-grid">
-            <div class="editor-pane">
-                <label>Body Content (<a href target="_blank" url="https://www.markdownguide.org/basic-syntax/">HELP</a>)</label>
-                <textarea name="content" id="content" placeholder="Type your story here..."></textarea>
-            </div>
-            <div class="preview-pane">
-                <label>Live Preview</label>
-                <div id="preview" class="article-body"></div>
+        <div id="tab-library" class="tab-content">
+            <div class="form-section">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px; gap: 12px; align-items: center; flex-wrap: wrap;">
+                    <div>
+                        <h2 style="margin: 0;">Content Library</h2>
+                        <p class="muted" style="margin: 6px 0 0;">Browse active articles and manage deleted content separately.</p>
+                    </div>
+                    <button class="btn-secondary" type="button" onclick="loadLibrary(editorState.currentFilter)">Reload List</button>
+                </div>
+
+                <div class="filter-group">
+                    <button type="button" class="btn-ghost filter-btn active" data-filter="active" onclick="loadLibrary('active')">Active</button>
+                    <button type="button" class="btn-ghost filter-btn" data-filter="draft" onclick="loadLibrary('draft')">Drafts</button>
+                    <button type="button" class="btn-ghost filter-btn" data-filter="build" onclick="loadLibrary('build')">Build</button>
+                    <button type="button" class="btn-ghost filter-btn" data-filter="scheduled" onclick="loadLibrary('scheduled')">Scheduled</button>
+                    <button type="button" class="btn-ghost filter-btn" data-filter="published" onclick="loadLibrary('published')">Published</button>
+                    <button type="button" class="btn-ghost filter-btn" data-filter="deleted" onclick="loadLibrary('deleted')">Deleted</button>
+                </div>
+
+                <table class="library-table">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Headline</th>
+                            <th>Author</th>
+                            <th>Publish</th>
+                            <th>Updated</th>
+                            <th>Versions</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="library-body">
+                        <tr><td colspan="7">Loading articles...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <div class="btn-group">
-            <button type="button" class="btn-preview" onclick="updatePreview()">Refresh Preview</button>
-            <button type="submit" class="btn-publish">Save Article</button>
+        <div id="tab-system" class="tab-content">
+            <div class="form-section">
+                <h2>System Control</h2>
+                <p class="muted">The article CRUD flow is being stabilized first. Build and deployment controls can be added once the editorial loop is reliable.</p>
+            </div>
         </div>
-    </form>
+
+    </main>
 
     <script>
+        const editorState = {
+            mode: 'new',
+            currentFilter: 'active',
+            currentArticle: null,
+        };
+
+        const form = document.getElementById('publishForm');
         const contentArea = document.getElementById('content');
         const previewArea = document.getElementById('preview');
-        
+        const statusField = document.getElementById('status');
+        const flash = document.getElementById('flash');
+
+        function showNotice(message, level = 'info') {
+            flash.className = `flash is-visible flash-${level}`;
+            flash.textContent = message;
+        }
+
+        function clearNotice() {
+            flash.className = 'flash';
+            flash.textContent = '';
+        }
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach((tab) => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-links a').forEach((link) => link.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            document.getElementById(`tab-link-${tabName}`).classList.add('active');
+            if (tabName === 'library') {
+                loadLibrary(editorState.currentFilter);
+            }
+        }
+
+        function setDefaultDate() {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('publish_at').value = now.toISOString().slice(0, 16);
+        }
+
+        function formatDateForInput(value) {
+            if (!value) return '';
+            return String(value).slice(0, 16);
+        }
+
+        function formatDateForDisplay(value) {
+            if (!value) return '—';
+            return String(value).replace('T', ' ');
+        }
+
+        function renderStatusBadge(status) {
+            const normalized = status || 'draft';
+            return `<span class="status-badge status-${normalized}">${escapeHtml(normalized)}</span>`;
+        }
+
         function updatePreview() {
-            const rawValue = contentArea.value;
-            previewArea.innerHTML = marked.parse(rawValue);
+            previewArea.innerHTML = marked.parse(contentArea.value || '');
+        }
+
+        function renderVersions(versions) {
+            const target = document.getElementById('versions-panel');
+            if (!versions || !versions.length) {
+                target.innerHTML = '<div class="empty-state">No stored versions yet.</div>';
+                return;
+            }
+
+            target.innerHTML = `<ul class="small-list">${versions.map((item) => `
+                <li>
+                    <strong>${escapeHtml(item.action || 'snapshot')}</strong><br>
+                    <span class="muted">${escapeHtml(item.created_at || item.version_id)}</span>
+                </li>
+            `).join('')}</ul>`;
+        }
+
+        function renderActivity(log) {
+            const target = document.getElementById('activity-panel');
+            if (!log || !log.length) {
+                target.innerHTML = '<div class="empty-state">No activity recorded yet.</div>';
+                return;
+            }
+
+            target.innerHTML = `<ul class="small-list">${log.slice(0, 8).map((entry) => `
+                <li>
+                    <strong>${escapeHtml(entry.action || 'update')}</strong><br>
+                    <span class="muted">${escapeHtml(entry.timestamp || '')}</span><br>
+                    <span>${escapeHtml(entry.summary || '')}</span>
+                </li>
+            `).join('')}</ul>`;
+        }
+
+        function syncActionButtons(status) {
+            const isPublished = status === 'published';
+            const isDeleted = status === 'deleted';
+            const scheduleButton = document.getElementById('btn-schedule');
+            document.getElementById('btn-save-draft').style.display = isDeleted ? 'none' : 'inline-block';
+            document.getElementById('btn-save-build').style.display = isPublished || isDeleted ? 'none' : 'inline-block';
+            scheduleButton.style.display = isPublished || isDeleted ? 'none' : 'inline-block';
+            document.getElementById('btn-publish').style.display = isPublished || isDeleted ? 'none' : 'inline-block';
+            document.getElementById('btn-update-live').style.display = isPublished ? 'inline-block' : 'none';
+
+            if (status === 'scheduled') {
+                scheduleButton.textContent = 'Save Scheduled Changes';
+                scheduleButton.onclick = () => submitArticleAction('save_scheduled_changes');
+            } else {
+                scheduleButton.textContent = 'Schedule';
+                scheduleButton.onclick = () => submitArticleAction('schedule');
+            }
+        }
+
+        function setEditorMode(mode, article = null) {
+            editorState.mode = mode;
+            editorState.currentArticle = article;
+
+            if (mode === 'edit' && article) {
+                document.getElementById('editor-heading').textContent = `Editing article: ${article.title || article.id}`;
+                document.getElementById('editor-subheading').textContent = `Article id: ${article.id}`;
+                document.getElementById('editor-file-label').textContent = article.filename || 'Saved article';
+                statusField.value = article.status || 'draft';
+                syncActionButtons(article.status || 'draft');
+                renderVersions(article.versions || []);
+                renderActivity(article.log || []);
+            } else {
+                document.getElementById('editor-heading').textContent = 'New article';
+                document.getElementById('editor-subheading').textContent = 'Create or edit articles without touching the markdown files directly.';
+                document.getElementById('editor-file-label').textContent = 'Unsaved article';
+                statusField.value = 'draft';
+                syncActionButtons('draft');
+                renderVersions([]);
+                renderActivity([]);
+            }
+        }
+
+        function populateForm(article) {
+            document.getElementById('title').value = article.title || '';
+            document.getElementById('author').value = (article.authors || []).join(', ');
+            document.getElementById('publish_at').value = formatDateForInput(article.publish_at);
+            document.getElementById('section').value = article.section || 'news';
+            document.getElementById('type').value = article.type || 'report';
+            document.getElementById('tags').value = (article.tags || []).join(', ');
+            document.getElementById('image_credit').value = article.image?.credit || '';
+            document.getElementById('image_source').value = article.image?.source || 'Lion\'s Roar archives';
+            document.getElementById('image_type').value = article.image?.image_type || 'illustration';
+            document.getElementById('teaser').value = article.teaser || '';
+            document.getElementById('discord_announce').checked = !!article.discord_announce;
+            document.getElementById('content').value = article.body_markdown || '';
+            document.getElementById('original_filename').value = article.filename || '';
+            statusField.value = article.status || 'draft';
+            updatePreview();
+        }
+
+        function resetEditor() {
+            form.reset();
+            document.getElementById('original_filename').value = '';
+            document.getElementById('image_source').value = 'Lion\'s Roar archives';
+            document.getElementById('discord_announce').checked = true;
+            setDefaultDate();
+            updatePreview();
+            clearNotice();
+            setEditorMode('new');
+            showTab('editor');
+        }
+
+        function serializeForm(action) {
+            const formData = new FormData(form);
+            formData.set('action', action);
+            formData.set('discord_announce', document.getElementById('discord_announce').checked ? 'true' : 'false');
+            return formData;
+        }
+
+        async function submitArticleAction(action) {
+            try {
+                const response = await fetch('/api/admin/publish', {
+                    method: 'POST',
+                    body: serializeForm(action),
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.message || 'Save failed.');
+                }
+
+                const article = result.article;
+                populateForm(article);
+                setEditorMode('edit', article);
+                showNotice(result.message || 'Article saved.', 'success');
+                loadLibrary(editorState.currentFilter);
+            } catch (error) {
+                showNotice(error.message || 'Error saving article.', 'error');
+            }
+        }
+
+        async function loadLibrary(filter = 'active') {
+            editorState.currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach((button) => {
+                button.classList.toggle('active', button.dataset.filter === filter);
+            });
+
+            const body = document.getElementById('library-body');
+            body.innerHTML = '<tr><td colspan="7">Loading articles...</td></tr>';
+
+            try {
+                const response = await fetch(`/api/admin/articles?status=${encodeURIComponent(filter)}`);
+                const payload = await response.json();
+                if (!response.ok) {
+                    throw new Error(payload.detail || 'Could not load article library.');
+                }
+                renderLibrary(payload.items || []);
+            } catch (error) {
+                body.innerHTML = `<tr><td colspan="7">${escapeHtml(error.message || 'Failed to load library.')}</td></tr>`;
+            }
+        }
+
+        function renderLibrary(items) {
+            const body = document.getElementById('library-body');
+            if (!items.length) {
+                body.innerHTML = '<tr><td colspan="7">No articles found for this filter.</td></tr>';
+                return;
+            }
+
+            body.innerHTML = items.map((article) => {
+                const author = article.authors && article.authors.length ? article.authors.join(', ') : '—';
+                const actions = article.status === 'deleted'
+                    ? `<button class="btn-secondary action-link" type="button" onclick="editArticle('${encodeURIComponent(article.filename)}')">View</button>
+                       <button class="btn-ghost" type="button" onclick="restoreArticle('${encodeURIComponent(article.filename)}', '${escapeHtml(article.title)}')">Restore</button>`
+                    : `<button class="btn-secondary action-link" type="button" onclick="editArticle('${encodeURIComponent(article.filename)}')">Edit</button>
+                       <button class="btn-danger" type="button" onclick="deleteArticle('${encodeURIComponent(article.filename)}', '${escapeHtml(article.title)}')">Delete</button>`;
+
+                return `
+                    <tr>
+                        <td>${renderStatusBadge(article.status)}</td>
+                        <td><strong>${escapeHtml(article.title || article.filename)}</strong><br><span class="muted">${escapeHtml(article.filename)}</span></td>
+                        <td>${escapeHtml(author)}</td>
+                        <td>${escapeHtml(formatDateForDisplay(article.publish_at))}</td>
+                        <td>${escapeHtml(formatDateForDisplay(article.updated_at || article.created_at))}</td>
+                        <td>${escapeHtml(article.version_count || 0)}</td>
+                        <td>${actions}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function editArticle(encodedFilename) {
+            const filename = decodeURIComponent(encodedFilename);
+            try {
+                const response = await fetch(`/api/admin/articles/${filename}`);
+                const article = await response.json();
+                if (!response.ok) {
+                    throw new Error(article.detail || 'Could not load article data.');
+                }
+
+                populateForm(article);
+                setEditorMode('edit', article);
+                clearNotice();
+                showTab('editor');
+            } catch (error) {
+                showNotice(error.message || 'Could not load article data.', 'error');
+            }
+        }
+
+        async function deleteArticle(encodedFilename, title) {
+            const filename = decodeURIComponent(encodedFilename);
+            if (!confirm(`Delete ${title || filename}? This will move it to the deleted tab.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/articles/${filename}`, { method: 'DELETE' });
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.detail || result.message || 'Delete failed.');
+                }
+
+                if (editorState.currentArticle && editorState.currentArticle.filename === filename) {
+                    resetEditor();
+                }
+                showNotice(result.message || 'Article deleted.', 'success');
+                loadLibrary(editorState.currentFilter);
+            } catch (error) {
+                showNotice(error.message || 'Delete failed.', 'error');
+            }
+        }
+
+        async function restoreArticle(encodedFilename, title) {
+            const filename = decodeURIComponent(encodedFilename);
+            if (!confirm(`Restore ${title || filename} to draft?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/articles/${filename}/restore`, { method: 'POST' });
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.detail || result.message || 'Restore failed.');
+                }
+
+                showNotice(result.message || 'Article restored.', 'success');
+                loadLibrary(editorState.currentFilter);
+            } catch (error) {
+                showNotice(error.message || 'Restore failed.', 'error');
+            }
         }
 
         contentArea.addEventListener('input', updatePreview);
 
-        document.getElementById('publish_at').value = new Date().toISOString().slice(0, 16);
-
-        document.getElementById('publishForm').onsubmit = async (e) => {
-            e.preventDefault();
-            
-            const status = document.getElementById('status').value;
-            const confirmMsg = status === 'draft' 
-                ? "Save this as a draft?" 
-                : "Are you sure you want to schedule this article for publication?";
-            
-            if (!confirm(confirmMsg)) return;
-
-            const formData = new FormData(e.target);
-            formData.set('discord_announce', document.getElementById('discord_announce').checked);
-            
-            try {
-                const response = await fetch('/api/admin/publish', { 
-                    method: 'POST', 
-                    body: formData 
-                });
-                
-                const result = await response.json();
-                if (response.ok) {
-                    alert("Success: " + result.message);
-                } else {
-                    alert("Error: " + (result.detail || "Failed to save"));
-                }
-            } catch (err) {
-                alert("Network error: Could not reach API");
-            }
-        };
+        setDefaultDate();
+        updatePreview();
+        setEditorMode('new');
     </script>
 </body>
 </html>

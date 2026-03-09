@@ -1,0 +1,22 @@
+{
+    "timestamp_utc": "2026-02-12T19:41:17+00:00",
+    "ip": "80.247.22.250",
+    "artist_name": "Steele of The Forsaken",
+    "contact_discord": ".lexikinz",
+    "genre": "Goth Metal old school (not like Meri)",
+    "set_lengths_ok": [
+        "20-30",
+        "40-45"
+    ],
+    "set_length_preferred": "20-30",
+    "set_length_minimum": "30",
+    "accept_short_showcase": "maybe",
+    "performance_description": "Steele has just been doing Horde shows and would love for him to be more neutral also bring a duet feature with Kyra his new singer\r\n\r\nWe are completely different to Meri\/Felfire etc",
+    "availability": {
+        "fri": "all",
+        "sat": "all",
+        "sun": "all"
+    },
+    "playback_method": "w2g",
+    "performed_before": "no"
+}

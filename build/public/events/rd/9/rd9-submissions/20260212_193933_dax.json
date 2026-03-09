@@ -1,0 +1,21 @@
+{
+    "timestamp_utc": "2026-02-12T19:39:33+00:00",
+    "ip": "80.247.22.250",
+    "artist_name": "Dax",
+    "contact_discord": ".Lexikinz",
+    "genre": "Skater Pop Punk",
+    "set_lengths_ok": [
+        "20-30"
+    ],
+    "set_length_preferred": "20-30",
+    "set_length_minimum": "30",
+    "accept_short_showcase": "yes",
+    "performance_description": "Dax, a Gnome Pop Punk Skater All warcraft related lyrics either musician or watchtogethe  my set is adabped to both \r\nflexible",
+    "availability": {
+        "fri": "all",
+        "sat": "all",
+        "sun": "all"
+    },
+    "playback_method": "musician",
+    "performed_before": "no"
+}
