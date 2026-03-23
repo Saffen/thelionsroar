@@ -2,7 +2,13 @@
 
 {% block content %}
   <section class="article-grid" style="padding-top:20px;">
-    <section class="article-center" aria-label="Page content" style="max-width: 900px; margin: 0 auto;">
+    <aside
+      class="rail rail-left"
+      aria-label="Page rail"
+      style="min-height:520px;"
+    ></aside>
+
+    <section class="article-center" aria-label="Page content">
       <article class="feature feature-article">
         <div class="feature-body">
           {% if page.kicker %}
@@ -17,7 +23,7 @@
 
           <hr class="rule rule-article" />
 
-          <div class="article-body">
+          <div class="article-body newspaper-columns columns-2">
             {{ page.html_body | safe }}
           </div>
         </div>

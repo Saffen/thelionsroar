@@ -46,6 +46,9 @@ interface FloatingText {
 const STORAGE_KEYS = {
   best: 'protect-the-outhouse-best',
   music: 'protect-the-outhouse-music',
+  sfx: 'protect-the-outhouse-sfx',
+  musicVolume: 'protect-the-outhouse-music-volume',
+  sfxVolume: 'protect-the-outhouse-sfx-volume',
 };
 
 const GAME_CONFIG = {
@@ -62,6 +65,8 @@ const GAME_CONFIG = {
   comboResetSeconds: 1.8,
   clickDamage: 1,
   bestLeaderboardSize: 10,
+  defaultMusicVolume: 0.5,
+  defaultSfxVolume: 0.6,
 };
 
 const ENEMY_CONFIGS: Record<EnemyTypeId, EnemyConfig> = {
@@ -157,6 +162,10 @@ const SPAWN_TABLE: SpawnWeights[] = [
 const HIT_WORDS = ['Bonk!', 'Thunk!', 'Denied!', 'Nope!', 'Shoo!'];
 const BREACH_WORDS = ['Breach!', 'Clatter!', 'Not the door!', 'Hold it together!'];
 const EMPTY_LEADERBOARD_TEXT = 'No defenders logged yet. Be the first to preserve public dignity.';
+const SOUND_EFFECTS = {
+  hit: ['assets/sfx-hit-1.wav', 'assets/sfx-hit-2.wav', 'assets/sfx-hit-3.wav'],
+  breach: ['assets/sfx-breach-1.wav', 'assets/sfx-breach-2.wav', 'assets/sfx-breach-3.wav'],
+};
 
 class LeaderboardAPI {
   async fetchScores(): Promise<ScoreEntry[]> {
@@ -269,6 +278,10 @@ class Game {
   private readonly startButton = this.getElement<HTMLButtonElement>('startButton');
   private readonly restartButton = this.getElement<HTMLButtonElement>('restartButton');
   private readonly musicToggle = this.getElement<HTMLButtonElement>('musicToggle');
+  private readonly sfxToggle = this.getElement<HTMLButtonElement>('sfxToggle');
+  private readonly pauseToggle = this.getElement<HTMLButtonElement>('pauseToggle');
+  private readonly musicVolumeSlider = this.getElement<HTMLInputElement>('musicVolume');
+  private readonly sfxVolumeSlider = this.getElement<HTMLInputElement>('sfxVolume');
   private readonly finalScoreValue = this.getElement<HTMLElement>('finalScoreValue');
   private readonly finalTimeValue = this.getElement<HTMLElement>('finalTimeValue');
   private readonly recordStatus = this.getElement<HTMLElement>('recordStatus');
@@ -283,6 +296,10 @@ class Game {
   private readonly api = new LeaderboardAPI();
   private readonly music = new Audio('assets/music.mp3');
   private readonly images = new Map<string, HTMLImageElement>();
+  private readonly soundEffects = {
+    hit: SOUND_EFFECTS.hit.map((path) => this.createAudio(path)),
+    breach: SOUND_EFFECTS.breach.map((path) => this.createAudio(path)),
+  };
   private readonly floatingTexts: FloatingText[] = [];
   private readonly enemies: Enemy[] = [];
   private lastFrameTime = 0;
@@ -295,6 +312,7 @@ class Game {
   private comboTimer = 0;
   private health = GAME_CONFIG.maxHealth;
   private playing = false;
+  private paused = false;
   private submittedScore = false;
   private shakeTimer = 0;
   private outhouseFlash = 0;
@@ -302,6 +320,9 @@ class Game {
   private leaderboard: ScoreEntry[] = [];
   private musicEnabled = true;
   private musicFailed = false;
+  private sfxEnabled = true;
+  private musicVolume = GAME_CONFIG.defaultMusicVolume;
+  private sfxVolume = GAME_CONFIG.defaultSfxVolume;
 
   constructor(canvas: HTMLCanvasElement) {
     const context = canvas.getContext('2d');
@@ -316,7 +337,7 @@ class Game {
     this.ctx.imageSmoothingEnabled = false;
 
     this.music.loop = true;
-    this.music.volume = 0.5;
+    this.music.volume = GAME_CONFIG.defaultMusicVolume;
     this.music.preload = 'auto';
     this.music.addEventListener('error', () => {
       this.musicFailed = true;
@@ -325,10 +346,17 @@ class Game {
 
     this.bestScore = Number(localStorage.getItem(STORAGE_KEYS.best) ?? '0') || 0;
     this.musicEnabled = localStorage.getItem(STORAGE_KEYS.music) !== 'off';
+    this.sfxEnabled = localStorage.getItem(STORAGE_KEYS.sfx) !== 'off';
+    this.musicVolume = this.readStoredVolume(STORAGE_KEYS.musicVolume, GAME_CONFIG.defaultMusicVolume);
+    this.sfxVolume = this.readStoredVolume(STORAGE_KEYS.sfxVolume, GAME_CONFIG.defaultSfxVolume);
+    this.music.volume = this.musicVolume;
 
     this.bindEvents();
     this.preloadAssets();
     this.updateMusicButton();
+    this.updateSfxButton();
+    this.updatePauseButton();
+    this.syncVolumeControls();
     this.updateHud();
     void this.loadLeaderboard();
     this.render(0);
@@ -340,6 +368,10 @@ class Game {
     this.startButton.addEventListener('click', () => this.startGame());
     this.restartButton.addEventListener('click', () => this.startGame());
     this.musicToggle.addEventListener('click', () => this.toggleMusic());
+    this.sfxToggle.addEventListener('click', () => this.toggleSfx());
+    this.pauseToggle.addEventListener('click', () => this.togglePause());
+    this.musicVolumeSlider.addEventListener('input', () => this.setMusicVolume(Number(this.musicVolumeSlider.value) / 100));
+    this.sfxVolumeSlider.addEventListener('input', () => this.setSfxVolume(Number(this.sfxVolumeSlider.value) / 100));
     this.canvas.addEventListener('click', (event) => this.handleCanvasClick(event));
     this.scoreForm.addEventListener('submit', (event) => {
       event.preventDefault();
@@ -370,6 +402,20 @@ class Game {
     this.renderLeaderboard();
   }
 
+  private readStoredVolume(key: string, fallback: number): number {
+    const raw = Number(localStorage.getItem(key));
+    if (Number.isFinite(raw) && raw >= 0 && raw <= 1) {
+      return raw;
+    }
+    return fallback;
+  }
+
+  private syncVolumeControls(): void {
+    this.musicVolumeSlider.value = String(Math.round(this.musicVolume * 100));
+    this.sfxVolumeSlider.value = String(Math.round(this.sfxVolume * 100));
+  }
+
+
   private getElement<T extends HTMLElement>(id: string): T {
     const element = document.getElementById(id);
     if (!element) {
@@ -380,6 +426,7 @@ class Game {
 
   private startGame(): void {
     this.playing = true;
+    this.paused = false;
     this.submittedScore = false;
     this.spawnTimer = 0;
     this.survivalSeconds = 0;
@@ -403,6 +450,7 @@ class Game {
 
   private endGame(): void {
     this.playing = false;
+    this.paused = false;
     this.pauseMusic();
     const isRecord = this.score > this.bestScore;
     if (isRecord) {
@@ -416,6 +464,7 @@ class Game {
     this.gameOverTitle.textContent = 'The last outhouse has fallen.';
     this.gameOverText.textContent = 'The outhouse has been overrun. Roaring Days is now a sanitation incident.';
     this.gameOverOverlay.classList.add('visible');
+    this.updatePauseButton();
     this.updateHud();
     this.renderLeaderboard();
   }
@@ -450,6 +499,7 @@ class Game {
       this.bestScore = Math.max(this.bestScore, this.leaderboard[0].score);
       localStorage.setItem(STORAGE_KEYS.best, String(this.bestScore));
     }
+    this.updatePauseButton();
     this.updateHud();
     this.renderLeaderboard();
     this.setSubmitMessage(result.message, true);
@@ -458,6 +508,25 @@ class Game {
   private setSubmitMessage(message: string, success: boolean): void {
     this.submitMessage.textContent = message;
     this.submitMessage.className = `submit-message ${success ? 'success' : 'error'}`;
+  }
+
+  private createAudio(path: string): HTMLAudioElement {
+    const audio = new Audio(path);
+    audio.preload = 'auto';
+    return audio;
+  }
+
+  private setMusicVolume(value: number): void {
+    this.musicVolume = Math.max(0, Math.min(1, value));
+    this.music.volume = this.musicVolume;
+    localStorage.setItem(STORAGE_KEYS.musicVolume, this.musicVolume.toFixed(2));
+    this.syncVolumeControls();
+  }
+
+  private setSfxVolume(value: number): void {
+    this.sfxVolume = Math.max(0, Math.min(1, value));
+    localStorage.setItem(STORAGE_KEYS.sfxVolume, this.sfxVolume.toFixed(2));
+    this.syncVolumeControls();
   }
 
   private toggleMusic(): void {
@@ -471,6 +540,12 @@ class Game {
     this.updateMusicButton();
   }
 
+  private toggleSfx(): void {
+    this.sfxEnabled = !this.sfxEnabled;
+    localStorage.setItem(STORAGE_KEYS.sfx, this.sfxEnabled ? 'on' : 'off');
+    this.updateSfxButton();
+  }
+
   private updateMusicButton(): void {
     if (this.musicFailed) {
       this.musicToggle.textContent = 'Music: Missing';
@@ -479,13 +554,56 @@ class Game {
     this.musicToggle.textContent = `Music: ${this.musicEnabled ? 'ON' : 'OFF'}`;
   }
 
-  private async playMusic(): Promise<void> {
+  private updateSfxButton(): void {
+    this.sfxToggle.textContent = `SFX: ${this.sfxEnabled ? 'ON' : 'OFF'}`;
+  }
+
+
+  private updatePauseButton(): void {
+    this.pauseToggle.textContent = this.paused ? 'Resume' : 'Pause';
+  }
+
+  private togglePause(): void {
+    if (!this.playing) {
+      return;
+    }
+
+    this.paused = !this.paused;
+    if (this.paused) {
+      this.pauseMusic();
+    } else if (this.musicEnabled) {
+      void this.playMusic(false);
+    }
+    this.updatePauseButton();
+  }
+
+  private playRandomSound(group: 'hit' | 'breach'): void {
+    if (!this.sfxEnabled) {
+      return;
+    }
+
+    const pool = this.soundEffects[group];
+    if (pool.length === 0) {
+      return;
+    }
+
+    const source = pool[Math.floor(Math.random() * pool.length)];
+    const sound = source.cloneNode(true) as HTMLAudioElement;
+    sound.volume = this.sfxVolume * (group === 'hit' ? 0.76 : 1); 
+    void sound.play().catch((error) => {
+      console.warn(`Unable to play ${group} sound effect.`, error);
+    });
+  }
+
+  private async playMusic(resetTime = true): Promise<void> {
     if (!this.musicEnabled || this.musicFailed) {
       return;
     }
 
     try {
-      this.music.currentTime = 0;
+      if (resetTime) {
+        this.music.currentTime = 0;
+      }
       await this.music.play();
     } catch (error) {
       console.warn('Music playback did not start.', error);
@@ -501,7 +619,7 @@ class Game {
   }
 
   private handleCanvasClick(event: MouseEvent): void {
-    if (!this.playing) {
+    if (!this.playing || this.paused) {
       return;
     }
 
@@ -518,6 +636,7 @@ class Game {
       }
 
       const defeated = enemy.takeHit(GAME_CONFIG.clickDamage);
+      this.playRandomSound('hit');
       this.spawnFloatingText(enemy.x, enemy.y - enemy.radius, HIT_WORDS[Math.floor(Math.random() * HIT_WORDS.length)], '#fff0a6', 18);
       if (defeated) {
         this.enemies.splice(index, 1);
@@ -537,7 +656,7 @@ class Game {
     const delta = Math.min(0.033, (timestamp - this.lastFrameTime) / 1000 || 0);
     this.lastFrameTime = timestamp;
 
-    if (this.playing) {
+    if (this.playing && !this.paused) {
       this.update(delta);
     }
 
@@ -578,6 +697,7 @@ class Game {
         this.combo = 0;
         this.comboTimer = 0;
         this.spawnFloatingText(target.x, target.y - 84, BREACH_WORDS[Math.floor(Math.random() * BREACH_WORDS.length)], '#ff9078', 22);
+        this.playRandomSound('breach');
         if (this.health <= 0) {
           this.updateHud();
           this.endGame();
@@ -721,32 +841,50 @@ class Game {
   private drawBackground(time: number): void {
     const { ctx } = this;
     const gradient = ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-    gradient.addColorStop(0, '#ffcf7a');
-    gradient.addColorStop(0.35, '#ea8a60');
-    gradient.addColorStop(0.72, '#65517d');
-    gradient.addColorStop(1, '#233040');
+    gradient.addColorStop(0, '#a8d6ff');
+    gradient.addColorStop(0.34, '#f0c97d');
+    gradient.addColorStop(0.72, '#8d623d');
+    gradient.addColorStop(1, '#3a2d27');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-    ctx.fillStyle = 'rgba(255, 243, 204, 0.14)';
-    for (let index = 0; index < 8; index += 1) {
-      const x = 90 + index * 105 + Math.sin(time + index) * 8;
-      const y = 88 + (index % 3) * 16;
-      ctx.fillRect(x, y, 8, 8);
-      ctx.fillRect(x + 16, y + 8, 8, 8);
-      ctx.fillRect(x + 8, y + 16, 8, 8);
+    ctx.fillStyle = '#7896b6';
+    ctx.fillRect(118, 154, 96, 26);
+    ctx.fillRect(702, 140, 124, 34);
+    ctx.fillStyle = '#b9c4cb';
+    ctx.fillRect(148, 126, 66, 54);
+    ctx.fillRect(728, 104, 104, 70);
+
+    ctx.fillStyle = '#648448';
+    ctx.fillRect(0, 186, this.canvas.width, 54);
+    ctx.fillStyle = '#8bb05a';
+    for (let x = 0; x < this.canvas.width; x += 20) {
+      const top = 176 + Math.sin(x * 0.02 + time * 0.4) * 8;
+      ctx.fillRect(x, top, 16, 36);
     }
 
-    ctx.fillStyle = '#405536';
-    ctx.fillRect(0, this.canvas.height - 164, this.canvas.width, 164);
-    ctx.fillStyle = '#56753f';
-    for (let x = 0; x < this.canvas.width; x += 32) {
-      ctx.fillRect(x, this.canvas.height - 164 + ((x / 32) % 2) * 6, 24, 164);
-    }
+    ctx.fillStyle = '#8f562b';
+    ctx.beginPath();
+    ctx.moveTo(0, 250);
+    ctx.lineTo(182, 170);
+    ctx.lineTo(368, 240);
+    ctx.lineTo(574, 184);
+    ctx.lineTo(760, 224);
+    ctx.lineTo(960, 178);
+    ctx.lineTo(960, 430);
+    ctx.lineTo(0, 430);
+    ctx.closePath();
+    ctx.fill();
 
-    ctx.fillStyle = '#2f4227';
-    for (let x = 0; x < this.canvas.width; x += 16) {
-      ctx.fillRect(x, this.canvas.height - 42 + (x % 32 === 0 ? 2 : 0), 12, 40);
+    ctx.fillStyle = '#6d4328';
+    for (let y = 336; y < this.canvas.height; y += 34) {
+      ctx.fillRect(0, y, this.canvas.width, 16);
+    }
+    ctx.fillStyle = '#3d6a2a';
+    for (let x = 18; x < this.canvas.width; x += 42) {
+      for (let y = 334; y < this.canvas.height; y += 34) {
+        ctx.fillRect(x, y + (x % 3), 10, 6);
+      }
     }
   }
 
@@ -766,14 +904,46 @@ class Game {
       ctx.fillRect(x - 8, bannerY + 46 + bob, 28, 8);
     }
 
-    ctx.fillStyle = '#a0c06b';
-    for (let index = 0; index < 18; index += 1) {
-      const x = 20 + index * 54;
-      const y = this.canvas.height - 144 + (index % 3) * 8;
-      ctx.fillRect(x, y, 8, 28);
-      ctx.fillRect(x - 6, y + 8, 8, 16);
-      ctx.fillRect(x + 6, y + 12, 8, 18);
+    ctx.fillStyle = '#7f3e2a';
+    ctx.fillRect(196, bannerY + 12, this.canvas.width - 392, 22);
+    ctx.font = 'bold 22px Georgia';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#f7e8aa';
+    ctx.fillText('Roaring Days', this.canvas.width / 2, bannerY + 24);
+
+    ctx.fillStyle = '#c8925d';
+    for (let x = 36; x < this.canvas.width; x += 84) {
+      ctx.fillRect(x, this.canvas.height - 224, 8, 82);
+      ctx.fillRect(x - 2, this.canvas.height - 206, 42, 6);
+      ctx.fillRect(x - 2, this.canvas.height - 172, 42, 6);
     }
+
+    this.drawMelon(254, this.canvas.height - 82, 1.15);
+    this.drawMelon(336, this.canvas.height - 92, 0.92);
+    this.drawMelon(402, this.canvas.height - 80, 0.8);
+    this.drawMelon(572, this.canvas.height - 86, 1.05);
+    this.drawMelon(646, this.canvas.height - 76, 0.88);
+    this.drawMelon(712, this.canvas.height - 92, 1.12);
+  }
+
+  private drawMelon(x: number, y: number, scale: number): void {
+    const { ctx } = this;
+    const width = 28 * scale;
+    const height = 18 * scale;
+    ctx.fillStyle = '#325d27';
+    ctx.fillRect(x + width * 0.3, y - height - 4 * scale, 4 * scale, 4 * scale);
+    ctx.fillRect(x + width * 0.48, y - height - 6 * scale, 6 * scale, 3 * scale);
+    ctx.fillStyle = '#8dc456';
+    ctx.fillRect(x, y - height, width, height);
+    ctx.fillStyle = '#bde37b';
+    ctx.fillRect(x + 3 * scale, y - height + 2 * scale, 4 * scale, height - 4 * scale);
+    ctx.fillRect(x + 11 * scale, y - height + 1 * scale, 4 * scale, height - 2 * scale);
+    ctx.fillRect(x + 19 * scale, y - height + 2 * scale, 4 * scale, height - 4 * scale);
+    ctx.fillStyle = '#5c8d34';
+    ctx.fillRect(x + 7 * scale, y - height + 1 * scale, 2 * scale, height - 2 * scale);
+    ctx.fillRect(x + 15 * scale, y - height + 1 * scale, 2 * scale, height - 2 * scale);
+    ctx.fillRect(x + 23 * scale, y - height + 2 * scale, 2 * scale, height - 4 * scale);
   }
 
   private drawEnemies(): void {
@@ -872,3 +1042,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
   new Game(canvas);
 });
+
+
+
+
+
+
+
+
+
+
+
+

@@ -75,7 +75,7 @@ a:hover { text-decoration: underline; }
   grid-template-columns: 1fr 2fr 1fr;
   gap: 16px;
   align-items: center;
-  padding: 18px 0 10px;
+  padding: 10px 0 6px;
   /* border-bottom: 1px solid var(--line);*/
 }
 
@@ -84,22 +84,24 @@ a:hover { text-decoration: underline; }
   font-family: var(--sans); font-size: 12px; color: var(--muted);
 }
 .masthead-right { align-items: flex-end; }
+.masthead-center { min-width: 0; }
 
 /* Logo & Tagline */
 .brand {
-  display: flex;
-  align-items: center;   /* Centrerer dem vertikalt */
-  justify-content: center; /* Centrerer dem horisontalt i masthead */
-  gap: 20px;            /* Plads mellem løve og tekst */
+  display: grid;
+  grid-template-columns: 100px minmax(0, 1fr);
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
   color: var(--ink);
-  margin-bottom: 1rem;  /* Fjern den store negative margin for nu, så vi kan se hvad vi laver */
+  max-width: 760px;
+  margin: 0 auto;
 }
 
 .brand-icon {
-  flex-shrink: 0;       /* Forhindrer ikonet i at blive mast */
-  width: 50px;         /* Juster størrelsen på løven her */
+  width: 50px;
   height: 50px;
-  background-color: currentColor; /* Bruger farven fra .brand (var(--ink)) */
+  background-color: currentColor;
   -webkit-mask-image: url('lion-logo.svg');
   mask-image: url('lion-logo.svg');
   mask-size: contain;
@@ -107,15 +109,18 @@ a:hover { text-decoration: underline; }
 }
 
 .brand-text {
-  flex-grow: 1;         /* Lad teksten fylde resten af pladsen */
-  max-width: 600px;     /* Sæt en max-bredde så den ikke bliver for voldsom */
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .brand-text svg {
-  font-size: 44px;  
-  width: 100%;          /* Sørger for at SVG'en faktisk fylder sin container */
-  height: auto;         /* Bevarer proportionerne */
+  font-size: 44px;
+  width: min(680px, 100%);
+  height: auto;
   display: block;
+  margin-bottom: -48px;
 }
 
 .lion-icon {
@@ -132,23 +137,29 @@ a:hover { text-decoration: underline; }
     background-color: var(--accent-gold); /* Her styrer du farven med din variabel! */
 }
 :root[data-theme="immersive"] .lion-icon {
-    margin-top: -8rem;
-    background-color: var(--accent-gold); /* Her styrer du farven med din variabel! */
+    margin-top: 0;
+    background-color: var(--accent-gold);
 }
 :root[data-theme="dark"] .brand {
-  color: var(--accent-gold); /* Guld i dark mode */
+  color: var(--accent-gold);
 }
 :root[data-theme="immersive"] .brand-text {
-  color: var(--accent-gold); /* Guld i dark mode */
-  margin-top: -2rem;
+  color: var(--accent-gold);
+  margin-top: 0;
+
+}
+
+:root[data-theme="immersive"] .brand-text svg {
+  margin-bottom: -48px;
 }
 
 .tagline {
+  width: 100%;
   text-align: center;
   font-family: var(--sans);
   font-size: 12px;
   color: var(--muted);
-  margin-top: -3rem;
+  margin-top: 0;
 }
 
 .social-dots { display: flex; gap: 6px; }
@@ -278,15 +289,40 @@ a:hover { text-decoration: underline; }
 }
 
 :root[data-theme="immersive"] .masthead-top {
-  display: block; text-align: center; padding: 30px 0 10px; margin-top: 20px;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 14px 0 8px;
+  margin-top: 0;
 }
 
 :root[data-theme="immersive"] .brand {
-  font-size: 85px; text-transform: uppercase; margin-bottom: -10rem;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-bottom: 0;
+  max-width: 780px;
+}
+
+:root[data-theme="immersive"] .brand-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+:root[data-theme="immersive"] .brand-text svg {
+  width: min(720px, 100%);
 }
 
 :root[data-theme="immersive"] .tagline {
-  padding: 2px 0; margin-top: 1px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px;
+  max-width: 620px;
+  padding: 0;
+  margin-top: 0;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  line-height: 1.25;
+  text-align: center;
   color: var(--accent-gold);
 }
 
@@ -305,4 +341,17 @@ a:hover { text-decoration: underline; }
 @media (max-width: 900px) {
   .masthead-top { grid-template-columns: 1fr; text-align: center; }
   .masthead-left, .masthead-right { align-items: center; }
+  .brand {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 10px;
+  }
+  .brand-text {
+    align-items: center;
+  }
+  .tagline,
+  :root[data-theme="immersive"] .tagline {
+    text-align: center;
+    margin-top: -48px;
+  }
 }

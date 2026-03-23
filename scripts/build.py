@@ -68,6 +68,8 @@ def estimate_reading_time_minutes(text: str) -> tuple[int, int]:
 
 def load_markdown_with_frontmatter(md_path: Path) -> tuple[dict[str, Any], str, str]:
     raw = md_path.read_text(encoding="utf-8")
+    raw = raw.lstrip("\ufeff")
+    raw = raw.lstrip()
     if not raw.startswith("---"):
         raise ValueError(f"{md_path.name} is missing YAML frontmatter")
 
@@ -103,6 +105,7 @@ def base_context(site_base_url: str) -> dict[str, Any]:
         {"href": f"{site_base_url}/about/", "label": "About"},
         {"href": f"{site_base_url}/contact/", "label": "Contact"},
         {"href": f"{site_base_url}/privacy/", "label": "Privacy"},
+        {"href": f"{site_base_url}/jobs/", "label": "Jobs"},
     ]
 
     return {

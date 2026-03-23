@@ -7,11 +7,11 @@
     <meta property="og:description" content="Protect the Outhouse. Only a single outhouse stands between civilization and catastrophe. Defend it from saboteurs, queue jumpers, druids, murlocs, and every other threat to public decency!" />
     <meta property="og:image" content="https://thelionsroar.eu/games/2/game2.jpg" /> <meta property="og:url" content="https://thelionsroar.eu/games/2/game2.jpg" /> <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image:alt" content="Protect the Outhouse">
-	
+    <meta name="twitter:image:alt" content="Preview of Roaring Days Outhouse Protection game">
   <title>Protect the Outhouse</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <link rel="stylesheet" href="style.css" />
-  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    
 </head>
 <body>
   <main class="page-shell">
@@ -41,6 +41,16 @@
         </div>
         <div class="hud-group hud-group-right">
           <button id="musicToggle" class="pixel-button button-small" type="button">Music: ON</button>
+          <button id="sfxToggle" class="pixel-button button-small" type="button">SFX: ON</button>
+          <button id="pauseToggle" class="pixel-button button-small" type="button">Pause</button>
+          <label class="audio-card" for="musicVolume">
+            <span class="audio-label">Music Vol</span>
+            <input id="musicVolume" class="audio-slider" type="range" min="0" max="100" step="1" value="50" />
+          </label>
+          <label class="audio-card" for="sfxVolume">
+            <span class="audio-label">SFX Vol</span>
+            <input id="sfxVolume" class="audio-slider" type="range" min="0" max="100" step="1" value="60" />
+          </label>
         </div>
       </header>
 
@@ -60,7 +70,7 @@
             <h1>Protect the Outhouse</h1>
             <p class="flavor-text">
               Roaring Days approaches, and once again only a single outhouse stands between civilization and catastrophe.
-              Defend it from saboteurs, queue jumpers, druids, murlocs, and every other threat to public decency.
+              Defend it from saboteurs, queue jumpers, drunks, murlocs, and every other threat to public decency.
             </p>
             <div class="overlay-actions">
               <button id="startButton" class="pixel-button" type="button">Defend the Throne</button>
@@ -123,3 +133,4 @@
   <script src="game.js"></script>
 </body>
 </html>
+
