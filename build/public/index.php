@@ -1,2 +1,284 @@
-<?php
-echo "Due to a malware attack, this site has been lost. It will be restored as soon as possible.";
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Lion&#39;s Roar</title>
+  <link rel="stylesheet" href="/assets/css/newbase.css" />
+
+  
+    <link rel="stylesheet" href="/assets/css/home.css" />
+  
+
+<link rel="stylesheet" href="/assets/css/widgets.css" />
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+</head>
+
+<body>
+    <header class="masthead">
+    <div class="masthead-top container">
+      <div class="masthead-left">
+        <div class="mini-meta"></div>
+        <div class="social-dots" aria-label="Social links">
+          <a
+            class="social-link"
+            href="https://discord.gg/AzC8KjnuFv"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Join The Lion's Roar on Discord"
+            title="Join The Lion's Roar on Discord"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path fill="currentColor" d="M20.32 4.37a16.4 16.4 0 0 0-4.09-1.29l-.2.4a15.2 15.2 0 0 1 3.74 1.23 12.9 12.9 0 0 0-7.55-1.94 12.9 12.9 0 0 0-7.55 1.94 15.2 15.2 0 0 1 3.74-1.23l-.2-.4a16.4 16.4 0 0 0-4.09 1.29C1.54 8.31.35 12.15.78 15.93a16.6 16.6 0 0 0 5.02 2.53l.4-.65a10.8 10.8 0 0 1-1.64-.79l.39-.28c3.16 1.48 6.59 1.48 9.71 0l.39.28c-.52.3-1.07.57-1.64.79l.4.65a16.6 16.6 0 0 0 5.02-2.53c.5-4.38-.85-8.18-3.11-11.56ZM8.68 13.62c-.95 0-1.72-.88-1.72-1.96 0-1.08.76-1.96 1.72-1.96.97 0 1.74.89 1.72 1.96 0 1.08-.76 1.96-1.72 1.96Zm6.64 0c-.95 0-1.72-.88-1.72-1.96 0-1.08.76-1.96 1.72-1.96.97 0 1.74.89 1.72 1.96 0 1.08-.76 1.96-1.72 1.96Z"/>
+            </svg>
+            <span>Discord</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="masthead-center">
+        <div class="brand">
+          <div class="brand-icon lion-icon"></div>
+          <div class="brand-text">
+          <svg viewBox="0 0 500 140" xmlns="http://www.w3.org/2000/svg">
+            <line x1="40" y1="20" x2="460" y2="20" stroke="currentColor" stroke-width="2" />
+            <text x="50%" y="45" text-anchor="middle"
+                  font-family="'EB Garamond', serif"
+                  dominant-baseline="central"
+                  font-weight="800"
+                  letter-spacing="2"
+                  fill="currentColor"
+                  style="text-transform: uppercase;">The Lion's Roar
+            </text>
+            <line x1="40" y1="70" x2="460" y2="70" stroke="currentColor" stroke-width="2" />
+          </svg>
+          <div class="tagline">An Independent source of news for the discerning reader of Azeroth.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="masthead-right">
+        <div class="mini-meta"></div>
+        <button class="theme-toggle" type="button" aria-label="Toggle theme">
+          <div class="toggle-track">
+            <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+
+            <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+
+            <svg class="news-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>
+
+            <div class="toggle-thumb"></div>
+          </div>
+        </button>
+
+      </div>
+    </div>
+
+    <nav class="nav-bar" aria-label="Primary">
+      <div class="container nav-inner">
+        <button class="nav-toggle" aria-label="Menu" aria-expanded="false" type="button">
+          <span class="nav-toggle-label">Menu</span>
+          <span class="nav-toggle-icon" aria-hidden="true">&#9776;</span>
+        </button>
+
+        <ul class="nav-links">
+          
+            <li><a href="/">Home</a></li>
+          
+            <li><a href="/games/">Games</a></li>
+          
+        </ul>
+
+        <div class="nav-meta">
+          
+        </div>
+      </div>
+    </nav>
+
+    
+  </header>
+
+  <main id="main" class="container">
+    
+  <section class="frontgrid" aria-label="Front page lead">
+    <aside class="rail rail-left" aria-label="Recent articles">
+      <h2 class="rail-title">Recent Articles</h2>
+
+      
+        
+          <article class="rail-item">
+            <h3 class="rail-headline"><a href="/news/2025/202512310318-stormwind-quiet-evening/">Testing New Year</a></h3>
+            <div class="rail-meta">Hardhy Lester &middot; 31 December (2025)</div>
+          </article>
+        
+      
+    </aside>
+
+    <section class="lead" aria-label="Latest edition">
+      <article class="feature">
+        
+          <div class="feature-media">
+            <img src="/assets/images/202602070650-testing-stuff-in-february.jpg" alt="Testing stuff in February preview" loading="lazy" />
+          </div>
+        
+
+        <div class="feature-body">
+          
+            <div class="kicker">The Latest Edition</div>
+          
+
+          <h1 class="feature-title">
+            
+              <a href="/news/2026/202602070650-testing-stuff-in-february/">Testing stuff in February</a>
+            
+          </h1>
+
+          
+            <p class="feature-dek">A test of the editor</p>
+          
+
+          
+            <div class="byline">
+              
+                <span class="byline-item">By Hardhy Lester</span>
+              
+              
+                <span class="byline-sep">&middot;</span>
+                <time class="byline-item" datetime="2026-02-07T06:50:00">07 February (2026)</time>
+              
+            </div>
+          
+        </div>
+      </article>
+
+      
+        <section class="section-block" aria-label="More stories">
+
+
+          
+        </section>
+      
+    </section>
+
+    <aside class="rail rail-right" aria-label="About and extras">
+      
+        <section class="widget">
+          <h2 class="widget-title">About The Paper</h2>
+          <p class="widget-text">The Lion&#39;s Roar follows the events and people of the Argent Dawn (EU) server&#39;s roleplaying community.</p>
+        </section>
+      
+
+      
+        <section class="widget">
+          <h2 class="widget-title">Explore</h2>
+          <ul class="widget-list">
+            
+              <li><a href="/about/">About</a></li>
+            
+              <li><a href="/contact/">Contact</a></li>
+            
+              <li><a href="/privacy/">Privacy</a></li>
+            
+              <li><a href="/jobs/">Jobs</a></li>
+            
+          </ul>
+        </section>
+      
+
+      
+        <section class="widget">
+          
+            <h2 class="widget-title">Upcoming Events</h2>
+          
+          
+            <p class="widget-text">The Weekend of April the 17th to April the 19th The Lion&#39;s Roar will be hosting the Roaring Days music festival for the 9th time.</p>
+          
+          
+            <a class="button" href="/events/rd9/">READ MORE</a>
+          
+        </section>
+      
+    </aside>
+  </section>
+
+  
+
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <div>&copy; The Lion&#39;s Roar</div>
+        <div class="footer-links">
+          
+            <a href="/about/">About</a>
+          
+            <a href="/contact/">Contact</a>
+          
+            <a href="/privacy/">Privacy</a>
+          
+            <a href="/jobs/">Jobs</a>
+          
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      const btn = document.querySelector(".nav-toggle");
+      const links = document.querySelector(".nav-links");
+      if (!btn || !links) return;
+
+      btn.addEventListener("click", () => {
+        const open = links.classList.toggle("is-open");
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+
+      links.addEventListener("click", () => {
+        links.classList.remove("is-open");
+        btn.setAttribute("aria-expanded", "false");
+      });
+
+      document.addEventListener("click", (event) => {
+        if (!links.classList.contains("is-open")) return;
+        if (btn.contains(event.target) || links.contains(event.target)) return;
+        links.classList.remove("is-open");
+        btn.setAttribute("aria-expanded", "false");
+      });
+    })();
+  </script>
+  <script>
+(function () {
+  const root = document.documentElement;
+  const key = "lr-theme";
+
+  function apply(theme) {
+    if (theme) root.setAttribute("data-theme", theme);
+    else root.removeAttribute("data-theme");
+  }
+
+  const saved = localStorage.getItem(key);
+  if (saved === "dark" || saved === "light") {
+    apply(saved);
+  } else {
+    const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    apply(prefersDark ? "dark" : "light");
+  }
+
+  const btn = document.querySelector(".theme-toggle");
+  if (!btn) return;
+
+  btn.addEventListener("click", () => {
+    const themes = ["light", "dark", "immersive"];
+    const current = root.getAttribute("data-theme") || "light";
+    const next = themes[(themes.indexOf(current) + 1) % themes.length];
+
+    apply(next);
+    localStorage.setItem(key, next);
+  });
+})();
+</script>
+<script src="/assets/js/widgets.js" defer></script>
+
+
+</body>
+</html>

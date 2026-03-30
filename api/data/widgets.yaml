@@ -1,15 +1,6 @@
 # thelionsroar/api/data/widgets.yaml
 zones:
-  article-rail-left:
-    - id: "nav-widget"
-      type: "navigation"
-      title: "Sections"
-      data:
-        - { label: "Home", href: "/" }
-        - { label: "News", href: "/news/" }
-        - { label: "Opinion", href: "/opinion/" }
-        - { label: "Culture", href: "/culture/" }
-
+  article-rail-left-secondary:
     - id: "breaking-news"
       type: "ticker"
       title: "Live News"

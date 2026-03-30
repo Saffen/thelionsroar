@@ -1,0 +1,24 @@
+links:
+  nav:
+    - label: Home
+      href: /
+    - label: Games
+      href: /games/
+  footer:
+    - label: About
+      href: /about/
+    - label: Contact
+      href: /contact/
+    - label: Privacy
+      href: /privacy/
+    - label: Jobs
+      href: /jobs/
+  explore:
+    - label: About
+      href: /about/
+    - label: Contact
+      href: /contact/
+    - label: Privacy
+      href: /privacy/
+    - label: Jobs
+      href: /jobs/

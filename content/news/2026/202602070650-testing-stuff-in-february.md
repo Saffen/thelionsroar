@@ -7,7 +7,7 @@ authors:
 - Hardhy Lester
 teaser: A test of the editor
 publish_at: 07-02-2026 06:50
-status: scheduled
+status: published
 discord_announce: true
 tags: []
 image:
@@ -17,5 +17,7 @@ image:
   image_type: illustration
 kicker: ''
 template: news_article
+created_at: ''
+updated_at: '2026-03-23T22:06:01Z'
 ---
 A test article

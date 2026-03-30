@@ -20,7 +20,8 @@ APP_ROOT = Path("/app")
 CONTENT_ROOT = APP_ROOT / "content" / "news"
 STATE_ROOT = APP_ROOT / "state"
 ASSETS_ROOT = APP_ROOT / "assets"
-DATA_FILE = APP_ROOT / "data" / "widgets.yaml"
+DATA_FILE = APP_ROOT / 'data' / 'widgets.yaml'
+SITE_CONFIG_FILE = APP_ROOT / 'content' / 'config.yaml'
 ARTICLE_LOG_ROOT = STATE_ROOT / "article-log"
 ALLOWED_STATUSES = {"draft", "build", "scheduled", "published", "deleted"}
 ACTION_TO_STATUS = {
@@ -51,11 +52,64 @@ def utc_now_iso() -> str:
     )
 
 
+def load_site_config() -> dict[str, Any]:
+    if not SITE_CONFIG_FILE.exists():
+        return {}
+    try:
+        with open(SITE_CONFIG_FILE, "r", encoding="utf-8") as handle:
+            data = yaml.safe_load(handle) or {}
+            return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def normalize_shared_links(value: Any, default: list[dict[str, str]]) -> list[dict[str, str]]:
+    items = value if isinstance(value, list) else default
+    out: list[dict[str, str]] = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        label = str(item.get("label") or "").strip()
+        href = str(item.get("href") or "").strip()
+        if label and href:
+            out.append({"label": label, "href": href})
+    return out
+
+
 def load_data() -> dict[str, Any]:
     if not DATA_FILE.exists():
-        return {"zones": {}}
-    with open(DATA_FILE, "r", encoding="utf-8") as handle:
-        return yaml.safe_load(handle) or {"zones": {}}
+        data: dict[str, Any] = {"zones": {}}
+    else:
+        with open(DATA_FILE, "r", encoding="utf-8") as handle:
+            data = yaml.safe_load(handle) or {"zones": {}}
+            if not isinstance(data, dict):
+                data = {"zones": {}}
+
+    site_config = load_site_config()
+    link_config = site_config.get("links") if isinstance(site_config.get("links"), dict) else {}
+    explore_links = normalize_shared_links(
+        link_config.get("explore"),
+        [
+            {"label": "About", "href": "/about/"},
+            {"label": "Contact", "href": "/contact/"},
+            {"label": "Privacy", "href": "/privacy/"},
+            {"label": "Jobs", "href": "/jobs/"},
+        ],
+    )
+
+    zones = data.get("zones") if isinstance(data.get("zones"), dict) else {}
+    for widgets in zones.values():
+        if not isinstance(widgets, list):
+            continue
+        for widget in widgets:
+            if not isinstance(widget, dict):
+                continue
+            if widget.get("id") == "nav-widget" and widget.get("type") == "navigation":
+                widget["title"] = str(widget.get("title") or "Explore")
+                widget["data"] = explore_links
+
+    data["zones"] = zones
+    return data
 
 
 def load_published_state() -> dict[str, Any]:

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import json
 import os
 import re
 import shutil
@@ -21,6 +22,9 @@ INTERNAL_BUILD_DIR = BUILD_ROOT / "internal"
 ASSET_SOURCE_DIR = REPO_ROOT / "assets"
 PUBLIC_ASSET_DIR = PUBLIC_BUILD_DIR / "assets"
 INTERNAL_ASSET_DIR = INTERNAL_BUILD_DIR / "assets"
+CONTENT_NEWS_DIR = REPO_ROOT / "content" / "news"
+SITE_CONFIG_FILE = REPO_ROOT / "content" / "config.yaml"
+PUBLISHED_STATE_FILE = REPO_ROOT / "state" / "published.json"
 ROOT_PUBLIC_FILES = [REPO_ROOT / "logo.svg"]
 WORDS_PER_MINUTE = 220
 
@@ -42,6 +46,25 @@ TEMPLATE_REGISTRY = {
         "extra_css": ["/assets/css/games.css"],
     },
 }
+
+DEFAULT_NAV_LINKS = [
+    {"label": "Home", "href": "/"},
+    {"label": "Games", "href": "/games/"},
+]
+
+DEFAULT_FOOTER_LINKS = [
+    {"label": "About", "href": "/about/"},
+    {"label": "Contact", "href": "/contact/"},
+    {"label": "Privacy", "href": "/privacy/"},
+    {"label": "Jobs", "href": "/jobs/"},
+]
+
+DEFAULT_HOME_EXPLORE_LINKS = [
+    {"label": "About", "href": "/about/"},
+    {"label": "Contact", "href": "/contact/"},
+    {"label": "Privacy", "href": "/privacy/"},
+    {"label": "Jobs", "href": "/jobs/"},
+]
 
 
 def strip_markdown_to_text(md_body: str) -> str:
@@ -83,7 +106,95 @@ def load_markdown_with_frontmatter(md_path: Path) -> tuple[dict[str, Any], str, 
     return frontmatter, md_body, html_body
 
 
+def load_site_config() -> dict[str, Any]:
+    if not SITE_CONFIG_FILE.exists():
+        return {}
+    try:
+        data = yaml.safe_load(SITE_CONFIG_FILE.read_text(encoding="utf-8")) or {}
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def parse_publish_datetime(value: Any) -> datetime | None:
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value
+
+    text = str(value).strip()
+    if not text:
+        return None
+
+    for fmt in ("%d-%m-%Y %H:%M", "%Y-%m-%d %H:%M", "%Y-%m-%dT%H:%M"):
+        try:
+            return datetime.strptime(text, fmt)
+        except ValueError:
+            continue
+    return None
+
+
+def format_publish_display(dt: datetime | None, raw_value: str) -> str:
+    if not dt:
+        return raw_value
+    return dt.strftime("%d %B (%Y)")
+
+
+def make_excerpt(text: str, limit: int = 180) -> str:
+    current = text.strip()
+    if len(current) <= limit:
+        return current
+    trimmed = current[:limit].rsplit(" ", 1)[0].strip()
+    return f"{trimmed}..."
+
+
+def coerce_int(value: Any, default: int) -> int:
+    try:
+        return max(0, int(value))
+    except (TypeError, ValueError):
+        return default
+
+
+def normalize_href(site_base_url: str, href: str) -> str:
+    current = str(href or "").strip()
+    if not current:
+        return ""
+    if current.startswith(("http://", "https://")):
+        return current
+    if current.startswith("/"):
+        return f"{site_base_url}{current}" if site_base_url else current
+    return f"{site_base_url}/{current}" if site_base_url else f"/{current}"
+
+
+def normalize_link_items(raw_items: Any, site_base_url: str, default_items: list[dict[str, str]]) -> list[dict[str, str]]:
+    source_items = raw_items if isinstance(raw_items, list) else default_items
+
+    links: list[dict[str, str]] = []
+    for item in source_items:
+        if not isinstance(item, dict):
+            continue
+        label = str(item.get("label") or "").strip()
+        href = normalize_href(site_base_url, str(item.get("href") or "").strip())
+        if label and href:
+            links.append({"label": label, "href": href})
+    return links
+
+
+def output_path_to_url(output_path: Path, root: Path, site_base_url: str) -> str:
+    rel = output_path.relative_to(root).as_posix()
+    if rel in {"index.html", "index.php"}:
+        url = "/"
+    elif rel.endswith("/index.html") or rel.endswith("/index.php"):
+        url = f"/{rel.rsplit('/index.', 1)[0]}/"
+    else:
+        url = f"/{rel}"
+    return f"{site_base_url}{url}" if site_base_url else url
+
+
 def base_context(site_base_url: str) -> dict[str, Any]:
+    site_config = load_site_config()
+    link_config = site_config.get("links") if isinstance(site_config.get("links"), dict) else {}
+
     site = {
         "base_url": site_base_url,
         "name": "The Lion's Roar",
@@ -93,25 +204,16 @@ def base_context(site_base_url: str) -> dict[str, Any]:
         "edition_pill": "",
     }
 
-    nav = [
-        {"href": f"{site_base_url}/", "label": "Home"},
-        {"href": f"{site_base_url}/news/", "label": "News"},
-        {"href": f"{site_base_url}/opinion/", "label": "Opinion"},
-        {"href": f"{site_base_url}/events/", "label": "Events"},
-        {"href": f"{site_base_url}/games/", "label": "Games"},
-    ]
+    nav = normalize_link_items(link_config.get("nav"), site_base_url, DEFAULT_NAV_LINKS)
+    footer_links = normalize_link_items(link_config.get("footer"), site_base_url, DEFAULT_FOOTER_LINKS)
 
-    footer_links = [
-        {"href": f"{site_base_url}/about/", "label": "About"},
-        {"href": f"{site_base_url}/contact/", "label": "Contact"},
-        {"href": f"{site_base_url}/privacy/", "label": "Privacy"},
-        {"href": f"{site_base_url}/jobs/", "label": "Jobs"},
-    ]
+    explore_links = normalize_link_items(link_config.get("explore"), site_base_url, DEFAULT_HOME_EXPLORE_LINKS)
 
     return {
         "site": site,
         "nav": nav,
         "footer_links": footer_links,
+        "explore_links": explore_links,
         "ticker_items": [],
     }
 
@@ -132,19 +234,14 @@ def build_news_article_context(frontmatter: dict[str, Any], md_body: str, body_h
     section_label = section.replace("-", " ").title() if section else ""
     plain_text = strip_markdown_to_text(md_body)
     word_count, reading_minutes = estimate_reading_time_minutes(plain_text)
+    publish_at_raw = str(frontmatter.get("publish_at", "")).strip()
+    publish_dt = parse_publish_datetime(publish_at_raw)
 
     article = dict(frontmatter)
     article["html_body"] = body_html
     article["authors_display"] = ", ".join(str(author).strip() for author in authors if str(author).strip())
-    publish_at_raw = str(frontmatter.get("publish_at", "")).strip()
-    article["date_iso"] = publish_at_raw
-
-    try:
-        dt = datetime.strptime(publish_at_raw, "%d-%m-%Y %H:%M")
-        article["date_display"] = dt.strftime("%d %B (%Y)")
-    except ValueError:
-        article["date_display"] = publish_at_raw
-
+    article["date_iso"] = publish_dt.isoformat() if publish_dt else publish_at_raw
+    article["date_display"] = format_publish_display(publish_dt, publish_at_raw)
     article["tags"] = tag_objs
     article["section_label"] = section_label
     article["word_count"] = word_count
@@ -214,6 +311,183 @@ def build_games_landing_context(frontmatter: dict[str, Any], site_base_url: str)
     return ctx
 
 
+def load_published_state() -> dict[str, Any]:
+    if not PUBLISHED_STATE_FILE.exists():
+        return {}
+    try:
+        data = json.loads(PUBLISHED_STATE_FILE.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def iter_article_files(root: Path) -> list[Path]:
+    if not root.exists():
+        return []
+    return sorted(
+        path for path in root.rglob("*.md")
+        if all(not part.startswith("_") and not part.startswith(".") for part in path.relative_to(root).parts)
+    )
+
+
+def article_is_public(frontmatter: dict[str, Any], article_id: str, published_state: dict[str, Any]) -> bool:
+    if article_id in published_state:
+        return True
+
+    status = str(frontmatter.get("status") or "draft").strip().lower()
+    return status == "published"
+
+
+def compute_output_path(frontmatter: dict[str, Any], md_path: Path, mode: str) -> Path:
+    explicit = str(frontmatter.get("output_path") or "").strip().lstrip("/")
+    root = PUBLIC_BUILD_DIR if mode == "public" else INTERNAL_BUILD_DIR
+    if explicit:
+        target = root / explicit
+        if target.suffix:
+            return target
+        return target / "index.html"
+
+    template_key = str(frontmatter.get("template", "news_article")).strip() or "news_article"
+    slug = str(frontmatter.get("id") or md_path.stem).strip()
+    section = str(frontmatter.get("section") or "news").strip() or "news"
+    year = parse_publish_year(frontmatter, md_path)
+
+    if template_key == "home":
+        return root / "index.html"
+
+    if mode == "public":
+        return PUBLIC_BUILD_DIR / section / year / slug / "index.html"
+    return INTERNAL_BUILD_DIR / section / year / slug / "index.html"
+
+
+def build_article_summary(frontmatter: dict[str, Any], md_body: str, md_path: Path, site_base_url: str) -> dict[str, Any]:
+    authors = frontmatter.get("authors") or []
+    if isinstance(authors, str):
+        authors = [authors]
+
+    article_id = str(frontmatter.get("id") or md_path.stem).strip()
+    publish_at_raw = str(frontmatter.get("publish_at") or "").strip()
+    publish_dt = parse_publish_datetime(publish_at_raw)
+    plain_text = strip_markdown_to_text(md_body)
+    teaser = str(frontmatter.get("teaser") or "").strip() or make_excerpt(plain_text)
+    image = frontmatter.get("image") if isinstance(frontmatter.get("image"), dict) else {}
+    output_path = compute_output_path(frontmatter, md_path, mode="public")
+    word_count, reading_minutes = estimate_reading_time_minutes(plain_text)
+
+    return {
+        "id": article_id,
+        "title": str(frontmatter.get("title") or article_id).strip(),
+        "kicker": str(frontmatter.get("kicker") or "").strip(),
+        "teaser": teaser,
+        "authors_display": ", ".join(str(author).strip() for author in authors if str(author).strip()),
+        "date_iso": publish_dt.isoformat() if publish_dt else publish_at_raw,
+        "date_display": format_publish_display(publish_dt, publish_at_raw),
+        "image": {
+            "src": str(image.get("src") or "").strip(),
+            "url": normalize_href(site_base_url, str(image.get("src") or "").strip()),
+            "credit": str(image.get("credit") or "").strip(),
+            "source": str(image.get("source") or "").strip(),
+        },
+        "url": output_path_to_url(output_path, PUBLIC_BUILD_DIR, site_base_url),
+        "word_count": word_count,
+        "reading_time_minutes": reading_minutes,
+        "_sort_timestamp": publish_dt.timestamp() if publish_dt else 0,
+    }
+
+
+def collect_public_articles(site_base_url: str) -> list[dict[str, Any]]:
+    published_state = load_published_state()
+    articles: list[dict[str, Any]] = []
+
+    for md_path in iter_article_files(CONTENT_NEWS_DIR):
+        frontmatter, md_body, _ = load_markdown_with_frontmatter(md_path)
+        article_id = str(frontmatter.get("id") or md_path.stem).strip()
+        if not article_is_public(frontmatter, article_id, published_state):
+            continue
+        articles.append(build_article_summary(frontmatter, md_body, md_path, site_base_url))
+
+    articles.sort(key=lambda article: (article.get("_sort_timestamp", 0), article.get("id", "")), reverse=True)
+    return articles
+
+
+def normalize_home_modules(raw_items: Any, site_base_url: str) -> list[dict[str, str]]:
+    if not isinstance(raw_items, list):
+        return []
+
+    modules: list[dict[str, str]] = []
+    for item in raw_items:
+        if not isinstance(item, dict):
+            continue
+        title = str(item.get("title") or "").strip()
+        text = str(item.get("text") or "").strip()
+        href = normalize_href(site_base_url, str(item.get("href") or "").strip())
+        cta = str(item.get("cta") or "Open").strip() if href else ""
+        if title or text or href:
+            modules.append({
+                "title": title,
+                "text": text,
+                "href": href,
+                "cta": cta,
+            })
+    return modules
+
+
+def build_home_context(frontmatter: dict[str, Any], site_base_url: str) -> dict[str, Any]:
+    articles = collect_public_articles(site_base_url)
+    site_config = load_site_config()
+    link_config = site_config.get("links") if isinstance(site_config.get("links"), dict) else {}
+    secondary_count = coerce_int(frontmatter.get("secondary_count"), 4)
+    recent_count = coerce_int(frontmatter.get("recent_count"), 6)
+    archive_count = coerce_int(frontmatter.get("archive_count"), 6)
+
+    lead_article = articles[0] if articles else {
+        "title": str(frontmatter.get("empty_title") or "The presses are quiet for the moment.").strip(),
+        "kicker": "",
+        "teaser": str(frontmatter.get("empty_teaser") or "When the next report is published, it will appear here automatically.").strip(),
+        "authors_display": "",
+        "date_iso": "",
+        "date_display": "",
+        "image": {"src": "", "url": "", "credit": "", "source": ""},
+        "url": normalize_href(site_base_url, "/about/"),
+        "word_count": 0,
+        "reading_time_minutes": 0,
+        "_sort_timestamp": 0,
+    }
+
+    secondary_articles = articles[1 : 1 + secondary_count]
+    remaining_articles = articles[1 + secondary_count :]
+    recent_articles = remaining_articles[:recent_count] if remaining_articles else articles[1 : 1 + recent_count]
+    archive_articles = remaining_articles[recent_count : recent_count + archive_count] if remaining_articles else []
+
+    home = {
+        "kicker": str(frontmatter.get("kicker") or "The Latest Edition").strip(),
+        "title": str(frontmatter.get("title") or "The Lion's Roar").strip(),
+        "intro": str(frontmatter.get("intro") or frontmatter.get("teaser") or "").strip(),
+        "about_text": str(frontmatter.get("about_text") or "The Lion's Roar chronicles the roleplaying life of Azeroth through reports, features, and curious notices from around the realm.").strip(),
+        "lead_article": lead_article,
+        "secondary_articles": secondary_articles,
+        "recent_articles": recent_articles,
+        "archive_articles": archive_articles,
+        "secondary_title": str(frontmatter.get("secondary_title") or "More Stories").strip(),
+        "recent_title": str(frontmatter.get("recent_title") or "Recent Articles").strip(),
+        "archive_title": str(frontmatter.get("archive_title") or "Earlier Editions").strip(),
+        "recent_empty_text": str(frontmatter.get("recent_empty_text") or "Recent articles will appear here once more reports have been published.").strip(),
+        "explore_links": normalize_link_items(link_config.get("explore"), site_base_url, DEFAULT_HOME_EXPLORE_LINKS),
+        "modules": normalize_home_modules(frontmatter.get("modules"), site_base_url),
+        "has_articles": bool(articles),
+    }
+
+    ctx = base_context(site_base_url)
+    page_title = home["title"] if home["title"] == ctx["site"]["name"] else f"{home['title']} | {ctx['site']['name']}"
+    ctx.update(
+        {
+            "page_title": page_title,
+            "home": home,
+        }
+    )
+    return ctx
+
+
 def normalize_extra_css(site_base_url: str, paths: list[str]) -> list[str]:
     out: list[str] = []
     for path in paths:
@@ -264,28 +538,6 @@ def ensure_public_assets() -> None:
         shutil.copy2(source, PUBLIC_BUILD_DIR / source.name)
 
 
-def compute_output_path(frontmatter: dict[str, Any], md_path: Path, mode: str) -> Path:
-    explicit = str(frontmatter.get("output_path") or "").strip().lstrip("/")
-    root = PUBLIC_BUILD_DIR if mode == "public" else INTERNAL_BUILD_DIR
-    if explicit:
-        target = root / explicit
-        if target.suffix:
-            return target
-        return target / "index.html"
-
-    template_key = str(frontmatter.get("template", "news_article")).strip() or "news_article"
-    slug = str(frontmatter.get("id") or md_path.stem).strip()
-    section = str(frontmatter.get("section") or "news").strip() or "news"
-    year = parse_publish_year(frontmatter, md_path)
-
-    if template_key == "home":
-        return root / "index.html"
-
-    if mode == "public":
-        return PUBLIC_BUILD_DIR / section / year / slug / "index.html"
-    return INTERNAL_BUILD_DIR / section / year / slug / "index.html"
-
-
 def build(md_path: Path, mode: str = "public") -> Path:
     if mode not in {"public", "internal"}:
         raise ValueError("mode must be 'public' or 'internal'")
@@ -305,6 +557,8 @@ def build(md_path: Path, mode: str = "public") -> Path:
         ctx = build_page_context(frontmatter, body_html, site_base_url)
     elif template_key == "games_landing":
         ctx = build_games_landing_context(frontmatter, site_base_url)
+    elif template_key == "home":
+        ctx = build_home_context(frontmatter, site_base_url)
     else:
         ctx = base_context(site_base_url)
         ctx.update({
