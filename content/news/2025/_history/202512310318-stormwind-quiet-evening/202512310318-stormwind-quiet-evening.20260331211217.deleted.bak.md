@@ -4,24 +4,24 @@ title: Testing New Year
 section: news
 type: report
 authors:
-- Hardhy Lester
+  - Hardhy Lester
 teaser: An oddly calm night raises more questions than answers
 publish_at: 31-12-2025 20:30
-status: deleted
+status: scheduled
 discord_announce: true
 tags:
-- stormwind
-- city-watch
-- newyear
+  - stormwind
+  - city-watch
+  - newyear
 image:
   src: /assets/images/stormwind-night.jpg
   credit: L. Greycandle
   source: Lion's Roar archive
   image_type: illustration
-kicker: ''
+kicker:
+correction_of:
+editor_note:
 template: news_article
-created_at: ''
-updated_at: '2026-03-31T21:12:17Z'
 ---
 The lamps along the Trade District were lit early this evening, not out of necessity,
 but out of habit. Guards reported no disturbances, merchants closed on time, and even

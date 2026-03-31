@@ -650,107 +650,148 @@ async def handle_publish(
             content={"status": "error", "message": "Unknown article action."},
         )
 
-    published_state = load_published_state()
-    current_article: Optional[dict[str, Any]] = None
-    if original_filename:
-        current_path = ensure_content_path(CONTENT_ROOT / original_filename)
-        if current_path.exists():
-            current_article = load_article(
-                current_path,
-                published_state=published_state,
-                include_details=True,
+    failed_step = "initializing article submission"
+    save_path: Optional[Path] = None
+    article_id: Optional[str] = None
+
+    try:
+        failed_step = "loading published state"
+        published_state = load_published_state()
+        current_article: Optional[dict[str, Any]] = None
+        if original_filename:
+            failed_step = "loading existing article"
+            current_path = ensure_content_path(CONTENT_ROOT / original_filename)
+            if current_path.exists():
+                current_article = load_article(
+                    current_path,
+                    published_state=published_state,
+                    include_details=True,
+                )
+
+        if action == "update_published" and (
+            not current_article or current_article["status"] != "published"
+        ):
+            return JSONResponse(
+                status_code=400,
+                content={"status": "error", "message": "Only published articles can be updated live."},
             )
 
-    if action == "update_published" and (
-        not current_article or current_article["status"] != "published"
-    ):
-        return JSONResponse(
-            status_code=400,
-            content={"status": "error", "message": "Only published articles can be updated live."},
+        if action == "save_scheduled_changes" and (
+            not current_article or current_article["status"] != "scheduled"
+        ):
+            return JSONResponse(
+                status_code=400,
+                content={"status": "error", "message": "Only scheduled articles can save scheduled changes."},
+            )
+
+        failed_step = "parsing publish date"
+        publish_dt = parse_publish_at(publish_at) or parse_publish_at(
+            current_article["publish_at"] if current_article else ""
+        ) or datetime.now()
+
+        failed_step = "resolving article path"
+        save_path = resolve_article_path(original_filename, publish_dt, title)
+        article_id = current_article["id"] if current_article else save_path.stem
+
+        current_image = current_article["image"] if current_article else {}
+        failed_step = "processing article image"
+        image_src = save_uploaded_image(
+            article_id,
+            image,
+            str(current_image.get("src") or ""),
         )
 
-    if action == "save_scheduled_changes" and (
-        not current_article or current_article["status"] != "scheduled"
-    ):
-        return JSONResponse(
-            status_code=400,
-            content={"status": "error", "message": "Only scheduled articles can save scheduled changes."},
-        )
-
-    publish_dt = parse_publish_at(publish_at) or parse_publish_at(
-        current_article["publish_at"] if current_article else ""
-    ) or datetime.now()
-
-    save_path = resolve_article_path(original_filename, publish_dt, title)
-    article_id = current_article["id"] if current_article else save_path.stem
-
-    current_image = current_article["image"] if current_article else {}
-    article = {
-        "id": article_id,
-        "filename": save_path.relative_to(CONTENT_ROOT).as_posix(),
-        "title": title.strip(),
-        "section": section.strip() or "news",
-        "type": type.strip() or "report",
-        "authors": normalize_list(author),
-        "teaser": teaser.strip(),
-        "publish_at": publish_dt.strftime("%Y-%m-%dT%H:%M"),
-        "status": ACTION_TO_STATUS[action],
-        "discord_announce": bool(discord_announce),
-        "tags": normalize_list(tags),
-        "image": {
-            "src": save_uploaded_image(
-                article_id,
-                image,
-                str(current_image.get("src") or ""),
-            ),
-            "credit": image_credit.strip(),
-            "source": image_source.strip() or "Lion's Roar archives",
-            "image_type": image_type.strip() or "illustration",
-        },
-        "kicker": current_article["kicker"] if current_article else "",
-        "template": current_article["template"] if current_article else "news_article",
-        "body_markdown": content.rstrip(),
-        "created_at": current_article["created_at"] if current_article else utc_now_iso(),
-        "updated_at": utc_now_iso(),
-    }
-
-    errors = validate_article_payload(article, action)
-    if errors:
-        return JSONResponse(
-            status_code=400,
-            content={"status": "error", "message": " ".join(errors), "errors": errors},
-        )
-
-    version_snapshot = None
-    if current_article and (current_article["status"] == "published" or has_been_published(article["id"], published_state)):
-        if action in {"publish_now", "update_published"}:
-            version_snapshot = create_version_snapshot(save_path, article["id"], action)
-
-    write_article(save_path, article)
-
-    previous_status = current_article["status"] if current_article else None
-    append_article_log(
-        article["id"],
-        {
-            "timestamp": article["updated_at"],
-            "action": action,
-            "from_status": previous_status,
-            "to_status": article["status"],
-            "version_snapshot_created": bool(version_snapshot),
-            "summary": f"Article saved via {action}.",
-        },
-    )
-
-    saved = load_article(save_path, published_state=published_state, include_details=True)
-    return JSONResponse(
-        {
-            "status": "ok",
-            "message": "Article saved",
-            "article": saved,
-            "version_snapshot": version_snapshot or {"created": False},
+        failed_step = "building article payload"
+        article = {
+            "id": article_id,
+            "filename": save_path.relative_to(CONTENT_ROOT).as_posix(),
+            "title": title.strip(),
+            "section": section.strip() or "news",
+            "type": type.strip() or "report",
+            "authors": normalize_list(author),
+            "teaser": teaser.strip(),
+            "publish_at": publish_dt.strftime("%Y-%m-%dT%H:%M"),
+            "status": ACTION_TO_STATUS[action],
+            "discord_announce": bool(discord_announce),
+            "tags": normalize_list(tags),
+            "image": {
+                "src": image_src,
+                "credit": image_credit.strip(),
+                "source": image_source.strip() or "Lion's Roar archives",
+                "image_type": image_type.strip() or "illustration",
+            },
+            "kicker": current_article["kicker"] if current_article else "",
+            "template": current_article["template"] if current_article else "news_article",
+            "body_markdown": content.rstrip(),
+            "created_at": current_article["created_at"] if current_article else utc_now_iso(),
+            "updated_at": utc_now_iso(),
         }
-    )
 
+        failed_step = "validating article payload"
+        errors = validate_article_payload(article, action)
+        if errors:
+            return JSONResponse(
+                status_code=400,
+                content={"status": "error", "message": " ".join(errors), "errors": errors},
+            )
+
+        version_snapshot = None
+        if current_article and (
+            current_article["status"] == "published"
+            or has_been_published(article["id"], published_state)
+        ):
+            if action in {"publish_now", "update_published"}:
+                failed_step = "creating version snapshot"
+                version_snapshot = create_version_snapshot(save_path, article["id"], action)
+
+        failed_step = "writing article file"
+        write_article(save_path, article)
+
+        previous_status = current_article["status"] if current_article else None
+        failed_step = "writing article activity log"
+        append_article_log(
+            article["id"],
+            {
+                "timestamp": article["updated_at"],
+                "action": action,
+                "from_status": previous_status,
+                "to_status": article["status"],
+                "version_snapshot_created": bool(version_snapshot),
+                "summary": f"Article saved via {action}.",
+            },
+        )
+
+        failed_step = "reloading saved article"
+        saved = load_article(save_path, published_state=published_state, include_details=True)
+        return JSONResponse(
+            {
+                "status": "ok",
+                "message": "Article saved",
+                "article": saved,
+                "version_snapshot": version_snapshot or {"created": False},
+            }
+        )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": "error",
+                "message": "Article save failed.",
+                "failed_step": failed_step,
+                "error_type": exc.__class__.__name__,
+                "detail": str(exc) or repr(exc),
+                "context": {
+                    "action": action,
+                    "title": title.strip(),
+                    "original_filename": original_filename or "",
+                    "save_path": str(save_path) if save_path else "",
+                    "article_id": article_id or "",
+                    "log_path": str(log_path_for(article_id)) if article_id else str(ARTICLE_LOG_ROOT),
+                },
+            },
+        )
 
 @app.post("/admin/preview")
 async def admin_preview(request: Request, content: str = Form(...)) -> JSONResponse:

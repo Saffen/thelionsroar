@@ -6,12 +6,14 @@ intro: The Lion's Roar is an in-character newspaper chronicling the roleplaying 
 template: home
 output_path: index.php
 secondary_title: More Stories
-recent_title: Recent Articles
+recent_title: RECENT ARTICLES
 archive_title: Earlier Editions
 secondary_count: 4
-recent_count: 6
+recent_count: 10
 archive_count: 6
-about_text: The Lion's Roar follows the events and people of the Argent Dawn (EU) server's roleplaying community.
+about_text: The Lion's Roar follows the events and people of the Argent Dawn (EU)
+  roleplaying community.<br><br>
+  [READ MORE](/about/)
 modules:
   - title: Upcoming Events
     text: The Weekend of April the 17th to April the 19th The Lion's Roar will be hosting the Roaring Days music festival for the 9th time. 

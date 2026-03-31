@@ -7,16 +7,10 @@
       aria-label="Article rail"
       style="min-height:520px;"
     >
-      {% if explore_links %}
-        <section class="widget">
-          <h2 class="widget-title">Explore</h2>
-          <ul class="widget-list">
-            {% for link in explore_links %}
-              <li><a href="{{ link.href }}">{{ link.label }}</a></li>
-            {% endfor %}
-          </ul>
-        </section>
-      {% endif %}
+      {% set recent_title = article_recent_title %}
+      {% set recent_articles = article_recent_articles %}
+      {% set recent_empty_text = article_recent_empty_text %}
+      {% include "recent_articles_rail.html" %}
 
       <div data-widget-zone="article-rail-left-secondary"></div>
     </aside>

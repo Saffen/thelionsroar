@@ -22,8 +22,9 @@ INTERNAL_BUILD_DIR = BUILD_ROOT / "internal"
 ASSET_SOURCE_DIR = REPO_ROOT / "assets"
 PUBLIC_ASSET_DIR = PUBLIC_BUILD_DIR / "assets"
 INTERNAL_ASSET_DIR = INTERNAL_BUILD_DIR / "assets"
-CONTENT_NEWS_DIR = REPO_ROOT / "content" / "news"
-SITE_CONFIG_FILE = REPO_ROOT / "content" / "config.yaml"
+CONTENT_NEWS_DIR = REPO_ROOT / 'content' / 'news'
+HOME_PAGE_SOURCE = REPO_ROOT / 'content' / 'pages' / 'home.md'
+SITE_CONFIG_FILE = REPO_ROOT / 'content' / 'config.yaml'
 PUBLISHED_STATE_FILE = REPO_ROOT / "state" / "published.json"
 ROOT_PUBLIC_FILES = [REPO_ROOT / "logo.svg"]
 WORDS_PER_MINUTE = 220
@@ -247,11 +248,23 @@ def build_news_article_context(frontmatter: dict[str, Any], md_body: str, body_h
     article["word_count"] = word_count
     article["reading_time_minutes"] = reading_minutes
 
+    home_listing = load_home_listing_settings()
+    article_id = str(frontmatter.get("id") or "").strip() or str(article.get("id") or "").strip()
+    article_recent_articles = select_recent_articles(
+        collect_public_articles(site_base_url),
+        home_listing["secondary_count"],
+        home_listing["recent_count"],
+        exclude_id=article_id,
+    )
+
     ctx = base_context(site_base_url)
     ctx.update(
         {
             "page_title": f"{article.get('title', 'Article')} | {ctx['site']['name']}",
             "article": article,
+            "article_recent_title": home_listing["recent_title"],
+            "article_recent_articles": article_recent_articles,
+            "article_recent_empty_text": home_listing["recent_empty_text"],
             "related": [],
             "latest": [],
             "section_url": f"/{section}/" if section else "/",
@@ -410,6 +423,52 @@ def collect_public_articles(site_base_url: str) -> list[dict[str, Any]]:
     return articles
 
 
+def load_home_listing_settings() -> dict[str, Any]:
+    settings = {
+        "secondary_count": 4,
+        "recent_count": 6,
+        "recent_title": "Recent Articles",
+        "recent_empty_text": "Recent articles will appear here once more reports have been published.",
+        "archive_title": "Earlier Editions",
+        "archive_count": 6,
+    }
+
+    if not HOME_PAGE_SOURCE.exists():
+        return settings
+
+    try:
+        frontmatter, _, _ = load_markdown_with_frontmatter(HOME_PAGE_SOURCE)
+    except Exception:
+        return settings
+
+    settings["secondary_count"] = coerce_int(frontmatter.get("secondary_count"), settings["secondary_count"])
+    settings["recent_count"] = coerce_int(frontmatter.get("recent_count"), settings["recent_count"])
+    settings["archive_count"] = coerce_int(frontmatter.get("archive_count"), settings["archive_count"])
+    settings["recent_title"] = str(frontmatter.get("recent_title") or settings["recent_title"]).strip()
+    settings["recent_empty_text"] = str(frontmatter.get("recent_empty_text") or settings["recent_empty_text"]).strip()
+    settings["archive_title"] = str(frontmatter.get("archive_title") or settings["archive_title"]).strip()
+    return settings
+
+
+def select_recent_articles(
+    articles: list[dict[str, Any]],
+    secondary_count: int,
+    recent_count: int,
+    exclude_id: str = "",
+) -> list[dict[str, Any]]:
+    remaining_articles = articles[1 + secondary_count :]
+    recent_pool = remaining_articles if remaining_articles else articles[1:]
+    selected: list[dict[str, Any]] = []
+
+    for article in recent_pool:
+        if exclude_id and str(article.get("id") or "") == exclude_id:
+            continue
+        selected.append(article)
+        if len(selected) >= recent_count:
+            break
+
+    return selected
+
 def normalize_home_modules(raw_items: Any, site_base_url: str) -> list[dict[str, str]]:
     if not isinstance(raw_items, list):
         return []
@@ -436,9 +495,10 @@ def build_home_context(frontmatter: dict[str, Any], site_base_url: str) -> dict[
     articles = collect_public_articles(site_base_url)
     site_config = load_site_config()
     link_config = site_config.get("links") if isinstance(site_config.get("links"), dict) else {}
-    secondary_count = coerce_int(frontmatter.get("secondary_count"), 4)
-    recent_count = coerce_int(frontmatter.get("recent_count"), 6)
-    archive_count = coerce_int(frontmatter.get("archive_count"), 6)
+    home_listing = load_home_listing_settings()
+    secondary_count = home_listing["secondary_count"]
+    recent_count = home_listing["recent_count"]
+    archive_count = home_listing["archive_count"]
 
     lead_article = articles[0] if articles else {
         "title": str(frontmatter.get("empty_title") or "The presses are quiet for the moment.").strip(),
@@ -456,7 +516,7 @@ def build_home_context(frontmatter: dict[str, Any], site_base_url: str) -> dict[
 
     secondary_articles = articles[1 : 1 + secondary_count]
     remaining_articles = articles[1 + secondary_count :]
-    recent_articles = remaining_articles[:recent_count] if remaining_articles else articles[1 : 1 + recent_count]
+    recent_articles = select_recent_articles(articles, secondary_count, recent_count)
     archive_articles = remaining_articles[recent_count : recent_count + archive_count] if remaining_articles else []
 
     home = {
@@ -464,14 +524,18 @@ def build_home_context(frontmatter: dict[str, Any], site_base_url: str) -> dict[
         "title": str(frontmatter.get("title") or "The Lion's Roar").strip(),
         "intro": str(frontmatter.get("intro") or frontmatter.get("teaser") or "").strip(),
         "about_text": str(frontmatter.get("about_text") or "The Lion's Roar chronicles the roleplaying life of Azeroth through reports, features, and curious notices from around the realm.").strip(),
+        "about_html": markdown.markdown(
+            str(frontmatter.get("about_text") or "The Lion's Roar chronicles the roleplaying life of Azeroth through reports, features, and curious notices from around the realm.").strip(),
+            extensions=["extra", "smarty"],
+        ),
         "lead_article": lead_article,
         "secondary_articles": secondary_articles,
         "recent_articles": recent_articles,
         "archive_articles": archive_articles,
         "secondary_title": str(frontmatter.get("secondary_title") or "More Stories").strip(),
-        "recent_title": str(frontmatter.get("recent_title") or "Recent Articles").strip(),
-        "archive_title": str(frontmatter.get("archive_title") or "Earlier Editions").strip(),
-        "recent_empty_text": str(frontmatter.get("recent_empty_text") or "Recent articles will appear here once more reports have been published.").strip(),
+        "recent_title": home_listing["recent_title"],
+        "archive_title": home_listing["archive_title"],
+        "recent_empty_text": home_listing["recent_empty_text"],
         "explore_links": normalize_link_items(link_config.get("explore"), site_base_url, DEFAULT_HOME_EXPLORE_LINKS),
         "modules": normalize_home_modules(frontmatter.get("modules"), site_base_url),
         "has_articles": bool(articles),

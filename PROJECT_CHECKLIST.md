@@ -70,3 +70,10 @@ These are currently treated as solved outside the repo unless proven otherwise.
 - 2026-03-23: Tightened homepage selection to true public content and moved shared link sets into content/config.yaml.
 - 2026-03-23: Moved article-page Explore links to build-time rendering from the shared config.
 - 2026-03-23: Implemented the immersive nav toggle and replaced the placeholder header social dots with a real Discord invite link.
+- 2026-03-30: Updated the homepage left-rail heading to use the same widget-title styling as the right rail for consistent headline presentation.
+- 2026-03-30: Fixed theme persistence so immersive mode is restored on refresh the same way light and dark modes are.
+- 2026-03-30: Enabled markdown rendering for the homepage about_text block so right-rail copy can include links and other simple formatting.
+- 2026-03-31: Improved admin article-save diagnostics so the publish endpoint returns step-aware JSON errors and the admin panel shows useful failure details instead of a generic malformed JSON message.
+- 2026-03-31: Replaced the article-page Explore rail with a shared Recent Articles rail, matched its feed to the homepage logic, and restyled both rails with thumbnail-based cards inspired by the Live News widget.
+- 2026-03-31: Tightened the shared Recent Articles rail styling into a more compact horizontal thumbnail layout after the first pass rendered too large and heavy in the rail.
+- 2026-03-31: Adjusted shared Recent Articles thumbnails to preserve a more natural article-image proportion instead of forcing them into square crops.

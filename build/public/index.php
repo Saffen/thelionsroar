@@ -102,23 +102,36 @@
     
   <section class="frontgrid" aria-label="Front page lead">
     <aside class="rail rail-left" aria-label="Recent articles">
-      <h2 class="rail-title">Recent Articles</h2>
+      
+      
+      
+      <h2 class="widget-title">RECENT ARTICLES</h2>
 
-      
+
+  <div class="recent-article-list">
+    
+      <article class="recent-article-card">
         
-          <article class="rail-item">
-            <h3 class="rail-headline"><a href="/news/2025/202512310318-stormwind-quiet-evening/">Testing New Year</a></h3>
-            <div class="rail-meta">Hardhy Lester &middot; 31 December (2025)</div>
-          </article>
+          <a class="recent-article-thumb" href="/news/2025/202512310318-stormwind-quiet-evening/" aria-hidden="true" tabindex="-1">
+            <img src="/assets/images/stormwind-night.jpg" alt="" loading="lazy" />
+          </a>
         
-      
+
+        <div class="recent-article-copy">
+          <h3 class="recent-article-title"><a href="/news/2025/202512310318-stormwind-quiet-evening/">Testing New Year</a></h3>
+          <div class="recent-article-meta">Hardhy Lester &middot; 31 December (2025)</div>
+        </div>
+      </article>
+    
+  </div>
+
     </aside>
 
     <section class="lead" aria-label="Latest edition">
       <article class="feature">
         
           <div class="feature-media">
-            <img src="/assets/images/202602070650-testing-stuff-in-february.jpg" alt="Testing stuff in February preview" loading="lazy" />
+            <img src="/assets/images/202603312250-healing-is-re-growth.png" alt="Healing is (re)growth preview" loading="lazy" />
           </div>
         
 
@@ -129,12 +142,12 @@
 
           <h1 class="feature-title">
             
-              <a href="/news/2026/202602070650-testing-stuff-in-february/">Testing stuff in February</a>
+              <a href="/news/2026/202603312250-healing-is-re-growth/">Healing is (re)growth</a>
             
           </h1>
 
           
-            <p class="feature-dek">A test of the editor</p>
+            <p class="feature-dek">Healing is (re)growth</p>
           
 
           
@@ -144,7 +157,7 @@
               
               
                 <span class="byline-sep">&middot;</span>
-                <time class="byline-item" datetime="2026-02-07T06:50:00">07 February (2026)</time>
+                <time class="byline-item" datetime="2026-03-31T22:50:00">31 March (2026)</time>
               
             </div>
           
@@ -164,7 +177,7 @@
       
         <section class="widget">
           <h2 class="widget-title">About The Paper</h2>
-          <p class="widget-text">The Lion&#39;s Roar follows the events and people of the Argent Dawn (EU) server&#39;s roleplaying community.</p>
+          <div class="widget-text"><p>The Lion&rsquo;s Roar follows the events and people of the Argent Dawn (EU) roleplaying community.<br><br> <a href="/about/">READ MORE</a></p></div>
         </section>
       
 
@@ -257,7 +270,7 @@
   }
 
   const saved = localStorage.getItem(key);
-  if (saved === "dark" || saved === "light") {
+  if (saved === "dark" || saved === "light" || saved === "immersive") {
     apply(saved);
   } else {
     const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;

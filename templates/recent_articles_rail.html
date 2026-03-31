@@ -1,0 +1,24 @@
+<h2 class="widget-title">{{ recent_title }}</h2>
+
+{% if recent_articles %}
+  <div class="recent-article-list">
+    {% for article in recent_articles %}
+      <article class="recent-article-card">
+        {% if article.image and article.image.url %}
+          <a class="recent-article-thumb" href="{{ article.url }}" aria-hidden="true" tabindex="-1">
+            <img src="{{ article.image.url }}" alt="" loading="lazy" />
+          </a>
+        {% else %}
+          <a class="recent-article-thumb recent-article-thumb-empty" href="{{ article.url }}" aria-hidden="true" tabindex="-1"></a>
+        {% endif %}
+
+        <div class="recent-article-copy">
+          <h3 class="recent-article-title"><a href="{{ article.url }}">{{ article.title }}</a></h3>
+          <div class="recent-article-meta">{% if article.authors_display %}{{ article.authors_display }} &middot; {% endif %}{{ article.date_display }}</div>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="widget-text">{{ recent_empty_text }}</p>
+{% endif %}

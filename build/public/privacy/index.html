@@ -208,7 +208,7 @@
   }
 
   const saved = localStorage.getItem(key);
-  if (saved === "dark" || saved === "light") {
+  if (saved === "dark" || saved === "light" || saved === "immersive") {
     apply(saved);
   } else {
     const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;

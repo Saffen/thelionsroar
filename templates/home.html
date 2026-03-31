@@ -3,18 +3,10 @@
 {% block content %}
   <section class="frontgrid" aria-label="Front page lead">
     <aside class="rail rail-left" aria-label="Recent articles">
-      <h2 class="rail-title">{{ home.recent_title }}</h2>
-
-      {% if home.recent_articles %}
-        {% for article in home.recent_articles %}
-          <article class="rail-item">
-            <h3 class="rail-headline"><a href="{{ article.url }}">{{ article.title }}</a></h3>
-            <div class="rail-meta">{% if article.authors_display %}{{ article.authors_display }} &middot; {% endif %}{{ article.date_display }}</div>
-          </article>
-        {% endfor %}
-      {% else %}
-        <p class="widget-text">{{ home.recent_empty_text }}</p>
-      {% endif %}
+      {% set recent_title = home.recent_title %}
+      {% set recent_articles = home.recent_articles %}
+      {% set recent_empty_text = home.recent_empty_text %}
+      {% include "recent_articles_rail.html" %}
     </aside>
 
     <section class="lead" aria-label="Latest edition">
@@ -73,7 +65,7 @@
       {% if home.about_text %}
         <section class="widget">
           <h2 class="widget-title">About The Paper</h2>
-          <p class="widget-text">{{ home.about_text }}</p>
+          <div class="widget-text">{{ home.about_html | safe }}</div>
         </section>
       {% endif %}
 

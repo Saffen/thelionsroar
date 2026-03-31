@@ -461,16 +461,63 @@
             return formData;
         }
 
+        function buildApiErrorMessage(payload, fallbackMessage) {
+            const parts = [];
+            const baseMessage = payload?.message || payload?.detail || fallbackMessage;
+            if (baseMessage) parts.push(baseMessage);
+            if (payload?.failed_step) parts.push(`Step: ${payload.failed_step}.`);
+            if (payload?.error_type && payload?.detail && payload.detail !== baseMessage) {
+                parts.push(`${payload.error_type}: ${payload.detail}.`);
+            } else if (payload?.error_type && !payload?.detail) {
+                parts.push(`Error type: ${payload.error_type}.`);
+            }
+            if (payload?.context?.save_path) parts.push(`Path: ${payload.context.save_path}.`);
+            if (payload?.context?.log_path) parts.push(`Log: ${payload.context.log_path}.`);
+            return parts.join(' ');
+        }
+
+        async function parseApiResponse(response, fallbackMessage) {
+            const raw = await response.text();
+            const contentType = response.headers.get('content-type') || '';
+            const looksJson = contentType.includes('application/json');
+            let payload = null;
+
+            if (raw && looksJson) {
+                try {
+                    payload = JSON.parse(raw);
+                } catch (error) {
+                    const snippet = raw.replace(/\s+/g, ' ').trim().slice(0, 220);
+                    throw new Error(`${fallbackMessage} Server claimed to return JSON but sent malformed data.${snippet ? ` Response starts with: ${snippet}` : ''}`);
+                }
+            }
+
+            if (!response.ok) {
+                if (payload) {
+                    throw new Error(buildApiErrorMessage(payload, fallbackMessage));
+                }
+                const snippet = raw.replace(/\s+/g, ' ').trim().slice(0, 220);
+                throw new Error(`${fallbackMessage} Server returned ${response.status} ${response.statusText || ''} instead of JSON.${snippet ? ` Response starts with: ${snippet}` : ''}`.trim());
+            }
+
+            if (payload !== null) {
+                return payload;
+            }
+
+            if (!raw.trim()) {
+                return {};
+            }
+
+            const snippet = raw.replace(/\s+/g, ' ').trim().slice(0, 220);
+            throw new Error(`${fallbackMessage} Server returned a non-JSON success response.${snippet ? ` Response starts with: ${snippet}` : ''}`);
+        }
+
         async function submitArticleAction(action) {
             try {
                 const response = await fetch('/api/admin/publish', {
                     method: 'POST',
                     body: serializeForm(action),
                 });
-                const result = await response.json();
-                if (!response.ok) {
-                    throw new Error(result.message || 'Save failed.');
-                }
+                const result = await parseApiResponse(response, 'Save failed.');
 
                 const article = result.article;
                 populateForm(article);
@@ -493,10 +540,7 @@
 
             try {
                 const response = await fetch(`/api/admin/articles?status=${encodeURIComponent(filter)}`);
-                const payload = await response.json();
-                if (!response.ok) {
-                    throw new Error(payload.detail || 'Could not load article library.');
-                }
+                const payload = await parseApiResponse(response, 'Could not load article library.');
                 renderLibrary(payload.items || []);
             } catch (error) {
                 body.innerHTML = `<tr><td colspan="7">${escapeHtml(error.message || 'Failed to load library.')}</td></tr>`;
@@ -536,10 +580,7 @@
             const filename = decodeURIComponent(encodedFilename);
             try {
                 const response = await fetch(`/api/admin/articles/${filename}`);
-                const article = await response.json();
-                if (!response.ok) {
-                    throw new Error(article.detail || 'Could not load article data.');
-                }
+                const article = await parseApiResponse(response, 'Could not load article data.');
 
                 populateForm(article);
                 setEditorMode('edit', article);
@@ -558,10 +599,7 @@
 
             try {
                 const response = await fetch(`/api/admin/articles/${filename}`, { method: 'DELETE' });
-                const result = await response.json();
-                if (!response.ok) {
-                    throw new Error(result.detail || result.message || 'Delete failed.');
-                }
+                const result = await parseApiResponse(response, 'Delete failed.');
 
                 if (editorState.currentArticle && editorState.currentArticle.filename === filename) {
                     resetEditor();
@@ -581,10 +619,7 @@
 
             try {
                 const response = await fetch(`/api/admin/articles/${filename}/restore`, { method: 'POST' });
-                const result = await response.json();
-                if (!response.ok) {
-                    throw new Error(result.detail || result.message || 'Restore failed.');
-                }
+                const result = await parseApiResponse(response, 'Restore failed.');
 
                 showNotice(result.message || 'Article restored.', 'success');
                 loadLibrary(editorState.currentFilter);
