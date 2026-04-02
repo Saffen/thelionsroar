@@ -219,6 +219,7 @@
                     <button type="button" id="btn-schedule" class="btn-secondary" onclick="submitArticleAction('schedule')">Schedule</button>
                     <button type="button" id="btn-publish" class="btn-secondary" onclick="submitArticleAction('publish_now')">Publish Now</button>
                     <button type="button" id="btn-update-live" class="btn-secondary" onclick="submitArticleAction('update_published')" style="display:none;">Update Live Article</button>
+                    <button type="button" id="btn-announce" class="btn-secondary" onclick="runArticleWorkflow('announce_discord')" style="display:none;">Announce Discord</button>
                     <button type="button" class="btn-ghost" onclick="resetEditor()">New Article</button>
                     <button type="button" class="btn-ghost" onclick="updatePreview()">Refresh Preview</button>
                 </div>
@@ -383,14 +384,21 @@
         }
 
         function syncActionButtons(status) {
+            const article = editorState.currentArticle;
             const isPublished = status === 'published';
             const isDeleted = status === 'deleted';
+            const isLivePublic = !!article?.is_live_public;
+            const hasSavedArticle = !!article?.filename;
             const scheduleButton = document.getElementById('btn-schedule');
+            const announceButton = document.getElementById('btn-announce');
+
             document.getElementById('btn-save-draft').style.display = isDeleted ? 'none' : 'inline-block';
             document.getElementById('btn-save-build').style.display = isPublished || isDeleted ? 'none' : 'inline-block';
             scheduleButton.style.display = isPublished || isDeleted ? 'none' : 'inline-block';
             document.getElementById('btn-publish').style.display = isPublished || isDeleted ? 'none' : 'inline-block';
             document.getElementById('btn-update-live').style.display = isPublished ? 'inline-block' : 'none';
+            announceButton.style.display = hasSavedArticle && !isDeleted && isLivePublic ? 'inline-block' : 'none';
+            announceButton.textContent = article?.discord?.announce ? 'Re-announce Discord' : 'Announce Discord';
 
             if (status === 'scheduled') {
                 scheduleButton.textContent = 'Save Scheduled Changes';
@@ -529,6 +537,50 @@
             }
         }
 
+        async function postArticleWorkflow(filename, command) {
+            const payload = new URLSearchParams({ command });
+            const response = await fetch(`/api/admin/articles/${encodeURIComponent(filename)}/workflow`, {
+                method: 'POST',
+                body: payload,
+            });
+            return parseApiResponse(response, 'Workflow action failed.');
+        }
+
+        async function runArticleWorkflow(command) {
+            const article = editorState.currentArticle;
+            if (!article || !article.filename) {
+                showNotice('Save the article before running workflow actions.', 'error');
+                return;
+            }
+
+            try {
+                const result = await postArticleWorkflow(article.filename, command);
+                if (result.article) {
+                    populateForm(result.article);
+                    setEditorMode('edit', result.article);
+                }
+                showNotice(result.message || 'Workflow action completed.', 'success');
+                loadLibrary(editorState.currentFilter);
+            } catch (error) {
+                showNotice(error.message || 'Workflow action failed.', 'error');
+            }
+        }
+
+        async function runLibraryWorkflow(encodedFilename, command) {
+            const filename = decodeURIComponent(encodedFilename);
+
+            try {
+                const result = await postArticleWorkflow(filename, command);
+                if (editorState.currentArticle && editorState.currentArticle.filename === filename && result.article) {
+                    populateForm(result.article);
+                    setEditorMode('edit', result.article);
+                }
+                showNotice(result.message || 'Workflow action completed.', 'success');
+                loadLibrary(editorState.currentFilter);
+            } catch (error) {
+                showNotice(error.message || 'Workflow action failed.', 'error');
+            }
+        }
         async function loadLibrary(filter = 'active') {
             editorState.currentFilter = filter;
             document.querySelectorAll('.filter-btn').forEach((button) => {
@@ -556,10 +608,15 @@
 
             body.innerHTML = items.map((article) => {
                 const author = article.authors && article.authors.length ? article.authors.join(', ') : '—';
+                const announceLabel = article.has_discord_announce ? 'Re-announce' : 'Announce';
+                const announceButton = article.is_live_public
+                    ? `<button class="btn-ghost action-link" type="button" onclick="runLibraryWorkflow('${encodeURIComponent(article.filename)}', 'announce_discord')">${announceLabel}</button>`
+                    : '';
                 const actions = article.status === 'deleted'
                     ? `<button class="btn-secondary action-link" type="button" onclick="editArticle('${encodeURIComponent(article.filename)}')">View</button>
                        <button class="btn-ghost" type="button" onclick="restoreArticle('${encodeURIComponent(article.filename)}', '${escapeHtml(article.title)}')">Restore</button>`
                     : `<button class="btn-secondary action-link" type="button" onclick="editArticle('${encodeURIComponent(article.filename)}')">Edit</button>
+                       ${announceButton}
                        <button class="btn-danger" type="button" onclick="deleteArticle('${encodeURIComponent(article.filename)}', '${escapeHtml(article.title)}')">Delete</button>`;
 
                 return `

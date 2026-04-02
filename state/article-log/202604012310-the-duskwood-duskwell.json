@@ -1,0 +1,74 @@
+[
+  {
+    "timestamp": "2026-04-02T23:09:51Z",
+    "action": "announce_discord",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Discord announcement posted and crossposted from the admin panel."
+  },
+  {
+    "timestamp": "2026-04-02T23:08:30Z",
+    "action": "announce_discord",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Discord announcement posted, but crosspost failed: Discord crosspost HTTP 403: {\"message\": \"Missing Access\", \"code\": 50001}"
+  },
+  {
+    "timestamp": "2026-04-02T23:08:24Z",
+    "action": "announce_discord",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Discord announcement posted, but crosspost failed: Discord crosspost HTTP 403: {\"message\": \"Missing Access\", \"code\": 50001}"
+  },
+  {
+    "timestamp": "2026-04-02T23:03:34Z",
+    "action": "announce_discord",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Discord announcement posted, but crosspost failed: Discord crosspost HTTP 403: {\"message\": \"Missing Access\", \"code\": 50001}"
+  },
+  {
+    "timestamp": "2026-04-02T22:55:34Z",
+    "action": "announce_discord",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Discord announcement posted, but crosspost failed: DISCORD_BOT_TOKEN is not set."
+  },
+  {
+    "timestamp": "2026-04-02T22:55:07Z",
+    "action": "announce_discord",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Discord announcement posted, but crosspost failed: DISCORD_BOT_TOKEN is not set."
+  },
+  {
+    "timestamp": "2026-04-02T22:53:19Z",
+    "action": "announce_discord",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Discord announcement triggered from the admin panel."
+  },
+  {
+    "timestamp": "2026-04-01T22:55:10Z",
+    "action": "update_published",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": true,
+    "summary": "Article saved via update_published. Public site rebuilt (2 article outputs, 0 stale outputs removed)."
+  },
+  {
+    "timestamp": "2026-04-01T22:26:30Z",
+    "action": "publish_now",
+    "from_status": null,
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Article saved via publish_now. Live publish state updated. Public site rebuilt (2 article outputs, 0 stale outputs removed)."
+  }
+]

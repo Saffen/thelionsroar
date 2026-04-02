@@ -12,6 +12,7 @@
 
 <link rel="stylesheet" href="/assets/css/widgets.css" />
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+
 </head>
 
 <body>
@@ -37,24 +38,26 @@
       </div>
 
       <div class="masthead-center">
-        <div class="brand">
-          <div class="brand-icon lion-icon"></div>
-          <div class="brand-text">
-          <svg viewBox="0 0 500 140" xmlns="http://www.w3.org/2000/svg">
-            <line x1="40" y1="20" x2="460" y2="20" stroke="currentColor" stroke-width="2" />
-            <text x="50%" y="45" text-anchor="middle"
-                  font-family="'EB Garamond', serif"
-                  dominant-baseline="central"
-                  font-weight="800"
-                  letter-spacing="2"
-                  fill="currentColor"
-                  style="text-transform: uppercase;">The Lion's Roar
-            </text>
-            <line x1="40" y1="70" x2="460" y2="70" stroke="currentColor" stroke-width="2" />
-          </svg>
-          <div class="tagline">An Independent source of news for the discerning reader of Azeroth.</div>
+        <a class="brand-link" href="/" aria-label="Go to the homepage">
+          <div class="brand">
+            <div class="brand-icon lion-icon"></div>
+            <div class="brand-text">
+            <svg viewBox="0 0 500 140" xmlns="http://www.w3.org/2000/svg">
+              <line x1="40" y1="20" x2="460" y2="20" stroke="currentColor" stroke-width="2" />
+              <text x="50%" y="45" text-anchor="middle"
+                    font-family="'EB Garamond', serif"
+                    dominant-baseline="central"
+                    font-weight="800"
+                    letter-spacing="2"
+                    fill="currentColor"
+                    style="text-transform: uppercase;">The Lion's Roar
+              </text>
+              <line x1="40" y1="70" x2="460" y2="70" stroke="currentColor" stroke-width="2" />
+            </svg>
+            <div class="tagline">An Independent source of news for the discerning reader of Azeroth.</div>
+            </div>
           </div>
-        </div>
+        </a>
       </div>
 
       <div class="masthead-right">
@@ -112,14 +115,14 @@
     
       <article class="recent-article-card">
         
-          <a class="recent-article-thumb" href="/news/2025/202512310318-stormwind-quiet-evening/" aria-hidden="true" tabindex="-1">
-            <img src="/assets/images/stormwind-night.jpg" alt="" loading="lazy" />
+          <a class="recent-article-thumb" href="/news/2026/202603312250-healing-is-re-growth/" aria-hidden="true" tabindex="-1">
+            <img src="/assets/images/202603312250-healing-is-re-growth.png" alt="" loading="lazy" />
           </a>
         
 
         <div class="recent-article-copy">
-          <h3 class="recent-article-title"><a href="/news/2025/202512310318-stormwind-quiet-evening/">Testing New Year</a></h3>
-          <div class="recent-article-meta">Hardhy Lester &middot; 31 December (2025)</div>
+          <h3 class="recent-article-title"><a href="/news/2026/202603312250-healing-is-re-growth/">Healing is (re)growth</a></h3>
+          <div class="recent-article-meta">Hardhy Lester &middot; 31 March (2026)</div>
         </div>
       </article>
     
@@ -131,7 +134,7 @@
       <article class="feature">
         
           <div class="feature-media">
-            <img src="/assets/images/202603312250-healing-is-re-growth.png" alt="Healing is (re)growth preview" loading="lazy" />
+            <img src="/assets/images/202604012310-the-duskwood-duskwell.png" alt="The Duskwood Duskwell preview" loading="lazy" />
           </div>
         
 
@@ -142,12 +145,12 @@
 
           <h1 class="feature-title">
             
-              <a href="/news/2026/202603312250-healing-is-re-growth/">Healing is (re)growth</a>
+              <a href="/news/2026/202604012310-the-duskwood-duskwell/">The Duskwood Duskwell</a>
             
           </h1>
 
           
-            <p class="feature-dek">Healing is (re)growth</p>
+            <p class="feature-dek">Raven Hill claims local well spouts &#34;Invisible Light&#34; and &#34;Existential Dread&#34;</p>
           
 
           
@@ -157,7 +160,7 @@
               
               
                 <span class="byline-sep">&middot;</span>
-                <time class="byline-item" datetime="2026-03-31T22:50:00">31 March (2026)</time>
+                <time class="byline-item" datetime="2026-04-01T23:10:00">01 April (2026)</time>
               
             </div>
           
@@ -182,21 +185,6 @@
       
 
       
-        <section class="widget">
-          <h2 class="widget-title">Explore</h2>
-          <ul class="widget-list">
-            
-              <li><a href="/about/">About</a></li>
-            
-              <li><a href="/contact/">Contact</a></li>
-            
-              <li><a href="/privacy/">Privacy</a></li>
-            
-              <li><a href="/jobs/">Jobs</a></li>
-            
-          </ul>
-        </section>
-      
 
       
         <section class="widget">
@@ -206,8 +194,6 @@
           
             <p class="widget-text">The Weekend of April the 17th to April the 19th The Lion&#39;s Roar will be hosting the Roaring Days music festival for the 9th time.</p>
           
-          
-            <a class="button" href="/events/rd9/">READ MORE</a>
           
         </section>
       
@@ -290,6 +276,7 @@
   });
 })();
 </script>
+
 <script src="/assets/js/widgets.js" defer></script>
 
 

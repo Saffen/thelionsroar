@@ -1,5 +1,21 @@
 {% extends "base.html" %}
 
+{% block head_meta %}
+  {% set social_description = article.teaser or article.kicker or site.tagline %}
+  {% set social_image = site.base_url ~ article.image.src if article.image and article.image.src else "" %}
+  <meta property="og:title" content="{{ article.title }}" />
+  <meta property="og:description" content="{{ social_description }}" />
+  <meta property="og:type" content="article" />
+  {% if article.url %}<meta property="og:url" content="{{ article.url }}" />{% endif %}
+  {% if social_image %}<meta property="og:image" content="{{ social_image }}" />{% endif %}
+  <meta name="twitter:card" content="{{ 'summary_large_image' if social_image else 'summary' }}" />
+  <meta name="twitter:title" content="{{ article.title }}" />
+  <meta name="twitter:description" content="{{ social_description }}" />
+  {% if social_image %}<meta name="twitter:image" content="{{ social_image }}" />{% endif %}
+  {% if article.date_iso %}<meta property="article:published_time" content="{{ article.date_iso }}" />{% endif %}
+  {% if article.authors_display %}<meta property="article:author" content="{{ article.authors_display }}" />{% endif %}
+{% endblock %}
+
 {% block content %}
   <section class="article-grid" style="padding-top:20px;">
     <aside
@@ -19,20 +35,34 @@
       <article class="feature feature-article">
         {% if article.image and article.image.src %}
           <div class="feature-media">
-  <img
-    src="{{ site.base_url }}{{ article.image.src }}"
-    alt=""
-    loading="lazy"
-  />
-</div>
-
-{% if article.image.credit or article.image.source %}
-  <div class="image-credit">
-    {% if article.image.credit %}{{ article.image.credit }}{% endif %}
-    {% if article.image.source %}<span class="byline-sep">&middot;</span>{{ article.image.source }}{% endif %}
-  </div>
-{% endif %}
+            <button
+              type="button"
+              class="feature-media-trigger"
+              data-lightbox-open
+              aria-haspopup="dialog"
+              aria-label="Open full-size article image"
+            >
+              <img
+                src="{{ site.base_url }}{{ article.image.src }}"
+                alt=""
+                loading="lazy"
+              />
+            </button>
           </div>
+
+          {% if article.image.credit or article.image.source %}
+            <div class="image-credit">
+              {% if article.image.credit %}{{ article.image.credit }}{% endif %}
+              {% if article.image.source %}<span class="byline-sep">&middot;</span>{{ article.image.source }}{% endif %}
+            </div>
+          {% endif %}
+
+          <dialog class="image-lightbox" data-image-lightbox aria-label="Full-size article image">
+            <div class="image-lightbox-shell">
+              <button type="button" class="image-lightbox-close" data-lightbox-close aria-label="Close full-size image">Close</button>
+              <img src="{{ site.base_url }}{{ article.image.src }}" alt="" loading="eager" />
+            </div>
+          </dialog>
         {% endif %}
 
         <div class="feature-body">
@@ -93,4 +123,31 @@
       {% endif %}
     </section>
   </section>
+{% endblock %}
+
+{% block page_scripts %}
+  <script>
+    (function () {
+      const dialog = document.querySelector('[data-image-lightbox]');
+      const openButton = document.querySelector('[data-lightbox-open]');
+      const closeButton = document.querySelector('[data-lightbox-close]');
+      if (!dialog || !openButton || !closeButton) return;
+
+      openButton.addEventListener('click', () => {
+        if (typeof dialog.showModal === 'function') {
+          dialog.showModal();
+        }
+      });
+
+      closeButton.addEventListener('click', () => {
+        dialog.close();
+      });
+
+      dialog.addEventListener('click', (event) => {
+        if (event.target === dialog) {
+          dialog.close();
+        }
+      });
+    })();
+  </script>
 {% endblock %}

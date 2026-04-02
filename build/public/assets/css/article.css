@@ -130,10 +130,10 @@
 @media (max-width: 900px){
   .article-grid{ 
     display: flex;
-    flex-direction: column; /* Stabler dem ovenpå hinanden */
+    flex-direction: column; /* Stabler dem ovenpÃƒÂ¥ hinanden */
   }
   .rail-left{ 
-    display: block; /* Sørg for at den er synlig */
+    display: block; /* SÃƒÂ¸rg for at den er synlig */
     width: 100%;
     order: 2; /* Flytter widgets under artiklen */
     min-height: auto;
@@ -178,10 +178,76 @@
 }
 
 :root[data-theme="immersive"] .rail-left {
-  display: none; /* Helt væk i dette tema */
+  display: none; /* Helt vÃƒÂ¦k i dette tema */
 }
 
 :root[data-theme="immersive"] .feature-article .image-credit {
     border: 1px solid var(--ink);
     margin-top: 5px;
+}
+.feature-article .feature-media {
+  overflow: hidden;
+}
+
+.feature-media-trigger {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+.feature-media-trigger img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-lightbox {
+  width: min(92vw, 1400px);
+  max-width: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.image-lightbox::backdrop {
+  background: rgba(12, 10, 8, 0.88);
+}
+
+.image-lightbox-shell {
+  position: relative;
+}
+
+.image-lightbox-shell img {
+  display: block;
+  width: 100%;
+  max-height: 88vh;
+  object-fit: contain;
+  border: 1px solid var(--line);
+  background: #111;
+}
+
+.image-lightbox-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1;
+  padding: 8px 12px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(12, 10, 8, 0.78);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.image-lightbox-close:hover,
+.image-lightbox-close:focus-visible {
+  background: rgba(12, 10, 8, 0.92);
 }

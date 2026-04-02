@@ -1,6 +1,6 @@
 # The Lion's Roar Project Checklist
 
-Last updated: 2026-03-23
+Last updated: 2026-04-01
 
 This is the working status file for the project. It should be updated as we make progress so the current state stays visible in-repo.
 
@@ -77,3 +77,7 @@ These are currently treated as solved outside the repo unless proven otherwise.
 - 2026-03-31: Replaced the article-page Explore rail with a shared Recent Articles rail, matched its feed to the homepage logic, and restyled both rails with thumbnail-based cards inspired by the Live News widget.
 - 2026-03-31: Tightened the shared Recent Articles rail styling into a more compact horizontal thumbnail layout after the first pass rendered too large and heavy in the rail.
 - 2026-03-31: Adjusted shared Recent Articles thumbnails to preserve a more natural article-image proportion instead of forcing them into square crops.
+- 2026-03-31: Made the shared header brand area clickable so the lion logo and site title link back to the homepage.
+- 2026-04-01: Fixed deleted-article public-state handling so deleted items are removed from live publish state, excluded from homepage/public rebuild logic, and have stale generated public output cleaned up.
+- 2026-04-01: Upgraded the admin workflow so Save Build performs an internal build, Publish Now/Update Live rebuild the live public site, and saved live articles can be announced individually from both the editor and the Library list.
+- 2026-04-02: Added Open Graph and Twitter card metadata for article pages, and made article hero images open in a mobile-friendly lightbox when tapped or clicked.

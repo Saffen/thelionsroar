@@ -1,0 +1,73 @@
+﻿{% extends "base.html" %}
+
+{% block content %}
+  <section class="crossword-page">
+    <header class="crossword-hero">
+      {% if crossword.kicker %}
+        <div class="kicker">{{ crossword.kicker }}</div>
+      {% endif %}
+      <h1 class="crossword-title">{{ crossword.title }}</h1>
+      {% if crossword.teaser %}
+        <p class="crossword-teaser">{{ crossword.teaser }}</p>
+      {% endif %}
+      <div class="crossword-meta">
+        {% if crossword.difficulty %}
+          <span>{{ crossword.difficulty }}</span>
+        {% endif %}
+        <span>{{ crossword.clue_count }} clues</span>
+        <span>{{ crossword.cell_count }} squares</span>
+      </div>
+      {% if crossword.intro %}
+        <p class="crossword-intro">{{ crossword.intro }}</p>
+      {% endif %}
+    </header>
+
+    <section class="crossword-workbench" data-crossword-root>
+      <div class="crossword-board-panel">
+        <div class="crossword-toolbar">
+          <div class="crossword-toolbar-copy">Click a clue or a square, then type to fill the grid.</div>
+          <div class="crossword-toolbar-actions">
+            <button type="button" class="crossword-button" data-action="toggle-direction">Switch Direction</button>
+            <button type="button" class="crossword-button" data-action="clear-cell">Clear Square</button>
+            <button type="button" class="crossword-button" data-action="clear-puzzle">Clear Puzzle</button>
+          </div>
+        </div>
+
+        <div class="crossword-grid-shell">
+          <div class="crossword-grid" role="grid" aria-label="{{ crossword.title }} crossword grid"></div>
+        </div>
+
+        <div class="crossword-status-row">
+          <p class="crossword-status" aria-live="polite"></p>
+          <p class="crossword-active-clue"></p>
+        </div>
+      </div>
+
+      <aside class="crossword-sidebar" aria-label="Crossword clues">
+        <section class="crossword-clue-group">
+          <h2>Across</h2>
+          <ol class="crossword-clue-list" data-clues="across"></ol>
+        </section>
+        <section class="crossword-clue-group">
+          <h2>Down</h2>
+          <ol class="crossword-clue-list" data-clues="down"></ol>
+        </section>
+      </aside>
+    </section>
+
+    {% if crossword.details_html %}
+      <section class="crossword-notes prose-block">
+        {{ crossword.details_html | safe }}
+      </section>
+    {% endif %}
+
+    <noscript>
+      <p class="crossword-noscript">This puzzle needs JavaScript enabled to be playable.</p>
+    </noscript>
+  </section>
+{% endblock %}
+
+{% block page_scripts %}
+  <script id="crossword-data" type="application/json">{{ crossword_json | safe }}</script>
+  <script src="{{ site.base_url }}/assets/js/crossword.js" defer></script>
+{% endblock %}

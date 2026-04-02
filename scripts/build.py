@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 
 import argparse
 import json
@@ -23,6 +23,7 @@ ASSET_SOURCE_DIR = REPO_ROOT / "assets"
 PUBLIC_ASSET_DIR = PUBLIC_BUILD_DIR / "assets"
 INTERNAL_ASSET_DIR = INTERNAL_BUILD_DIR / "assets"
 CONTENT_NEWS_DIR = REPO_ROOT / 'content' / 'news'
+PUZZLE_CONFIG_DIR = REPO_ROOT / 'content' / 'puzzles'
 HOME_PAGE_SOURCE = REPO_ROOT / 'content' / 'pages' / 'home.md'
 SITE_CONFIG_FILE = REPO_ROOT / 'content' / 'config.yaml'
 PUBLISHED_STATE_FILE = REPO_ROOT / "state" / "published.json"
@@ -45,6 +46,14 @@ TEMPLATE_REGISTRY = {
     "games_landing": {
         "template_file": "games.html",
         "extra_css": ["/assets/css/games.css"],
+    },
+    "crossword": {
+        "template_file": "crossword.html",
+        "extra_css": ["/assets/css/crossword.css"],
+    },
+    "puzzles_landing": {
+        "template_file": "puzzles.html",
+        "extra_css": ["/assets/css/puzzles.css"],
     },
 }
 
@@ -117,6 +126,13 @@ def load_site_config() -> dict[str, Any]:
         return {}
 
 
+def load_yaml_mapping(file_path: Path) -> dict[str, Any]:
+    data = yaml.safe_load(file_path.read_text(encoding="utf-8")) or {}
+    if not isinstance(data, dict):
+        raise ValueError(f"{file_path.name} must contain a YAML object at the top level")
+    return data
+
+
 def parse_publish_datetime(value: Any) -> datetime | None:
     if value is None:
         return None
@@ -154,6 +170,14 @@ def coerce_int(value: Any, default: int) -> int:
         return max(0, int(value))
     except (TypeError, ValueError):
         return default
+
+
+def coerce_bool(value: Any, default: bool = False) -> bool:
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() in {"1", "true", "yes", "y", "on"}
 
 
 def normalize_href(site_base_url: str, href: str) -> str:
@@ -219,7 +243,7 @@ def base_context(site_base_url: str) -> dict[str, Any]:
     }
 
 
-def build_news_article_context(frontmatter: dict[str, Any], md_body: str, body_html: str, site_base_url: str) -> dict[str, Any]:
+def build_news_article_context(frontmatter: dict[str, Any], md_body: str, body_html: str, site_base_url: str, md_path: Path) -> dict[str, Any]:
     authors = frontmatter.get("authors") or []
     if isinstance(authors, str):
         authors = [authors]
@@ -247,15 +271,21 @@ def build_news_article_context(frontmatter: dict[str, Any], md_body: str, body_h
     article["section_label"] = section_label
     article["word_count"] = word_count
     article["reading_time_minutes"] = reading_minutes
+    article["url"] = output_path_to_url(
+        compute_output_path(frontmatter, md_path, mode="public"),
+        PUBLIC_BUILD_DIR,
+        site_base_url,
+    )
 
     home_listing = load_home_listing_settings()
     article_id = str(frontmatter.get("id") or "").strip() or str(article.get("id") or "").strip()
-    article_recent_articles = select_recent_articles(
-        collect_public_articles(site_base_url),
-        home_listing["secondary_count"],
-        home_listing["recent_count"],
-        exclude_id=article_id,
-    )
+    article_recent_articles = []
+    for recent_article in collect_public_articles(site_base_url):
+        if article_id and str(recent_article.get("id") or "") == article_id:
+            continue
+        article_recent_articles.append(recent_article)
+        if len(article_recent_articles) >= home_listing["recent_count"]:
+            break
 
     ctx = base_context(site_base_url)
     ctx.update(
@@ -324,6 +354,302 @@ def build_games_landing_context(frontmatter: dict[str, Any], site_base_url: str)
     return ctx
 
 
+def iter_puzzle_files(root: Path) -> list[Path]:
+    if not root.exists():
+        return []
+    return sorted(
+        path for path in root.rglob("*")
+        if path.is_file()
+        and path.suffix.lower() in {".yaml", ".yml"}
+        and all(not part.startswith("_") and not part.startswith(".") for part in path.relative_to(root).parts)
+    )
+
+
+
+def normalize_crossword_answer(value: Any) -> str:
+    answer = re.sub(r"[^A-Za-z0-9]", "", str(value or "").upper())
+    if not answer:
+        raise ValueError("Crossword answers must include at least one letter or digit")
+    return answer
+
+
+
+def sort_by_grid_position(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return sorted(items, key=lambda item: (int(item["row"]), int(item["col"]), str(item["direction"])))
+
+
+
+def load_puzzle_bundle(config_path: Path, site_base_url: str, mode: str = "public") -> dict[str, Any]:
+    raw = load_yaml_mapping(config_path)
+    slug = str(raw.get("id") or config_path.stem).strip() or config_path.stem
+    title = str(raw.get("title") or slug.replace("-", " ").title()).strip()
+    kicker = str(raw.get("kicker") or "Puzzle Desk").strip()
+    teaser = str(raw.get("teaser") or raw.get("intro") or "").strip()
+    intro = str(raw.get("intro") or "").strip()
+    details_markdown = str(raw.get("details") or "").strip()
+    listing = raw.get("listing") if isinstance(raw.get("listing"), dict) else {}
+
+    config = dict(raw)
+    config["id"] = slug
+    config["title"] = title
+    config["template"] = "crossword"
+    config["output_path"] = str(config.get("output_path") or f"puzzles/{slug}/").strip()
+
+    entries_raw = config.get("entries")
+    if not isinstance(entries_raw, list) or not entries_raw:
+        raise ValueError(f"{config_path.name} must define a non-empty entries list")
+
+    rows = coerce_int(config.get("rows"), 0)
+    cols = coerce_int(config.get("cols"), 0)
+
+    cells_by_key: dict[str, dict[str, Any]] = {}
+    words: list[dict[str, Any]] = []
+
+    for index, entry in enumerate(entries_raw, start=1):
+        if not isinstance(entry, dict):
+            raise ValueError(f"{config_path.name} entry #{index} must be a mapping")
+
+        direction = str(entry.get("direction") or "").strip().lower()
+        if direction not in {"across", "down"}:
+            raise ValueError(f"{config_path.name} entry #{index} has invalid direction '{direction}'")
+
+        row = coerce_int(entry.get("row"), -1)
+        col = coerce_int(entry.get("col"), -1)
+        if row < 0 or col < 0:
+            raise ValueError(f"{config_path.name} entry #{index} must include non-negative row and col values")
+
+        answer = normalize_crossword_answer(entry.get("answer"))
+        clue = str(entry.get("clue") or "").strip()
+        if not clue:
+            raise ValueError(f"{config_path.name} entry #{index} is missing a clue")
+
+        delta_row, delta_col = (0, 1) if direction == "across" else (1, 0)
+        word_cells: list[str] = []
+        for offset, letter in enumerate(answer):
+            cell_row = row + (offset * delta_row)
+            cell_col = col + (offset * delta_col)
+            cell_key = f"{cell_row}-{cell_col}"
+            existing = cells_by_key.get(cell_key)
+            if existing and existing["solution"] != letter:
+                raise ValueError(
+                    f"{config_path.name} has conflicting letters at row {cell_row}, col {cell_col}"
+                )
+
+            if not existing:
+                existing = {"row": cell_row, "col": cell_col, "solution": letter}
+                cells_by_key[cell_key] = existing
+
+            word_cells.append(cell_key)
+
+        words.append(
+            {
+                "direction": direction,
+                "row": row,
+                "col": col,
+                "clue": clue,
+                "answer": answer,
+                "cells": word_cells,
+                "start_key": f"{row}-{col}",
+            }
+        )
+
+    if not cells_by_key:
+        raise ValueError(f"{config_path.name} did not produce any crossword cells")
+
+    max_row = max(cell["row"] for cell in cells_by_key.values())
+    max_col = max(cell["col"] for cell in cells_by_key.values())
+    rows = rows or (max_row + 1)
+    cols = cols or (max_col + 1)
+
+    if rows <= 0 or cols <= 0:
+        raise ValueError(f"{config_path.name} must resolve to a positive row and column size")
+
+    for cell in cells_by_key.values():
+        if cell["row"] >= rows or cell["col"] >= cols:
+            raise ValueError(f"{config_path.name} declares rows/cols smaller than its filled cells")
+
+    start_keys = sorted(
+        {word["start_key"] for word in words},
+        key=lambda key: tuple(int(part) for part in key.split("-", 1)),
+    )
+    numbering = {start_key: index for index, start_key in enumerate(start_keys, start=1)}
+
+    across_clues: list[dict[str, Any]] = []
+    down_clues: list[dict[str, Any]] = []
+    words_by_id: dict[str, dict[str, Any]] = {}
+
+    for word in sort_by_grid_position(words):
+        number = numbering[word["start_key"]]
+        clue_id = f"{number}-{word['direction']}"
+        clue_data = {
+            "id": clue_id,
+            "number": number,
+            "direction": word["direction"],
+            "row": word["row"],
+            "col": word["col"],
+            "clue": word["clue"],
+            "answer_length": len(word["answer"]),
+            "cells": word["cells"],
+        }
+        words_by_id[clue_id] = clue_data
+
+        for cell_key in word["cells"]:
+            cells_by_key[cell_key][f"{word['direction']}_id"] = clue_id
+
+        if word["direction"] == "across":
+            across_clues.append(clue_data)
+        else:
+            down_clues.append(clue_data)
+
+    grid: list[list[dict[str, Any] | None]] = []
+    for row in range(rows):
+        row_cells: list[dict[str, Any] | None] = []
+        for col in range(cols):
+            key = f"{row}-{col}"
+            cell = cells_by_key.get(key)
+            if not cell:
+                row_cells.append(None)
+                continue
+
+            row_cells.append(
+                {
+                    "row": row,
+                    "col": col,
+                    "solution": cell["solution"],
+                    "number": numbering.get(key),
+                    "across_id": cell.get("across_id"),
+                    "down_id": cell.get("down_id"),
+                }
+            )
+        grid.append(row_cells)
+
+    puzzle_payload = {
+        "id": slug,
+        "title": title,
+        "rows": rows,
+        "cols": cols,
+        "cells": grid,
+        "clues": {
+            "across": across_clues,
+            "down": down_clues,
+        },
+        "words": words_by_id,
+    }
+
+    details_html = ""
+    if details_markdown:
+        details_html = markdown.markdown(details_markdown, extensions=["extra", "smarty"])
+
+    output_root = PUBLIC_BUILD_DIR if mode == "public" else INTERNAL_BUILD_DIR
+    puzzle_url = output_path_to_url(
+        compute_output_path(config, config_path, mode),
+        output_root,
+        site_base_url,
+    )
+
+    listing_item = {
+        "href": puzzle_url,
+        "image_src": str(listing.get("image_src") or "").strip(),
+        "eyebrow": str(listing.get("eyebrow") or "Crossword Puzzle").strip(),
+        "title": title,
+        "description": str(
+            listing.get("description")
+            or teaser
+            or intro
+            or "A config-driven crossword puzzle that runs entirely in the browser."
+        ).strip(),
+        "placeholder_label": str(listing.get("placeholder_label") or "Puzzle").strip(),
+        "sort_order": coerce_int(listing.get("sort_order"), 100),
+    }
+
+    return {
+        "config": config,
+        "page": {
+            "title": title,
+            "kicker": kicker,
+            "teaser": teaser,
+            "intro": intro,
+            "details_html": details_html,
+            "difficulty": str(config.get("difficulty") or "").strip(),
+            "cell_count": len(cells_by_key),
+            "clue_count": len(across_clues) + len(down_clues),
+        },
+        "puzzle": puzzle_payload,
+        "puzzle_json": json.dumps(puzzle_payload),
+        "listing": listing_item,
+        "published": coerce_bool(config.get("published"), True),
+    }
+
+
+
+def load_published_puzzles(site_base_url: str, mode: str = "public") -> list[dict[str, Any]]:
+    puzzles = []
+    for config_path in iter_puzzle_files(PUZZLE_CONFIG_DIR):
+        puzzle_bundle = load_puzzle_bundle(config_path, site_base_url, mode=mode)
+        if puzzle_bundle["published"]:
+            puzzles.append(puzzle_bundle)
+    return sorted(
+        puzzles,
+        key=lambda item: (int(item["listing"].get("sort_order") or 100), str(item["page"]["title"])),
+    )
+
+
+
+def build_crossword_context(config_path: Path, site_base_url: str, mode: str) -> dict[str, Any]:
+    puzzle_bundle = load_puzzle_bundle(config_path, site_base_url, mode=mode)
+
+    ctx = base_context(site_base_url)
+    ctx.update(
+        {
+            "page_title": f"{puzzle_bundle['page']['title']} | {ctx['site']['name']}",
+            "crossword": puzzle_bundle["page"],
+            "crossword_data": puzzle_bundle["puzzle"],
+            "crossword_json": puzzle_bundle["puzzle_json"],
+        }
+    )
+    return ctx
+
+
+
+def build_puzzles_landing_context(site_base_url: str, mode: str) -> dict[str, Any]:
+    puzzle_items = [bundle["listing"] for bundle in load_published_puzzles(site_base_url, mode=mode)]
+
+    ctx = base_context(site_base_url)
+    ctx.update(
+        {
+            "page_title": f"Puzzles | {ctx['site']['name']}",
+            "puzzles_landing": {
+                "kicker": "Puzzle Desk",
+                "title": "Crossword Puzzles",
+                "intro": "Open a puzzle, fill the grid in your browser, and come back later with your progress still saved on the same device.",
+            },
+            "puzzles": puzzle_items,
+        }
+    )
+    return ctx
+
+
+
+def build_puzzles_landing(mode: str = "public") -> Path:
+    if mode not in {"public", "internal"}:
+        raise ValueError("mode must be 'public' or 'internal'")
+
+    site_base_url = os.getenv("SITE_BASE_URL", "")
+    spec = TEMPLATE_REGISTRY["puzzles_landing"]
+    ctx = build_puzzles_landing_context(site_base_url, mode)
+    ctx["extra_css"] = normalize_extra_css(site_base_url, spec.get("extra_css", []))
+    html = render(spec["template_file"], ctx)
+
+    root = PUBLIC_BUILD_DIR if mode == "public" else INTERNAL_BUILD_DIR
+    out_path = root / "puzzles" / "index.html"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(html, encoding="utf-8")
+
+    print(f"Built -> {out_path.relative_to(REPO_ROOT)} (template=puzzles_landing, mode={mode})")
+    return out_path
+
+
+
 def load_published_state() -> dict[str, Any]:
     if not PUBLISHED_STATE_FILE.exists():
         return {}
@@ -344,10 +670,13 @@ def iter_article_files(root: Path) -> list[Path]:
 
 
 def article_is_public(frontmatter: dict[str, Any], article_id: str, published_state: dict[str, Any]) -> bool:
+    status = str(frontmatter.get("status") or "draft").strip().lower()
+    if status == "deleted":
+        return False
+
     if article_id in published_state:
         return True
 
-    status = str(frontmatter.get("status") or "draft").strip().lower()
     return status == "published"
 
 
@@ -607,6 +936,21 @@ def build(md_path: Path, mode: str = "public") -> Path:
         raise ValueError("mode must be 'public' or 'internal'")
 
     site_base_url = os.getenv("SITE_BASE_URL", "")
+
+    if md_path.suffix.lower() in {".yaml", ".yml"}:
+        ctx = build_crossword_context(md_path, site_base_url, mode)
+        spec = TEMPLATE_REGISTRY["crossword"]
+        ctx["extra_css"] = normalize_extra_css(site_base_url, spec.get("extra_css", []))
+        html = render(spec["template_file"], ctx)
+
+        puzzle_bundle = load_puzzle_bundle(md_path, site_base_url, mode=mode)
+        out_path = compute_output_path(puzzle_bundle["config"], md_path, mode)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(html, encoding="utf-8")
+
+        print(f"Built -> {out_path.relative_to(REPO_ROOT)} (template=crossword, mode={mode})")
+        return out_path
+
     frontmatter, md_body, body_html = load_markdown_with_frontmatter(md_path)
 
     template_key = str(frontmatter.get("template", "news_article")).strip() or "news_article"
@@ -616,7 +960,7 @@ def build(md_path: Path, mode: str = "public") -> Path:
         raise ValueError(f"Unknown template '{template_key}'. Known: {known}")
 
     if template_key == "news_article":
-        ctx = build_news_article_context(frontmatter, md_body, body_html, site_base_url)
+        ctx = build_news_article_context(frontmatter, md_body, body_html, site_base_url, md_path)
     elif template_key == "page":
         ctx = build_page_context(frontmatter, body_html, site_base_url)
     elif template_key == "games_landing":

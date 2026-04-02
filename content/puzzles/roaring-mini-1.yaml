@@ -1,0 +1,57 @@
+﻿id: roaring-mini-1
+title: Roaring Mini No. 1
+kicker: Puzzle Desk
+teaser: A compact demo crossword powered by a single YAML config file.
+intro: This first puzzle is deliberately tiny, but the same format works for larger themed crosswords.
+difficulty: Easy
+published: true
+details: |
+  The build system reads this YAML file, derives the grid from the entries, and renders a playable puzzle page automatically.
+
+  Progress is saved locally in the browser, so a visitor can leave and resume later on the same device.
+listing:
+  eyebrow: Crossword Demo
+  description: A four-by-four sample puzzle that proves the config-driven pipeline end to end.
+  placeholder_label: Mini
+  sort_order: 10
+entries:
+  - direction: across
+    row: 0
+    col: 0
+    answer: BALL
+    clue: A formal dance.
+  - direction: across
+    row: 1
+    col: 0
+    answer: AREA
+    clue: Surface measured in square units.
+  - direction: across
+    row: 2
+    col: 0
+    answer: LEAD
+    clue: Take charge.
+  - direction: across
+    row: 3
+    col: 0
+    answer: LADY
+    clue: A polite title for a woman.
+  - direction: down
+    row: 0
+    col: 0
+    answer: BALL
+    clue: A round toy or piece of sports equipment.
+  - direction: down
+    row: 0
+    col: 1
+    answer: AREA
+    clue: A region or zone.
+  - direction: down
+    row: 0
+    col: 2
+    answer: LEAD
+    clue: A dense metallic element.
+  - direction: down
+    row: 0
+    col: 3
+    answer: LADY
+    clue: Someone addressed as madam in gentler form.

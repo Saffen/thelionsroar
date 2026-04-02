@@ -5,7 +5,7 @@ section: news
 type: report
 authors:
 - Hardhy Lester
-teaser: Healing is (re)growth
+teaser: A report from an evening of tea, healing and regrowth
 publish_at: 31-03-2026 22:50
 status: published
 discord_announce: true
@@ -18,7 +18,7 @@ image:
 kicker: ''
 template: news_article
 created_at: '2026-03-31T20:50:58Z'
-updated_at: '2026-03-31T21:01:11Z'
+updated_at: '2026-04-02T00:54:53Z'
 ---
 One of the odd thing about being a journalist is that sometimes you don't know where a story comes from or why it is even a story. Sometimes you just write and hope that it will resonate with the readers.
 

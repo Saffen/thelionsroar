@@ -12,6 +12,7 @@
 
 <link rel="stylesheet" href="/assets/css/widgets.css" />
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+
 </head>
 
 <body>
@@ -37,24 +38,26 @@
       </div>
 
       <div class="masthead-center">
-        <div class="brand">
-          <div class="brand-icon lion-icon"></div>
-          <div class="brand-text">
-          <svg viewBox="0 0 500 140" xmlns="http://www.w3.org/2000/svg">
-            <line x1="40" y1="20" x2="460" y2="20" stroke="currentColor" stroke-width="2" />
-            <text x="50%" y="45" text-anchor="middle"
-                  font-family="'EB Garamond', serif"
-                  dominant-baseline="central"
-                  font-weight="800"
-                  letter-spacing="2"
-                  fill="currentColor"
-                  style="text-transform: uppercase;">The Lion's Roar
-            </text>
-            <line x1="40" y1="70" x2="460" y2="70" stroke="currentColor" stroke-width="2" />
-          </svg>
-          <div class="tagline">An Independent source of news for the discerning reader of Azeroth.</div>
+        <a class="brand-link" href="/" aria-label="Go to the homepage">
+          <div class="brand">
+            <div class="brand-icon lion-icon"></div>
+            <div class="brand-text">
+            <svg viewBox="0 0 500 140" xmlns="http://www.w3.org/2000/svg">
+              <line x1="40" y1="20" x2="460" y2="20" stroke="currentColor" stroke-width="2" />
+              <text x="50%" y="45" text-anchor="middle"
+                    font-family="'EB Garamond', serif"
+                    dominant-baseline="central"
+                    font-weight="800"
+                    letter-spacing="2"
+                    fill="currentColor"
+                    style="text-transform: uppercase;">The Lion's Roar
+              </text>
+              <line x1="40" y1="70" x2="460" y2="70" stroke="currentColor" stroke-width="2" />
+            </svg>
+            <div class="tagline">An Independent source of news for the discerning reader of Azeroth.</div>
+            </div>
           </div>
-        </div>
+        </a>
       </div>
 
       <div class="masthead-right">
@@ -102,9 +105,7 @@
     
   <section class="article-grid" style="padding-top:20px;">
     <aside
-      class="rail rail-left"
-      aria-label="Page rail"
-      style="min-height:520px;"
+      
     ></aside>
 
     <section class="article-center" aria-label="Page content">
@@ -228,6 +229,7 @@
   });
 })();
 </script>
+
 <script src="/assets/js/widgets.js" defer></script>
 
 

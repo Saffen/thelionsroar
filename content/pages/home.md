@@ -17,7 +17,7 @@ about_text: The Lion's Roar follows the events and people of the Argent Dawn (EU
 modules:
   - title: Upcoming Events
     text: The Weekend of April the 17th to April the 19th The Lion's Roar will be hosting the Roaring Days music festival for the 9th time. 
-    href: /events/rd9/
-    cta: READ MORE
+    href: 
+    cta: 
 ---
 This homepage is generated from source content and automatically promotes the latest public article.

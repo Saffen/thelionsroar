@@ -1,24 +1,28 @@
 {
-  "202512310318-stormwind-quiet-evening": {
-    "path": "news/2025/a-new-year-test.md",
-    "title": "Testing New Year",
+  "202604012310-the-duskwood-duskwell": {
+    "path": "2026/202604012310-the-duskwood-duskwell.md",
+    "title": "The Duskwood Duskwell",
     "section": "news",
-    "publish_at": "31-12-2025 20:30",
-    "recorded_at": "2026-02-05T05:51:04Z",
+    "publish_at": "01-04-2026 23:10",
+    "recorded_at": "2026-04-02T23:09:50Z",
     "discord": {
       "forum": {
-        "thread_id": "1468846372798337117",
-        "starter_message_id": "1468846372798337117",
-        "posted_at": "2026-02-05T05:51:04Z"
+        "thread_id": "1489401504212320459",
+        "starter_message_id": "1489401504212320459",
+        "posted_at": "2026-04-02T23:09:50Z"
       },
       "announce": {
-        "message_id": "1468846373997645917",
-        "posted_at": "2026-02-05T05:51:04Z"
+        "message_id": "1489401505181339731",
+        "channel_id": "1489389644314312878",
+        "posted_at": "2026-04-02T23:09:50Z",
+        "crossposted_at": "2026-04-02T23:09:50Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-04-02T23:09:50Z"
       }
     },
     "discord_last_action": {
-      "action": "announce_post",
-      "at": "2026-02-05T05:51:04Z"
+      "action": "announce_crosspost",
+      "at": "2026-04-02T23:09:50Z"
     }
   }
 }

@@ -1,0 +1,46 @@
+﻿{% extends "base.html" %}
+
+{% block content %}
+  <section class="puzzles-landing" aria-label="Puzzle landing page">
+    <section class="puzzles-hero">
+      {% if puzzles_landing.kicker %}
+        <div class="kicker">{{ puzzles_landing.kicker }}</div>
+      {% endif %}
+      <h1 class="puzzles-title">{{ puzzles_landing.title }}</h1>
+      {% if puzzles_landing.intro %}
+        <p class="puzzles-intro">{{ puzzles_landing.intro }}</p>
+      {% endif %}
+    </section>
+
+    {% if puzzles and puzzles|length > 0 %}
+      <section class="puzzles-grid" aria-label="Available puzzles">
+        {% for puzzle in puzzles %}
+          <article class="puzzle-card">
+            <a class="puzzle-card-link" href="{{ puzzle.href }}">
+              <div class="puzzle-card-media">
+                {% if puzzle.image_src %}
+                  <img src="{{ puzzle.image_src }}" alt="{{ puzzle.title }} preview" loading="lazy" />
+                {% else %}
+                  <div class="puzzle-card-placeholder" aria-hidden="true">
+                    <span>{{ puzzle.placeholder_label }}</span>
+                  </div>
+                {% endif %}
+              </div>
+              <div class="puzzle-card-body">
+                <div class="puzzle-card-eyebrow">{{ puzzle.eyebrow }}</div>
+                <h2 class="puzzle-card-title">{{ puzzle.title }}</h2>
+                <p class="puzzle-card-text">{{ puzzle.description }}</p>
+                <span class="puzzle-card-cta">Open puzzle</span>
+              </div>
+            </a>
+          </article>
+        {% endfor %}
+      </section>
+    {% else %}
+      <section class="puzzles-empty">
+        <h2>No puzzles yet</h2>
+        <p>Add a YAML file in <code>content/puzzles/</code> and rebuild to publish the next one.</p>
+      </section>
+    {% endif %}
+  </section>
+{% endblock %}

@@ -169,6 +169,72 @@ def webhook_post(
         raise RuntimeError(f"Discord webhook HTTP {e.code}: {err_body}") from e
 
 
+def normalize_discord_bot_auth(bot_token: str) -> str:
+    token = str(bot_token or "").strip()
+    if not token:
+        return ""
+    if token.lower().startswith("bot ") or token.lower().startswith("bearer "):
+        return token
+    return f"Bot {token}"
+
+
+def webhook_channel_id(webhook_url: str) -> str:
+    req = urllib.request.Request(
+        webhook_url,
+        headers={
+            "Accept": "application/json",
+            "User-Agent": "LionsRoarPublisher/0.1 (+https://thelionsroar.eu)",
+            "Connection": "close",
+        },
+        method="GET",
+    )
+
+    try:
+        with urllib.request.urlopen(req, timeout=25) as resp:
+            body = resp.read().decode("utf-8", errors="replace").strip()
+            data = json.loads(body) if body else {}
+    except urllib.error.HTTPError as e:
+        err_body = e.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"Discord webhook lookup HTTP {e.code}: {err_body}") from e
+
+    channel_id = str(data.get("channel_id") or "").strip() if isinstance(data, dict) else ""
+    if not channel_id:
+        raise RuntimeError("Discord webhook lookup response did not include a channel id.")
+    return channel_id
+
+
+def crosspost_discord_announcement(bot_token: str, channel_id: str, message_id: str) -> Dict[str, Any]:
+    auth_header = normalize_discord_bot_auth(bot_token)
+    if not auth_header:
+        raise RuntimeError("DISCORD_BOT_TOKEN is not set.")
+
+    channel_key = str(channel_id or "").strip()
+    message_key = str(message_id or "").strip()
+    if not channel_key or not message_key:
+        raise RuntimeError("Discord announce channel id or message id is missing.")
+
+    req = urllib.request.Request(
+        f"https://discord.com/api/v10/channels/{channel_key}/messages/{message_key}/crosspost",
+        data=b"{}",
+        headers={
+            "Authorization": auth_header,
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "User-Agent": "LionsRoarPublisher/0.1 (+https://thelionsroar.eu)",
+            "Connection": "close",
+        },
+        method="POST",
+    )
+
+    try:
+        with urllib.request.urlopen(req, timeout=25) as resp:
+            body = resp.read().decode("utf-8", errors="replace").strip()
+            return json.loads(body) if body else {}
+    except urllib.error.HTTPError as e:
+        err_body = e.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"Discord crosspost HTTP {e.code}: {err_body}") from e
+
+
 def build_forum_payload(
     *,
     thread_name: str,
@@ -305,6 +371,8 @@ def main() -> int:
     ap.add_argument("--state", default=str(DEFAULT_STATE_FILE), help="State file path")
     ap.add_argument("--apply", action="store_true", help="Actually post to Discord and write state. Default is dry-run.")
     ap.add_argument("--limit", type=int, default=20, help="Max number of articles to process per run")
+    ap.add_argument("--article-id", default="", help="Only process a single article id")
+    ap.add_argument("--force", action="store_true", help="Allow a manual announcement even if discord_announce is false")
     args = ap.parse_args()
 
     if load_dotenv is not None:
@@ -312,6 +380,7 @@ def main() -> int:
 
     forum_webhook = (os.environ.get("DISCORD_FORUM_WEBHOOK_URL") or "").strip()
     announce_webhook = (os.environ.get("DISCORD_ANNOUNCE_WEBHOOK_URL") or "").strip()
+    bot_token = (os.environ.get("DISCORD_BOT_TOKEN") or "").strip()
     site_base = (os.environ.get("SITE_BASE_URL") or "").strip()
     username = (os.environ.get("DISCORD_USERNAME") or "").strip()
     avatar_url = (os.environ.get("DISCORD_AVATAR_URL") or "").strip()
@@ -345,6 +414,8 @@ def main() -> int:
 
     # Candidates: should_publish True
     candidates: List[Dict[str, Any]] = []
+    filter_article_id = str(args.article_id or "").strip()
+
     for it in items:
         if not it.get("ok", False):
             continue
@@ -352,11 +423,21 @@ def main() -> int:
         fm = it.get("frontmatter")
         if not isinstance(decisions, dict) or not isinstance(fm, dict):
             continue
-        if decisions.get("should_publish") is not True:
-            continue
+
         article_id = fm.get("id")
         if not isinstance(article_id, str) or not article_id.strip():
             continue
+        article_id = article_id.strip()
+
+        if filter_article_id and article_id != filter_article_id:
+            continue
+
+        if decisions.get("should_publish") is not True:
+            continue
+
+        if not args.force and decisions.get("should_announce_discord") is not True:
+            continue
+
         candidates.append(it)
 
     if not candidates:
@@ -365,33 +446,40 @@ def main() -> int:
 
     candidates = candidates[: max(1, args.limit)]
 
-    # Work list: needs either forum thread or announcement (or both)
-    work: List[Tuple[str, Dict[str, Any], bool, bool]] = []
+    # Work list: needs forum, announcement, or crosspost work
+    work: List[Tuple[str, Dict[str, Any], bool, bool, bool]] = []
     for it in candidates:
         fm = it["frontmatter"]
         aid = fm["id"].strip()
         ensure_state_entry(state, aid, it)
 
-        forum_done = bool(state[aid]["discord"].get("forum"))
-        announce_done = bool(state[aid]["discord"].get("announce"))
+        forum_state = state[aid]["discord"].get("forum")
+        announce_state = state[aid]["discord"].get("announce")
+        forum_done = isinstance(forum_state, dict) and bool(str(forum_state.get("thread_id") or "").strip())
+        announce_done = isinstance(announce_state, dict) and bool(str(announce_state.get("message_id") or "").strip())
+        crosspost_done = isinstance(announce_state, dict) and bool(str(announce_state.get("crossposted_at") or "").strip())
+        need_announce = not announce_done
+        need_crosspost = not crosspost_done
 
-        # We want double functionality. If either missing, we process.
-        if forum_done and announce_done:
+        # We want forum, announce, and crosspost. If any part is missing, we process.
+        if forum_done and announce_done and crosspost_done:
             continue
-        work.append((aid, it, (not forum_done), (not announce_done)))
+        work.append((aid, it, (not forum_done), need_announce, need_crosspost))
 
     if not work:
-        print("Nothing to do. Forum threads and announcements already recorded in state.")
+        print("Nothing to do. Forum threads, announcements, and crossposts already recorded in state.")
         return 0
 
     print("Pending Discord actions:")
-    for aid, it, need_forum, need_announce in work:
+    for aid, it, need_forum, need_announce, need_crosspost in work:
         p = it.get("path", "")
         flags = []
         if need_forum:
             flags.append("forum")
         if need_announce:
             flags.append("announce")
+        if need_crosspost:
+            flags.append("crosspost")
         print(f"- {p} (id: {aid}) -> {', '.join(flags)}")
     print()
 
@@ -401,9 +489,10 @@ def main() -> int:
 
     posted_forum = 0
     posted_announce = 0
+    crossposted_announce = 0
     now_utc = iso_now_utc()
 
-    for aid, it, need_forum, need_announce in work:
+    for aid, it, need_forum, need_announce, need_crosspost in work:
         fm = it["frontmatter"]
         path_str = it.get("path", "") or ""
 
@@ -510,12 +599,14 @@ def main() -> int:
                 continue
 
             announce_message_id = str(resp.get("id") or "").strip()
+            announce_channel_id = str(resp.get("channel_id") or "").strip()
             if not announce_message_id:
                 print(f"ERROR: Announce response missing message id for {aid}. Not writing announce state.", file=sys.stderr)
                 continue
 
             state[aid]["discord"]["announce"] = {
                 "message_id": announce_message_id,
+                "channel_id": announce_channel_id,
                 "posted_at": now_utc,
             }
             state[aid]["discord_last_action"] = {"action": "announce_post", "at": now_utc}
@@ -523,9 +614,57 @@ def main() -> int:
             posted_announce += 1
             print(f"Announcement posted: {aid} -> message_id={announce_message_id}")
 
+        if need_crosspost:
+            announce_state = state[aid]["discord"].get("announce")
+            announce_message_id = str(announce_state.get("message_id") or "").strip() if isinstance(announce_state, dict) else ""
+            announce_channel_id = str(announce_state.get("channel_id") or "").strip() if isinstance(announce_state, dict) else ""
+
+            if not announce_message_id:
+                print(f"WARNING: Crosspost skipped for {aid}: no announce message id in state.", file=sys.stderr)
+                continue
+
+            if not announce_channel_id:
+                try:
+                    announce_channel_id = webhook_channel_id(announce_webhook)
+                    if isinstance(announce_state, dict):
+                        announce_state["channel_id"] = announce_channel_id
+                except Exception as e:
+                    if isinstance(announce_state, dict):
+                        announce_state["crosspost_status"] = "failed"
+                        announce_state["crosspost_attempted_at"] = now_utc
+                        announce_state["crosspost_error"] = str(e) or repr(e)
+                        state[aid]["discord_last_action"] = {"action": "announce_crosspost_failed", "at": now_utc}
+                        save_state(state_path, state)
+                    print(f"WARNING: Crosspost failed for {aid}: {e}", file=sys.stderr)
+                    continue
+
+            try:
+                crosspost_discord_announcement(bot_token, announce_channel_id, announce_message_id)
+            except Exception as e:
+                if isinstance(announce_state, dict):
+                    announce_state["crosspost_status"] = "failed"
+                    announce_state["crosspost_attempted_at"] = now_utc
+                    announce_state["crosspost_error"] = str(e) or repr(e)
+                state[aid]["discord_last_action"] = {"action": "announce_crosspost_failed", "at": now_utc}
+                save_state(state_path, state)
+                print(f"WARNING: Crosspost failed for {aid}: {e}", file=sys.stderr)
+                continue
+
+            if isinstance(announce_state, dict):
+                announce_state["channel_id"] = announce_channel_id
+                announce_state["crossposted_at"] = now_utc
+                announce_state["crosspost_status"] = "crossposted"
+                announce_state["crosspost_attempted_at"] = now_utc
+                announce_state.pop("crosspost_error", None)
+            state[aid]["discord_last_action"] = {"action": "announce_crosspost", "at": now_utc}
+            save_state(state_path, state)
+            crossposted_announce += 1
+            print(f"Announcement crossposted: {aid} -> message_id={announce_message_id}")
+
     print(f"\nUpdated state: {state_path}")
     print(f"Forum threads created: {posted_forum}")
     print(f"Announcements posted: {posted_announce}")
+    print(f"Announcements crossposted: {crossposted_announce}")
 
     return 0
 

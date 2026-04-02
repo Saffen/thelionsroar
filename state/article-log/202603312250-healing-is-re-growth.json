@@ -1,5 +1,69 @@
 [
   {
+    "timestamp": "2026-04-02T22:58:00Z",
+    "action": "announce_discord",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Discord announcement posted, but crosspost failed: DISCORD_BOT_TOKEN is not set."
+  },
+  {
+    "timestamp": "2026-04-02T22:55:27Z",
+    "action": "announce_discord",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Discord announcement posted, but crosspost failed: DISCORD_BOT_TOKEN is not set."
+  },
+  {
+    "timestamp": "2026-04-02T00:54:53Z",
+    "action": "update_published",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": true,
+    "summary": "Article saved via update_published. Public site rebuilt (2 article outputs, 0 stale outputs removed)."
+  },
+  {
+    "timestamp": "2026-04-02T00:15:32Z",
+    "action": "update_published",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": true,
+    "summary": "Article saved via update_published. Public site rebuilt (2 article outputs, 0 stale outputs removed)."
+  },
+  {
+    "timestamp": "2026-04-01T23:45:27Z",
+    "action": "announce_discord",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Discord announcement triggered from the admin panel."
+  },
+  {
+    "timestamp": "2026-04-01T21:05:38Z",
+    "action": "announce_discord",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Discord announcement triggered from the admin panel."
+  },
+  {
+    "timestamp": "2026-04-01T21:05:28Z",
+    "action": "update_published",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": true,
+    "summary": "Article saved via update_published. Public site rebuilt (1 article outputs, 2 stale outputs removed)."
+  },
+  {
+    "timestamp": "2026-04-01T20:27:44Z",
+    "action": "announce_discord",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Discord announcement triggered from the admin panel."
+  },
+  {
     "timestamp": "2026-03-31T21:01:11Z",
     "action": "update_published",
     "from_status": "published",

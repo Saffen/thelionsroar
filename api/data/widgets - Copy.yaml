@@ -1,0 +1,17 @@
+# thelionsroar/api/data/widgets.yaml
+zones:
+  article-rail-left-secondary:
+    - id: "breaking-news"
+      type: "ticker"
+      title: "Live News"
+      data:
+        - "Defias Brotherhood spotted near Northshire!"
+        - "New trade tariffs announced by the House of Nobles."
+        - "Stormwind Library hosting lore night this Friday."
+
+    - id: "weekly-poll"
+      type: "poll"
+      title: "Weekly Poll"
+      data:
+        question: "Who is your favorite leader?"
+        options: ["Anduin Wrynn", "Thrall", "Jaina Proudmoore"]

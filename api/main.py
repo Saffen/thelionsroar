@@ -1,6 +1,10 @@
 import json
 import os
 import shutil
+import subprocess
+import sys
+import urllib.parse
+import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
@@ -16,13 +20,21 @@ from slugify import slugify
 
 
 ALLOWED_IP = "192.168.0.1"
-APP_ROOT = Path("/app")
+ALLOWED_IP = "192.168.0.1"
+API_ROOT = Path(__file__).resolve().parent
+APP_ROOT = API_ROOT.parent
 CONTENT_ROOT = APP_ROOT / "content" / "news"
 STATE_ROOT = APP_ROOT / "state"
 ASSETS_ROOT = APP_ROOT / "assets"
-DATA_FILE = APP_ROOT / 'data' / 'widgets.yaml'
+DATA_FILE = API_ROOT / 'data' / 'widgets.yaml'
 SITE_CONFIG_FILE = APP_ROOT / 'content' / 'config.yaml'
 ARTICLE_LOG_ROOT = STATE_ROOT / "article-log"
+PUBLISHED_STATE_FILE = STATE_ROOT / "published.json"
+PUBLIC_BUILD_ROOT = APP_ROOT / "build" / "public"
+SCRIPTS_ROOT = APP_ROOT / "scripts"
+BUILD_SCRIPT = SCRIPTS_ROOT / "build.py"
+BUILD_PAGES_SCRIPT = SCRIPTS_ROOT / "build_pages.py"
+ANNOUNCE_DISCORD_SCRIPT = SCRIPTS_ROOT / "announce_discord.py"
 ALLOWED_STATUSES = {"draft", "build", "scheduled", "published", "deleted"}
 ACTION_TO_STATUS = {
     "save_draft": "draft",
@@ -113,17 +125,550 @@ def load_data() -> dict[str, Any]:
 
 
 def load_published_state() -> dict[str, Any]:
-    state_path = STATE_ROOT / "published.json"
-    if not state_path.exists():
+    if not PUBLISHED_STATE_FILE.exists():
         return {}
 
     try:
-        with open(state_path, "r", encoding="utf-8") as handle:
+        with open(PUBLISHED_STATE_FILE, "r", encoding="utf-8") as handle:
             data = json.load(handle)
             return data if isinstance(data, dict) else {}
     except Exception as exc:
         print(f"Error loading published.json: {exc}")
         return {}
+
+
+def save_published_state(state: dict[str, Any]) -> None:
+    STATE_ROOT.mkdir(parents=True, exist_ok=True)
+    PUBLISHED_STATE_FILE.write_text(
+        json.dumps(state, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+
+
+def normalize_discord_state(value: Any) -> dict[str, Any]:
+    discord_state = value if isinstance(value, dict) else {}
+    forum_state = discord_state.get("forum") if isinstance(discord_state.get("forum"), dict) else None
+    announce_state = discord_state.get("announce") if isinstance(discord_state.get("announce"), dict) else None
+    return {"forum": forum_state, "announce": announce_state}
+
+
+def normalize_discord_bot_auth(bot_token: str) -> str:
+    token = str(bot_token or "").strip()
+    if not token:
+        return ""
+    if token.lower().startswith("bot ") or token.lower().startswith("bearer "):
+        return token
+    return f"Bot {token}"
+
+
+def article_is_live_public(status: str, article_id: str, published_state: dict[str, Any]) -> bool:
+    if status == "deleted":
+        return False
+    return article_id in published_state or status == "published"
+
+
+def ensure_live_state_entry(article: dict[str, Any], published_state: dict[str, Any]) -> bool:
+    article_id = str(article.get("id") or "").strip()
+    if not article_id:
+        return False
+
+    existing = published_state.get(article_id)
+    entry = existing if isinstance(existing, dict) else {}
+    before = json.dumps(entry, sort_keys=True, ensure_ascii=False)
+
+    discord_state = normalize_discord_state(entry.get("discord"))
+    normalized = {
+        "path": article.get("filename") or entry.get("path") or "",
+        "title": article.get("title") or entry.get("title") or article_id,
+        "section": article.get("section") or entry.get("section") or "news",
+        "publish_at": publish_at_to_storage(article.get("publish_at")) or entry.get("publish_at") or "",
+        "recorded_at": entry.get("recorded_at") or utc_now_iso(),
+        "discord": discord_state,
+    }
+    if entry.get("discord_last_action"):
+        normalized["discord_last_action"] = entry.get("discord_last_action")
+
+    after = json.dumps(normalized, sort_keys=True, ensure_ascii=False)
+    published_state[article_id] = normalized
+    return before != after or existing is None
+
+
+def remove_live_state_entry(article_id: str, published_state: dict[str, Any]) -> bool:
+    article_key = str(article_id or "").strip()
+    if not article_key or article_key not in published_state:
+        return False
+    del published_state[article_key]
+    return True
+
+
+def iter_article_source_files() -> list[Path]:
+    if not CONTENT_ROOT.exists():
+        return []
+    return sorted(
+        path for path in CONTENT_ROOT.rglob("*.md")
+        if "_history" not in path.parts
+        and all(not part.startswith("_") and not part.startswith(".") for part in path.relative_to(CONTENT_ROOT).parts)
+    )
+
+
+def parse_publish_year_from_article(article: dict[str, Any]) -> str:
+    publish_dt = parse_publish_at(article.get("publish_at"))
+    if publish_dt:
+        return publish_dt.strftime("%Y")
+
+    filename = str(article.get("filename") or "")
+    for part in Path(filename).parts:
+        if len(part) == 4 and part.isdigit():
+            return part
+    return datetime.now().strftime("%Y")
+
+
+def public_output_path_for_article(article: dict[str, Any]) -> Path:
+    section = str(article.get("section") or "news").strip() or "news"
+    slug = str(article.get("id") or "untitled").strip() or "untitled"
+    year = parse_publish_year_from_article(article)
+    return PUBLIC_BUILD_ROOT / section / year / slug / "index.html"
+
+
+def remove_public_output(article: dict[str, Any]) -> str:
+    target = public_output_path_for_article(article)
+    resolved = target.resolve()
+    build_root = PUBLIC_BUILD_ROOT.resolve()
+    if not resolved.is_relative_to(build_root):
+        raise RuntimeError(f"Refusing to remove output outside public build root: {resolved}")
+
+    if resolved.parent.exists():
+        shutil.rmtree(resolved.parent)
+        return str(resolved.parent)
+    if resolved.exists():
+        resolved.unlink()
+        return str(resolved)
+    return ""
+
+
+def run_project_script(script_path: Path, *args: str) -> str:
+    if not script_path.exists():
+        raise RuntimeError(f"Required script is missing: {script_path}")
+
+    result = subprocess.run(
+        [sys.executable, str(script_path), *args],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout or "").strip()
+        raise RuntimeError(
+            f"{script_path.name} failed with exit code {result.returncode}. {detail}".strip()
+        )
+    return (result.stdout or "").strip()
+
+
+def build_single_article(article_path: Path, mode: str) -> str:
+    return run_project_script(BUILD_SCRIPT, str(article_path), "--mode", mode)
+
+
+def rebuild_public_pages() -> str:
+    return run_project_script(BUILD_PAGES_SCRIPT, "--mode", "public")
+
+
+def rebuild_live_public_articles(published_state: dict[str, Any]) -> dict[str, int]:
+    built_articles = 0
+    removed_outputs = 0
+
+    for article_path in iter_article_source_files():
+        try:
+            article = load_article(article_path, published_state=published_state, include_details=False)
+        except Exception:
+            continue
+
+        if article_is_live_public(article["status"], article["id"], published_state):
+            build_single_article(article_path, "public")
+            built_articles += 1
+        else:
+            if remove_public_output(article):
+                removed_outputs += 1
+
+    return {
+        "built_articles": built_articles,
+        "removed_outputs": removed_outputs,
+    }
+
+
+def refresh_public_site(published_state: dict[str, Any]) -> dict[str, int]:
+    result = rebuild_live_public_articles(published_state)
+    rebuild_public_pages()
+    return result
+
+
+def normalize_asset_url(site_base_url: str, src: str) -> str:
+    path = str(src or "").strip()
+    if not path:
+        return ""
+    if path.startswith(("http://", "https://")):
+        return path
+    if not site_base_url:
+        return ""
+    base = site_base_url.rstrip("/")
+    if path.startswith("/"):
+        return f"{base}{path}"
+    return f"{base}/{path}"
+
+
+def build_public_article_url(article: dict[str, Any]) -> str:
+    site_base = (os.environ.get("SITE_BASE_URL") or "").strip().rstrip("/")
+    if not site_base:
+        return ""
+    section = str(article.get("section") or "news").strip() or "news"
+    year = parse_publish_year_from_article(article)
+    slug = str(article.get("id") or "untitled").strip() or "untitled"
+    return f"{site_base}/{section}/{year}/{slug}/"
+
+
+def webhook_post(
+    webhook_url: str,
+    payload: dict[str, Any],
+    thread_id: str = "",
+    wait: bool = True,
+    username: str = "",
+    avatar_url: str = "",
+) -> dict[str, Any]:
+    parsed = urllib.parse.urlparse(webhook_url)
+    query = urllib.parse.parse_qs(parsed.query)
+
+    if wait:
+        query["wait"] = ["true"]
+    if thread_id.strip():
+        query["thread_id"] = [thread_id.strip()]
+
+    post_url = urllib.parse.urlunparse(parsed._replace(query=urllib.parse.urlencode(query, doseq=True)))
+
+    body = dict(payload)
+    if username.strip():
+        body["username"] = username.strip()
+    if avatar_url.strip():
+        body["avatar_url"] = avatar_url.strip()
+
+    data = json.dumps(body).encode("utf-8")
+    request = urllib.request.Request(
+        post_url,
+        data=data,
+        headers={
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "User-Agent": "LionsRoarAdmin/0.1 (+https://thelionsroar.eu)",
+            "Connection": "close",
+        },
+        method="POST",
+    )
+
+    try:
+        with urllib.request.urlopen(request, timeout=25) as response:
+            raw = response.read().decode("utf-8", errors="replace").strip()
+            return json.loads(raw) if raw else {}
+    except urllib.error.HTTPError as exc:
+        raw = exc.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"Discord webhook HTTP {exc.code}: {raw}") from exc
+
+
+def webhook_channel_id(webhook_url: str) -> str:
+    request = urllib.request.Request(
+        webhook_url,
+        headers={
+            "Accept": "application/json",
+            "User-Agent": "LionsRoarAdmin/0.1 (+https://thelionsroar.eu)",
+            "Connection": "close",
+        },
+        method="GET",
+    )
+
+    try:
+        with urllib.request.urlopen(request, timeout=25) as response:
+            raw = response.read().decode("utf-8", errors="replace").strip()
+            data = json.loads(raw) if raw else {}
+    except urllib.error.HTTPError as exc:
+        raw = exc.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"Discord webhook lookup HTTP {exc.code}: {raw}") from exc
+
+    channel_id = str(data.get("channel_id") or "").strip() if isinstance(data, dict) else ""
+    if not channel_id:
+        raise RuntimeError("Discord webhook lookup response did not include a channel id.")
+    return channel_id
+
+
+def crosspost_discord_announcement(bot_token: str, channel_id: str, message_id: str) -> dict[str, Any]:
+    auth_header = normalize_discord_bot_auth(bot_token)
+    if not auth_header:
+        raise RuntimeError("DISCORD_BOT_TOKEN is not set.")
+
+    channel_key = str(channel_id or "").strip()
+    message_key = str(message_id or "").strip()
+    if not channel_key or not message_key:
+        raise RuntimeError("Discord announce channel id or message id is missing.")
+
+    request = urllib.request.Request(
+        f"https://discord.com/api/v10/channels/{channel_key}/messages/{message_key}/crosspost",
+        data=b"{}",
+        headers={
+            "Authorization": auth_header,
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "User-Agent": "LionsRoarAdmin/0.1 (+https://thelionsroar.eu)",
+            "Connection": "close",
+        },
+        method="POST",
+    )
+
+    try:
+        with urllib.request.urlopen(request, timeout=25) as response:
+            raw = response.read().decode("utf-8", errors="replace").strip()
+            return json.loads(raw) if raw else {}
+    except urllib.error.HTTPError as exc:
+        raw = exc.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"Discord crosspost HTTP {exc.code}: {raw}") from exc
+
+
+def build_forum_payload(
+    *,
+    thread_name: str,
+    title: str,
+    authors: list[str],
+    publish_time: str,
+    teaser: str,
+    image_url: str,
+    article_url: str,
+) -> dict[str, Any]:
+    fields: list[dict[str, Any]] = []
+    author_line = ", ".join(author for author in authors if author)
+    if author_line:
+        fields.append({"name": "By", "value": author_line, "inline": True})
+    if publish_time:
+        fields.append({"name": "Published", "value": publish_time, "inline": True})
+
+    description_parts: list[str] = []
+    if teaser.strip():
+        description_parts.append(teaser.strip())
+    if article_url:
+        description_parts.append(f"[Read on the site]({article_url})")
+
+    embed: dict[str, Any] = {
+        "title": title,
+        "description": "\n\n".join(description_parts).strip(),
+    }
+    if fields:
+        embed["fields"] = fields
+    if image_url:
+        embed["image"] = {"url": image_url}
+
+    return {
+        "thread_name": thread_name[:100],
+        "content": "",
+        "embeds": [embed],
+        "allowed_mentions": {"parse": []},
+    }
+
+
+def build_announce_payload(
+    *,
+    title: str,
+    authors: list[str],
+    publish_time: str,
+    teaser: str,
+    image_url: str,
+    article_url: str,
+    thread_id: str,
+) -> dict[str, Any]:
+    fields: list[dict[str, Any]] = []
+    author_line = ", ".join(author for author in authors if author)
+    if author_line:
+        fields.append({"name": "By", "value": author_line, "inline": True})
+    if publish_time:
+        fields.append({"name": "Published", "value": publish_time, "inline": True})
+    if thread_id:
+        fields.append({"name": "Discuss", "value": f"<#{thread_id}>", "inline": True})
+
+    description_parts: list[str] = []
+    if teaser.strip():
+        description_parts.append(teaser.strip())
+    if article_url:
+        description_parts.append(f"[Read on the site]({article_url})")
+
+    embed: dict[str, Any] = {
+        "title": title,
+        "description": "\n\n".join(description_parts).strip(),
+        "color": 0x3D352E,
+    }
+    if fields:
+        embed["fields"] = fields
+    if image_url:
+        embed["image"] = {"url": image_url}
+
+    return {
+        "content": "",
+        "embeds": [embed],
+        "allowed_mentions": {"parse": []},
+    }
+
+
+def trigger_discord_announce(article: dict[str, Any], published_state: dict[str, Any], force: bool = False) -> dict[str, Any]:
+    forum_webhook = (os.environ.get("DISCORD_FORUM_WEBHOOK_URL") or "").strip()
+    announce_webhook = (os.environ.get("DISCORD_ANNOUNCE_WEBHOOK_URL") or "").strip()
+    bot_token = (os.environ.get("DISCORD_BOT_TOKEN") or "").strip()
+    username = (os.environ.get("DISCORD_USERNAME") or "").strip()
+    avatar_url = (os.environ.get("DISCORD_AVATAR_URL") or "").strip()
+
+    if not forum_webhook:
+        raise RuntimeError("DISCORD_FORUM_WEBHOOK_URL is not set.")
+    if not announce_webhook:
+        raise RuntimeError("DISCORD_ANNOUNCE_WEBHOOK_URL is not set.")
+    if not force and not bool(article.get("discord_announce", True)):
+        raise RuntimeError("discord_announce is disabled for this article.")
+
+    if not ensure_live_state_entry(article, published_state):
+        if article.get("id") not in published_state:
+            raise RuntimeError("Article is not available in live publish state.")
+    save_published_state(published_state)
+
+    article_id = str(article.get("id") or "").strip()
+    state_entry = published_state.get(article_id) if isinstance(published_state.get(article_id), dict) else {}
+    discord_state = normalize_discord_state(state_entry.get("discord"))
+    now_utc = utc_now_iso()
+
+    title = str(article.get("title") or "").strip() or "(Untitled)"
+    teaser = str(article.get("teaser") or "").strip()
+    authors = [str(author).strip() for author in (article.get("authors") or []) if str(author).strip()]
+    publish_time = publish_at_to_storage(article.get("publish_at")) or str(article.get("publish_at") or "").strip()
+    article_url = build_public_article_url(article)
+    image_ref = article.get("image") if isinstance(article.get("image"), dict) else {}
+    image_url = normalize_asset_url((os.environ.get("SITE_BASE_URL") or "").strip(), str(image_ref.get("src") or ""))
+
+    forum_info = discord_state.get("forum") if isinstance(discord_state.get("forum"), dict) else None
+    announce_info = discord_state.get("announce") if isinstance(discord_state.get("announce"), dict) else None
+    created_forum = False
+    posted_announce = False
+    crossposted_announce = False
+    crosspost_error = ""
+
+    thread_id = str(forum_info.get("thread_id") or "") if forum_info else ""
+    starter_message_id = str(forum_info.get("starter_message_id") or "") if forum_info else ""
+    announce_message_id = str(announce_info.get("message_id") or "").strip() if announce_info else ""
+    announce_channel_id = str(announce_info.get("channel_id") or "").strip() if announce_info else ""
+    announce_crossposted_at = str(announce_info.get("crossposted_at") or "").strip() if announce_info else ""
+
+    if not thread_id:
+        forum_response = webhook_post(
+            forum_webhook,
+            build_forum_payload(
+                thread_name=title,
+                title=title,
+                authors=authors,
+                publish_time=publish_time,
+                teaser=teaser,
+                image_url=image_url,
+                article_url=article_url,
+            ),
+            username=username,
+            avatar_url=avatar_url,
+        )
+        starter_message_id = str(forum_response.get("id") or "").strip()
+        thread_id = str(forum_response.get("channel_id") or "").strip()
+        if not thread_id or not starter_message_id:
+            raise RuntimeError("Discord forum response did not include the created thread ids.")
+        discord_state["forum"] = {
+            "thread_id": thread_id,
+            "starter_message_id": starter_message_id,
+            "posted_at": now_utc,
+        }
+        created_forum = True
+
+    if not announce_message_id:
+        announce_response = webhook_post(
+            announce_webhook,
+            build_announce_payload(
+                title=title,
+                authors=authors,
+                publish_time=publish_time,
+                teaser=teaser,
+                image_url=image_url,
+                article_url=article_url,
+                thread_id=thread_id,
+            ),
+            username=username,
+            avatar_url=avatar_url,
+        )
+        announce_message_id = str(announce_response.get("id") or "").strip()
+        announce_channel_id = str(announce_response.get("channel_id") or "").strip() or announce_channel_id
+        if not announce_message_id:
+            raise RuntimeError("Discord announce response did not include a message id.")
+        discord_state["announce"] = {
+            "message_id": announce_message_id,
+            "channel_id": announce_channel_id,
+            "posted_at": now_utc,
+        }
+        state_entry["discord"] = discord_state
+        state_entry["discord_last_action"] = {"action": "announce_post", "at": now_utc}
+        published_state[article_id] = state_entry
+        save_published_state(published_state)
+        posted_announce = True
+    elif isinstance(announce_info, dict):
+        discord_state["announce"] = dict(announce_info)
+
+    if not announce_channel_id:
+        try:
+            announce_channel_id = webhook_channel_id(announce_webhook)
+            announce_state = discord_state.get("announce") if isinstance(discord_state.get("announce"), dict) else {}
+            announce_state["message_id"] = announce_message_id
+            announce_state["channel_id"] = announce_channel_id
+            announce_state.setdefault("posted_at", now_utc)
+            if announce_crossposted_at:
+                announce_state["crossposted_at"] = announce_crossposted_at
+            discord_state["announce"] = announce_state
+        except Exception as exc:
+            crosspost_error = str(exc) or repr(exc)
+
+    if not announce_crossposted_at:
+        try:
+            crosspost_discord_announcement(bot_token, announce_channel_id, announce_message_id)
+            announce_state = discord_state.get("announce") if isinstance(discord_state.get("announce"), dict) else {}
+            announce_state["message_id"] = announce_message_id
+            announce_state["channel_id"] = announce_channel_id
+            announce_state.setdefault("posted_at", now_utc)
+            announce_state["crossposted_at"] = now_utc
+            announce_state["crosspost_status"] = "crossposted"
+            announce_state["crosspost_attempted_at"] = now_utc
+            announce_state.pop("crosspost_error", None)
+            discord_state["announce"] = announce_state
+            state_entry["discord_last_action"] = {"action": "announce_crosspost", "at": now_utc}
+            crossposted_announce = True
+        except Exception as exc:
+            crosspost_error = str(exc) or repr(exc)
+            announce_state = discord_state.get("announce") if isinstance(discord_state.get("announce"), dict) else {}
+            announce_state["message_id"] = announce_message_id
+            if announce_channel_id:
+                announce_state["channel_id"] = announce_channel_id
+            announce_state.setdefault("posted_at", now_utc)
+            announce_state["crosspost_status"] = "failed"
+            announce_state["crosspost_attempted_at"] = now_utc
+            announce_state["crosspost_error"] = crosspost_error
+            discord_state["announce"] = announce_state
+            state_entry["discord_last_action"] = {"action": "announce_crosspost_failed", "at": now_utc}
+
+    state_entry["discord"] = discord_state
+    state_entry.setdefault("discord_last_action", {"action": "announce_post", "at": now_utc})
+    published_state[article_id] = state_entry
+    save_published_state(published_state)
+
+    return {
+        "forum_created": created_forum,
+        "announcement_posted": posted_announce,
+        "announcement_crossposted": crossposted_announce,
+        "thread_id": thread_id,
+        "starter_message_id": starter_message_id,
+        "announce_message_id": announce_message_id,
+        "announce_channel_id": announce_channel_id,
+        "crosspost_error": crosspost_error,
+        "previous_announce": bool(announce_info),
+    }
 
 
 def verify_ip(request: Request):
@@ -306,6 +851,7 @@ def normalize_article_payload(
 
     image = frontmatter.get("image") if isinstance(frontmatter.get("image"), dict) else {}
     versions = load_article_versions(article_path, article_id)
+    state_entry = published_state.get(article_id) if isinstance(published_state.get(article_id), dict) else {}
     payload = {
         "id": article_id,
         "filename": filename,
@@ -329,7 +875,9 @@ def normalize_article_payload(
         "body_markdown": body_markdown,
         "created_at": str(frontmatter.get("created_at") or "").strip(),
         "updated_at": str(frontmatter.get("updated_at") or "").strip(),
-        "is_live_public": article_id in published_state or status == "published",
+        "discord": normalize_discord_state(state_entry.get("discord")),
+        "recorded_at": str(state_entry.get("recorded_at") or "").strip(),
+        "is_live_public": article_is_live_public(status, article_id, published_state),
         "version_count": len(versions),
     }
 
@@ -372,6 +920,8 @@ def build_admin_article_summary(article: dict[str, Any]) -> dict[str, Any]:
         "created_at": article["created_at"],
         "version_count": article["version_count"],
         "is_live_public": article["is_live_public"],
+        "has_discord_forum": bool(article.get("discord", {}).get("forum")),
+        "has_discord_announce": bool(article.get("discord", {}).get("announce")),
     }
 
 
@@ -462,12 +1012,10 @@ def save_uploaded_image(article_id: str, image: Optional[UploadFile], current_sr
             shutil.copyfileobj(image.file, buffer)
         image_ref = f"/assets/images/{img_name}"
     return image_ref
-
-
-templates = Jinja2Templates(directory="/app/templates")
+templates = Jinja2Templates(directory=str(APP_ROOT / "templates"))
 
 if ASSETS_ROOT.exists():
-    app.mount("/assets", StaticFiles(directory="/app/assets"), name="assets")
+    app.mount("/assets", StaticFiles(directory=str(ASSETS_ROOT)), name="assets")
 
 
 @app.get("/api/config")
@@ -559,6 +1107,7 @@ async def delete_article(request: Request, filepath: str) -> JSONResponse:
         )
 
     snapshot = None
+    was_live_public = bool(article.get("is_live_public"))
     if article["status"] == "published" or has_been_published(article["id"], published_state):
         snapshot = create_version_snapshot(article_path, article["id"], "deleted")
 
@@ -566,6 +1115,15 @@ async def delete_article(request: Request, filepath: str) -> JSONResponse:
     article["status"] = "deleted"
     article["updated_at"] = utc_now_iso()
     write_article(article_path, article)
+
+    state_changed = remove_live_state_entry(article["id"], published_state)
+    if state_changed:
+        save_published_state(published_state)
+
+    removed_output = remove_public_output(article)
+    if was_live_public or state_changed or removed_output:
+        refresh_public_site(published_state)
+
     append_article_log(
         article["id"],
         {
@@ -574,7 +1132,7 @@ async def delete_article(request: Request, filepath: str) -> JSONResponse:
             "from_status": previous_status,
             "to_status": "deleted",
             "version_snapshot_created": bool(snapshot),
-            "summary": "Article moved to deleted state.",
+            "summary": "Article moved to deleted state and removed from public output.",
         },
     )
 
@@ -601,6 +1159,15 @@ async def restore_article(request: Request, filepath: str) -> JSONResponse:
     article["status"] = "draft"
     article["updated_at"] = utc_now_iso()
     write_article(article_path, article)
+
+    state_changed = remove_live_state_entry(article["id"], published_state)
+    if state_changed:
+        save_published_state(published_state)
+
+    removed_output = remove_public_output(article)
+    if state_changed or removed_output:
+        refresh_public_site(published_state)
+
     append_article_log(
         article["id"],
         {
@@ -609,7 +1176,7 @@ async def restore_article(request: Request, filepath: str) -> JSONResponse:
             "from_status": "deleted",
             "to_status": "draft",
             "version_snapshot_created": False,
-            "summary": "Deleted article restored to draft.",
+            "summary": "Deleted article restored to draft and kept off the public site.",
         },
     )
 
@@ -653,6 +1220,12 @@ async def handle_publish(
     failed_step = "initializing article submission"
     save_path: Optional[Path] = None
     article_id: Optional[str] = None
+    workflow: dict[str, Any] = {
+        "internal_build": False,
+        "public_refresh": None,
+        "removed_public_output": "",
+        "state_changed": False,
+    }
 
     try:
         failed_step = "loading published state"
@@ -747,7 +1320,46 @@ async def handle_publish(
         failed_step = "writing article file"
         write_article(save_path, article)
 
+        was_live_public = bool(current_article.get("is_live_public")) if current_article else False
+        failed_step = "updating live state"
+        if article["status"] == "published":
+            workflow["state_changed"] = ensure_live_state_entry(article, published_state)
+            if workflow["state_changed"]:
+                save_published_state(published_state)
+        else:
+            workflow["state_changed"] = remove_live_state_entry(article["id"], published_state)
+            if workflow["state_changed"]:
+                save_published_state(published_state)
+
+        if action == "save_build":
+            failed_step = "building internal article output"
+            build_single_article(save_path, "internal")
+            workflow["internal_build"] = True
+
+        if article["status"] == "published":
+            failed_step = "rebuilding public site"
+            workflow["public_refresh"] = refresh_public_site(published_state)
+        elif was_live_public or workflow["state_changed"]:
+            failed_step = "removing stale public output"
+            workflow["removed_public_output"] = remove_public_output(article)
+            failed_step = "rebuilding public site"
+            workflow["public_refresh"] = refresh_public_site(published_state)
+
         previous_status = current_article["status"] if current_article else None
+        summary_parts = [f"Article saved via {action}."]
+        if workflow["internal_build"]:
+            summary_parts.append("Internal build refreshed.")
+        if workflow["state_changed"] and article["status"] == "published":
+            summary_parts.append("Live publish state updated.")
+        elif workflow["state_changed"]:
+            summary_parts.append("Live publish state cleared.")
+        if workflow["removed_public_output"]:
+            summary_parts.append("Removed stale public output.")
+        if isinstance(workflow["public_refresh"], dict):
+            summary_parts.append(
+                f"Public site rebuilt ({workflow['public_refresh'].get('built_articles', 0)} article outputs, {workflow['public_refresh'].get('removed_outputs', 0)} stale outputs removed)."
+            )
+
         failed_step = "writing article activity log"
         append_article_log(
             article["id"],
@@ -757,17 +1369,26 @@ async def handle_publish(
                 "from_status": previous_status,
                 "to_status": article["status"],
                 "version_snapshot_created": bool(version_snapshot),
-                "summary": f"Article saved via {action}.",
+                "summary": " ".join(summary_parts),
             },
         )
 
         failed_step = "reloading saved article"
         saved = load_article(save_path, published_state=published_state, include_details=True)
+        message_map = {
+            "save_draft": "Draft saved.",
+            "save_build": "Article saved and internal build refreshed.",
+            "schedule": "Article scheduled.",
+            "save_scheduled_changes": "Scheduled article updated.",
+            "publish_now": "Article published and public site rebuilt.",
+            "update_published": "Live article updated and public site rebuilt.",
+        }
         return JSONResponse(
             {
                 "status": "ok",
-                "message": "Article saved",
+                "message": message_map.get(action, "Article saved."),
                 "article": saved,
+                "workflow": workflow,
                 "version_snapshot": version_snapshot or {"created": False},
             }
         )
@@ -789,6 +1410,95 @@ async def handle_publish(
                     "save_path": str(save_path) if save_path else "",
                     "article_id": article_id or "",
                     "log_path": str(log_path_for(article_id)) if article_id else str(ARTICLE_LOG_ROOT),
+                },
+            },
+        )
+
+
+@app.post("/admin/articles/{filepath:path}/workflow")
+async def run_article_workflow(
+    request: Request,
+    filepath: str,
+    command: str = Form(...),
+) -> JSONResponse:
+    verify_ip(request)
+
+    if command != "announce_discord":
+        return JSONResponse(
+            status_code=400,
+            content={"status": "error", "message": "Unknown workflow command."},
+        )
+
+    failed_step = "loading article"
+    try:
+        published_state = load_published_state()
+        article_path = ensure_content_path(CONTENT_ROOT / filepath)
+        article = load_article(article_path, published_state=published_state, include_details=True)
+
+        if not article.get("is_live_public") and article.get("status") != "published":
+            return JSONResponse(
+                status_code=400,
+                content={"status": "error", "message": "Only live published articles can be announced."},
+            )
+
+        failed_step = "running Discord announcement"
+        announce_output = trigger_discord_announce(article, published_state, force=True)
+
+        failed_step = "reloading article state"
+        published_state = load_published_state()
+        updated = load_article(article_path, published_state=published_state, include_details=True)
+
+        workflow_message = "Discord announcement completed."
+        workflow_summary = "Discord announcement triggered from the admin panel."
+        if announce_output.get("crosspost_error"):
+            workflow_message = "Discord announcement posted, but crosspost failed and can be retried."
+            workflow_summary = f"Discord announcement posted, but crosspost failed: {announce_output['crosspost_error']}"
+        elif announce_output.get("announcement_crossposted"):
+            workflow_message = "Discord announcement posted and crossposted."
+            workflow_summary = "Discord announcement posted and crossposted from the admin panel."
+        elif announce_output.get("previous_announce"):
+            workflow_message = "Discord announcement already posted and crossposted."
+            workflow_summary = "Discord announcement was already posted and crossposted."
+
+        failed_step = "writing workflow activity log"
+        append_article_log(
+            updated["id"],
+            {
+                "timestamp": utc_now_iso(),
+                "action": command,
+                "from_status": updated["status"],
+                "to_status": updated["status"],
+                "version_snapshot_created": False,
+                "summary": workflow_summary,
+            },
+        )
+        updated = load_article(article_path, published_state=published_state, include_details=True)
+
+        return JSONResponse(
+            {
+                "status": "ok",
+                "message": workflow_message,
+                "article": updated,
+                "workflow": {
+                    "command": command,
+                    "output": announce_output,
+                },
+            }
+        )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": "error",
+                "message": "Article workflow failed.",
+                "failed_step": failed_step,
+                "error_type": exc.__class__.__name__,
+                "detail": str(exc) or repr(exc),
+                "context": {
+                    "command": command,
+                    "filepath": filepath,
                 },
             },
         )
