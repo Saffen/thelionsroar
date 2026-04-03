@@ -126,7 +126,7 @@ a:hover { text-decoration: underline; }
   width: min(680px, 100%);
   height: auto;
   display: block;
-  margin-bottom: -48px;
+  
 }
 
 .lion-icon {
@@ -155,9 +155,6 @@ a:hover { text-decoration: underline; }
 
 }
 
-:root[data-theme="immersive"] .brand-text svg {
-  margin-bottom: -48px;
-}
 
 .tagline {
   width: 100%;
@@ -523,7 +520,7 @@ a:hover { text-decoration: underline; }
   .tagline,
   :root[data-theme="immersive"] .tagline {
     text-align: center;
-    margin-top: -48px;
+    margin-top: 0;
   }
   .nav-inner {
     flex-wrap: wrap;
