@@ -243,7 +243,7 @@ def base_context(site_base_url: str) -> dict[str, Any]:
     }
 
 
-def build_news_article_context(frontmatter: dict[str, Any], md_body: str, body_html: str, site_base_url: str, md_path: Path) -> dict[str, Any]:
+def build_news_article_context(frontmatter: dict[str, Any], md_body: str, body_html: str, site_base_url: str, md_path: Path, mode: str = "public") -> dict[str, Any]:
     authors = frontmatter.get("authors") or []
     if isinstance(authors, str):
         authors = [authors]
@@ -272,15 +272,15 @@ def build_news_article_context(frontmatter: dict[str, Any], md_body: str, body_h
     article["word_count"] = word_count
     article["reading_time_minutes"] = reading_minutes
     article["url"] = output_path_to_url(
-        compute_output_path(frontmatter, md_path, mode="public"),
-        PUBLIC_BUILD_DIR,
+        compute_output_path(frontmatter, md_path, mode=mode),
+        PUBLIC_BUILD_DIR if mode == "public" else INTERNAL_BUILD_DIR,
         site_base_url,
     )
 
     home_listing = load_home_listing_settings()
     article_id = str(frontmatter.get("id") or "").strip() or str(article.get("id") or "").strip()
     article_recent_articles = []
-    for recent_article in collect_public_articles(site_base_url):
+    for recent_article in collect_articles(site_base_url, mode=mode):
         if article_id and str(recent_article.get("id") or "") == article_id:
             continue
         article_recent_articles.append(recent_article)
@@ -680,6 +680,13 @@ def article_is_public(frontmatter: dict[str, Any], article_id: str, published_st
     return status == "published"
 
 
+def article_is_internal(frontmatter: dict[str, Any], article_id: str, published_state: dict[str, Any]) -> bool:
+    status = str(frontmatter.get("status") or "draft").strip().lower()
+    if status in {"build", "scheduled", "published"}:
+        return True
+    return article_is_public(frontmatter, article_id, published_state)
+
+
 def compute_output_path(frontmatter: dict[str, Any], md_path: Path, mode: str) -> Path:
     explicit = str(frontmatter.get("output_path") or "").strip().lstrip("/")
     root = PUBLIC_BUILD_DIR if mode == "public" else INTERNAL_BUILD_DIR
@@ -702,7 +709,7 @@ def compute_output_path(frontmatter: dict[str, Any], md_path: Path, mode: str) -
     return INTERNAL_BUILD_DIR / section / year / slug / "index.html"
 
 
-def build_article_summary(frontmatter: dict[str, Any], md_body: str, md_path: Path, site_base_url: str) -> dict[str, Any]:
+def build_article_summary(frontmatter: dict[str, Any], md_body: str, md_path: Path, site_base_url: str, mode: str = "public") -> dict[str, Any]:
     authors = frontmatter.get("authors") or []
     if isinstance(authors, str):
         authors = [authors]
@@ -713,7 +720,8 @@ def build_article_summary(frontmatter: dict[str, Any], md_body: str, md_path: Pa
     plain_text = strip_markdown_to_text(md_body)
     teaser = str(frontmatter.get("teaser") or "").strip() or make_excerpt(plain_text)
     image = frontmatter.get("image") if isinstance(frontmatter.get("image"), dict) else {}
-    output_path = compute_output_path(frontmatter, md_path, mode="public")
+    output_root = PUBLIC_BUILD_DIR if mode == "public" else INTERNAL_BUILD_DIR
+    output_path = compute_output_path(frontmatter, md_path, mode=mode)
     word_count, reading_minutes = estimate_reading_time_minutes(plain_text)
 
     return {
@@ -730,26 +738,34 @@ def build_article_summary(frontmatter: dict[str, Any], md_body: str, md_path: Pa
             "credit": str(image.get("credit") or "").strip(),
             "source": str(image.get("source") or "").strip(),
         },
-        "url": output_path_to_url(output_path, PUBLIC_BUILD_DIR, site_base_url),
+        "url": output_path_to_url(output_path, output_root, site_base_url),
         "word_count": word_count,
         "reading_time_minutes": reading_minutes,
         "_sort_timestamp": publish_dt.timestamp() if publish_dt else 0,
     }
 
 
-def collect_public_articles(site_base_url: str) -> list[dict[str, Any]]:
+def collect_articles(site_base_url: str, mode: str = "public") -> list[dict[str, Any]]:
     published_state = load_published_state()
     articles: list[dict[str, Any]] = []
 
     for md_path in iter_article_files(CONTENT_NEWS_DIR):
         frontmatter, md_body, _ = load_markdown_with_frontmatter(md_path)
         article_id = str(frontmatter.get("id") or md_path.stem).strip()
-        if not article_is_public(frontmatter, article_id, published_state):
+        if mode == "internal":
+            include_article = article_is_internal(frontmatter, article_id, published_state)
+        else:
+            include_article = article_is_public(frontmatter, article_id, published_state)
+        if not include_article:
             continue
-        articles.append(build_article_summary(frontmatter, md_body, md_path, site_base_url))
+        articles.append(build_article_summary(frontmatter, md_body, md_path, site_base_url, mode=mode))
 
     articles.sort(key=lambda article: (article.get("_sort_timestamp", 0), article.get("id", "")), reverse=True)
     return articles
+
+
+def collect_public_articles(site_base_url: str) -> list[dict[str, Any]]:
+    return collect_articles(site_base_url, mode="public")
 
 
 def load_home_listing_settings() -> dict[str, Any]:
@@ -843,10 +859,10 @@ def build_home_context(frontmatter: dict[str, Any], site_base_url: str) -> dict[
         "_sort_timestamp": 0,
     }
 
-    secondary_articles = articles[1 : 1 + secondary_count]
-    remaining_articles = articles[1 + secondary_count :]
-    recent_articles = select_recent_articles(articles, secondary_count, recent_count)
-    archive_articles = remaining_articles[recent_count : recent_count + archive_count] if remaining_articles else []
+    secondary_articles = []
+    recent_articles = select_recent_articles(articles, 0, recent_count)
+    archive_pool = articles[1 + recent_count :]
+    archive_articles = archive_pool[:archive_count] if archive_pool else []
 
     home = {
         "kicker": str(frontmatter.get("kicker") or "The Latest Edition").strip(),
@@ -960,7 +976,7 @@ def build(md_path: Path, mode: str = "public") -> Path:
         raise ValueError(f"Unknown template '{template_key}'. Known: {known}")
 
     if template_key == "news_article":
-        ctx = build_news_article_context(frontmatter, md_body, body_html, site_base_url, md_path)
+        ctx = build_news_article_context(frontmatter, md_body, body_html, site_base_url, md_path, mode=mode)
     elif template_key == "page":
         ctx = build_page_context(frontmatter, body_html, site_base_url)
     elif template_key == "games_landing":

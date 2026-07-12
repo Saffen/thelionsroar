@@ -1,0 +1,58 @@
+[
+  {
+    "timestamp": "2026-05-02T23:37:41Z",
+    "action": "announce_discord",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Discord announcement posted and crossposted from the admin panel."
+  },
+  {
+    "timestamp": "2026-05-02T23:36:55Z",
+    "action": "publish_now",
+    "from_status": "build",
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Article saved via publish_now. Live publish state updated. Public site rebuilt (9 article outputs, 0 stale outputs removed)."
+  },
+  {
+    "timestamp": "2026-05-02T23:36:52Z",
+    "action": "save_build",
+    "from_status": "build",
+    "to_status": "build",
+    "version_snapshot_created": false,
+    "summary": "Article saved via save_build. Internal build refreshed."
+  },
+  {
+    "timestamp": "2026-05-02T20:33:21Z",
+    "action": "save_build",
+    "from_status": "build",
+    "to_status": "build",
+    "version_snapshot_created": false,
+    "summary": "Article saved via save_build. Internal build refreshed."
+  },
+  {
+    "timestamp": "2026-05-02T20:22:46Z",
+    "action": "save_build",
+    "from_status": "build",
+    "to_status": "build",
+    "version_snapshot_created": false,
+    "summary": "Article saved via save_build. Internal build refreshed."
+  },
+  {
+    "timestamp": "2026-05-02T20:22:39Z",
+    "action": "save_build",
+    "from_status": "build",
+    "to_status": "build",
+    "version_snapshot_created": false,
+    "summary": "Article saved via save_build. Internal build refreshed."
+  },
+  {
+    "timestamp": "2026-05-02T19:48:50Z",
+    "action": "save_build",
+    "from_status": null,
+    "to_status": "build",
+    "version_snapshot_created": false,
+    "summary": "Article saved via save_build. Internal build refreshed."
+  }
+]

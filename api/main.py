@@ -5,15 +5,18 @@ import subprocess
 import sys
 import urllib.parse
 import urllib.request
-from datetime import datetime, timezone
+from collections import Counter, defaultdict
+from datetime import datetime, timedelta, timezone
+import glob
 from pathlib import Path
+import re
 from typing import Any, Optional
 
 import markdown
 import yaml
 from fastapi import FastAPI, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from slugify import slugify
@@ -31,10 +34,13 @@ SITE_CONFIG_FILE = APP_ROOT / 'content' / 'config.yaml'
 ARTICLE_LOG_ROOT = STATE_ROOT / "article-log"
 PUBLISHED_STATE_FILE = STATE_ROOT / "published.json"
 PUBLIC_BUILD_ROOT = APP_ROOT / "build" / "public"
+INTERNAL_BUILD_ROOT = APP_ROOT / "build" / "internal"
 SCRIPTS_ROOT = APP_ROOT / "scripts"
 BUILD_SCRIPT = SCRIPTS_ROOT / "build.py"
 BUILD_PAGES_SCRIPT = SCRIPTS_ROOT / "build_pages.py"
 ANNOUNCE_DISCORD_SCRIPT = SCRIPTS_ROOT / "announce_discord.py"
+PDF_EXPORT_SCRIPT = SCRIPTS_ROOT / "export_pdf.py"
+PDF_OUTPUT_ROOT = STATE_ROOT / "article-pdf"
 ALLOWED_STATUSES = {"draft", "build", "scheduled", "published", "deleted"}
 ACTION_TO_STATUS = {
     "save_draft": "draft",
@@ -44,6 +50,32 @@ ACTION_TO_STATUS = {
     "update_published": "published",
     "save_scheduled_changes": "scheduled",
 }
+DEFAULT_TRAFFIC_WINDOW_DAYS = 30
+MAX_TRAFFIC_WINDOW_DAYS = 90
+DEFAULT_TRAFFIC_TOP_LIMIT = 25
+MAX_TRAFFIC_TOP_LIMIT = 250
+MAX_TRAFFIC_GRAPH_LIMIT = 50
+MAX_TRAFFIC_LOG_LINES = 200000
+TRAFFIC_STATIC_PAGES_ROOT = APP_ROOT / "content" / "pages"
+TRAFFIC_PAGE_TYPES = {"all", "articles", "static", "other"}
+PAGEVIEW_EXCLUDED_PREFIXES = ("/api/", "/admin", "/assets/")
+PAGEVIEW_EXCLUDED_EXTENSIONS = {".avif", ".bmp", ".css", ".csv", ".gif", ".ico", ".jpeg", ".jpg", ".js", ".json", ".map", ".mjs", ".mp3", ".ogg", ".pdf", ".png", ".rar", ".svg", ".txt", ".wav", ".webmanifest", ".webp", ".woff", ".woff2", ".xml", ".zip"}
+NGINX_ACCESS_LOG_PATTERN = re.compile(
+    r'^(?P<remote_addr>\S+) \S+ \S+ '
+    r'\[(?P<time_local>[^\]]+)\] '
+    r'"(?P<request>[^"]*)" '
+    r'(?P<status>\d{3}) \S+ '
+    r'"(?P<referrer>[^"]*)" '
+    r'"(?P<user_agent>[^"]*)"(?: .*)?$'
+)
+BOT_USER_AGENT_PATTERN = re.compile(
+    r"bot|crawl|crawler|spider|slurp|bingpreview|googleother|adsbot|mediapartners|"
+    r"duckduckbot|baiduspider|yandex|semrush|ahrefs|mj12bot|dotbot|petalbot|"
+    r"facebookexternalhit|slackbot|discordbot|telegrambot|whatsapp|preview|"
+    r"curl|wget|python-requests|python-urllib|aiohttp|axios|go-http-client|"
+    r"headless|lighthouse|monitor|uptime|feedfetcher",
+    re.IGNORECASE,
+)
 
 app = FastAPI(title="The Lion's Roar API", redirect_slashes=False)
 
@@ -87,6 +119,394 @@ def normalize_shared_links(value: Any, default: list[dict[str, str]]) -> list[di
             out.append({"label": label, "href": href})
     return out
 
+
+def normalize_string_list(value: Any) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, list):
+        items = value
+    else:
+        items = re.split(r"[\r\n,]+", str(value))
+    return [os.path.expandvars(os.path.expanduser(str(item).strip())) for item in items if str(item).strip()]
+
+
+def load_traffic_log_patterns() -> list[str]:
+    site_config = load_site_config()
+    analytics = site_config.get("analytics") if isinstance(site_config.get("analytics"), dict) else {}
+    configured = normalize_string_list(analytics.get("nginx_logs"))
+    if configured:
+        return configured
+    return normalize_string_list(os.getenv("NGINX_ACCESS_LOGS") or os.getenv("NGINX_ACCESS_LOG"))
+
+
+def iter_log_lines_reverse(log_file: Path, chunk_size: int = 64 * 1024):
+    # Tail log files from the end so capped scans still include the newest requests.
+    with open(log_file, "rb") as handle:
+        handle.seek(0, os.SEEK_END)
+        position = handle.tell()
+        buffer = b""
+
+        while position > 0:
+            read_size = min(chunk_size, position)
+            position -= read_size
+            handle.seek(position)
+            buffer = handle.read(read_size) + buffer
+            lines = buffer.split(b"\n")
+            buffer = lines[0]
+
+            for raw_line in reversed(lines[1:]):
+                yield raw_line.decode("utf-8", errors="replace").rstrip("\r")
+
+        if buffer:
+            yield buffer.decode("utf-8", errors="replace").rstrip("\r")
+
+
+def normalize_traffic_path(path_value: str) -> str:
+    normalized = "/" + str(path_value or "/").strip().split("?", 1)[0].lstrip("/")
+    if normalized != "/" and not Path(normalized).suffix:
+        return normalized.rstrip("/") + "/"
+    return normalized
+
+
+def traffic_static_page_paths() -> set[str]:
+    paths = {"/"}
+    if not TRAFFIC_STATIC_PAGES_ROOT.exists():
+        return paths
+    for page_file in TRAFFIC_STATIC_PAGES_ROOT.rglob("*.md"):
+        try:
+            relative = page_file.relative_to(TRAFFIC_STATIC_PAGES_ROOT)
+        except ValueError:
+            continue
+        if any(part.startswith(("_", ".")) for part in relative.parts):
+            continue
+        route_parts = list(relative.with_suffix("").parts)
+        if route_parts == ["home"]:
+            paths.add("/")
+            continue
+        if route_parts and route_parts[-1] == "index":
+            route_parts = route_parts[:-1]
+        route = "/" + "/".join(route_parts).strip("/")
+        paths.add(normalize_traffic_path(route or "/"))
+    return paths
+
+
+def traffic_article_paths() -> set[str]:
+    paths: set[str] = set()
+    published_state = load_published_state()
+    try:
+        article_files = iter_article_source_files()
+    except Exception:
+        return paths
+    for article_file in article_files:
+        try:
+            article = load_article(article_file, published_state=published_state, include_details=False)
+        except Exception:
+            continue
+        section = str(article.get("section") or "news").strip() or "news"
+        year = parse_publish_year_from_article(article)
+        slug = str(article.get("id") or "").strip()
+        if slug:
+            paths.add(normalize_traffic_path(f"/{section}/{year}/{slug}/"))
+    return paths
+
+
+def traffic_page_type(path_value: str, article_paths: set[str], static_paths: set[str]) -> str:
+    normalized = normalize_traffic_path(path_value)
+    if normalized in article_paths:
+        return "articles"
+    if normalized in static_paths:
+        return "static"
+    return "other"
+
+
+def build_traffic_report(window_days: int = DEFAULT_TRAFFIC_WINDOW_DAYS, top_limit: int = DEFAULT_TRAFFIC_TOP_LIMIT) -> dict[str, Any]:
+    def is_pageview_candidate(method: str, path: str, status: int) -> bool:
+        if method not in {"GET", "HEAD"} or status >= 400:
+            return False
+        lower_path = (path or "/").lower()
+        if any(lower_path.startswith(prefix) for prefix in PAGEVIEW_EXCLUDED_PREFIXES) or "/assets/" in lower_path:
+            return False
+        return Path(lower_path).suffix not in PAGEVIEW_EXCLUDED_EXTENSIONS
+
+    def is_bot_user_agent(user_agent: str) -> bool:
+        normalized = str(user_agent or "").strip().lower()
+        if not normalized or normalized == "-":
+            return False
+        return bool(BOT_USER_AGENT_PATTERN.search(normalized))
+
+    def empty_period() -> dict[str, Any]:
+        return {
+            "requests": 0,
+            "pageviews": 0,
+            "bot_pageviews": 0,
+            "bot_requests": 0,
+            "request_ips": set(),
+            "page_ips": set(),
+            "bot_page_ips": set(),
+            "latest_request_at": "",
+        }
+
+    def summarize(period: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "requests": period["requests"],
+            "pageviews": period["pageviews"],
+            "bot_pageviews": period["bot_pageviews"],
+            "bot_requests": period["bot_requests"],
+            "unique_request_ips": len(period["request_ips"]),
+            "unique_page_ips": len(period["page_ips"]),
+            "unique_bot_ips": len(period["bot_page_ips"]),
+            "latest_request_at": period["latest_request_at"],
+        }
+
+    def serialize_top_items(
+        items: dict[str, dict[str, Any]],
+        series_items: dict[str, Counter[str]],
+        bucket_labels: list[str],
+        bucket_key_name: str,
+        limit: int,
+    ) -> list[dict[str, Any]]:
+        serialized: list[dict[str, Any]] = []
+        for key, info in sorted(items.items(), key=lambda item: (item[1]["hits"], len(item[1]["ips"]), item[1]["last_seen"], item[0]), reverse=True)[:limit]:
+            page_series = series_items.get(key, Counter())
+            serialized.append(
+                {
+                    "path": key,
+                    "hits": info["hits"],
+                    "unique_ips": len(info["ips"]),
+                    "last_seen": info["last_seen"],
+                    "page_type": info.get("page_type") or "other",
+                    "series": [
+                        {bucket_key_name: bucket_label, "hits": page_series.get(bucket_label, 0)}
+                        for bucket_label in bucket_labels
+                    ],
+                }
+            )
+        return serialized
+
+    def serialize_page_items(items: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+        return [
+            {
+                "path": key,
+                "hits": info["hits"],
+                "unique_ips": len(info["ips"]),
+                "last_seen": info["last_seen"],
+                "page_type": info.get("page_type") or "other",
+            }
+            for key, info in sorted(items.items(), key=lambda item: (item[1]["hits"], len(item[1]["ips"]), item[1]["last_seen"], item[0]), reverse=True)
+        ]
+
+    window_days = max(1, min(window_days, MAX_TRAFFIC_WINDOW_DAYS))
+    top_limit = max(1, min(top_limit, MAX_TRAFFIC_TOP_LIMIT))
+    graph_limit = min(top_limit, MAX_TRAFFIC_GRAPH_LIMIT)
+    window_label = f"{window_days}d"
+    series_granularity = "hour" if window_days <= 2 else "day"
+    patterns = load_traffic_log_patterns()
+    if not patterns:
+        return {
+            "available": False,
+            "window_days": window_days,
+            "window_label": window_label,
+            "message": "Traffic stats are not configured yet. Set analytics.nginx_logs in content/config.yaml or NGINX_ACCESS_LOGS in the API environment.",
+            "source": {"configured_patterns": [], "matched_files": [], "lines_processed": 0, "lines_parsed": 0, "ignored_lines": 0, "truncated": False, "bot_requests_filtered": 0},
+        }
+
+    files: list[Path] = []
+    seen: set[str] = set()
+    for pattern in patterns:
+        matches = glob.glob(pattern) or [pattern]
+        for match_path in matches:
+            path_item = Path(match_path)
+            try:
+                if not path_item.exists() or not path_item.is_file():
+                    continue
+                resolved = str(path_item.resolve())
+            except OSError:
+                continue
+            if resolved in seen:
+                continue
+            seen.add(resolved)
+            files.append(path_item)
+    files.sort(key=lambda item: item.stat().st_mtime if item.exists() else 0, reverse=True)
+    if not files:
+        return {
+            "available": False,
+            "window_days": window_days,
+            "window_label": window_label,
+            "message": "Traffic stats are configured, but no matching nginx log files were found.",
+            "source": {"configured_patterns": patterns, "matched_files": [], "lines_processed": 0, "lines_parsed": 0, "ignored_lines": 0, "truncated": False, "bot_requests_filtered": 0},
+        }
+
+    now_utc = datetime.now(timezone.utc)
+    starts = {"24h": now_utc - timedelta(hours=24), "7d": now_utc - timedelta(days=7), window_label: now_utc - timedelta(days=window_days)}
+    oldest_start = min(starts.values())
+    selected_start = starts[window_label]
+    article_paths = traffic_article_paths()
+    static_paths = traffic_static_page_paths()
+    periods = {label: empty_period() for label in starts}
+    top_pages_humans: dict[str, dict[str, Any]] = defaultdict(lambda: {"hits": 0, "ips": set(), "last_seen": ""})
+    top_pages_bots: dict[str, dict[str, Any]] = defaultdict(lambda: {"hits": 0, "ips": set(), "last_seen": ""})
+    page_series_humans: dict[str, Counter[str]] = defaultdict(Counter)
+    page_series_bots: dict[str, Counter[str]] = defaultdict(Counter)
+    top_referrers_humans: Counter[str] = Counter()
+    top_referrers_bots: Counter[str] = Counter()
+    daily: dict[str, dict[str, Any]] = defaultdict(lambda: {"requests": 0, "pageviews": 0, "bot_pageviews": 0, "page_ips": set(), "bot_page_ips": set(), "bot_requests": 0})
+    status_counts: Counter[int] = Counter()
+    lines_processed = 0
+    lines_parsed = 0
+    ignored_lines = 0
+    truncated = False
+    bot_requests_filtered = 0
+
+    for log_file in files:
+        try:
+            for line in iter_log_lines_reverse(log_file):
+                if lines_processed >= MAX_TRAFFIC_LOG_LINES:
+                    truncated = True
+                    break
+                lines_processed += 1
+                match = NGINX_ACCESS_LOG_PATTERN.match(line.strip())
+                if not match:
+                    ignored_lines += 1
+                    continue
+                request_parts = match.group("request").split()
+                if len(request_parts) < 2:
+                    ignored_lines += 1
+                    continue
+                try:
+                    timestamp = datetime.strptime(match.group("time_local"), "%d/%b/%Y:%H:%M:%S %z").astimezone(timezone.utc)
+                except ValueError:
+                    ignored_lines += 1
+                    continue
+                if timestamp < oldest_start:
+                    break
+                lines_parsed += 1
+                method = request_parts[0].upper()
+                path_value = normalize_traffic_path(urllib.parse.unquote(urllib.parse.urlsplit(request_parts[1]).path or "/") or "/")
+                status = int(match.group("status"))
+                ip = match.group("remote_addr")
+                referrer = match.group("referrer")
+                user_agent = match.group("user_agent")
+                referrer_host = ""
+                if referrer and referrer != "-":
+                    parsed_referrer = urllib.parse.urlsplit(referrer)
+                    referrer_host = (parsed_referrer.netloc or referrer).lower().removeprefix("www.")
+                pageview_candidate = is_pageview_candidate(method, path_value, status)
+                is_bot = is_bot_user_agent(user_agent)
+                human_pageview = pageview_candidate and not is_bot
+                bot_pageview = pageview_candidate and is_bot
+                page_type = traffic_page_type(path_value, article_paths, static_paths) if pageview_candidate else "other"
+                iso_ts = timestamp.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+                for label, start_at in starts.items():
+                    if timestamp < start_at:
+                        continue
+                    period = periods[label]
+                    period["requests"] += 1
+                    period["request_ips"].add(ip)
+                    if iso_ts > period["latest_request_at"]:
+                        period["latest_request_at"] = iso_ts
+                    if is_bot:
+                        period["bot_requests"] += 1
+                    if human_pageview:
+                        period["pageviews"] += 1
+                        period["page_ips"].add(ip)
+                    if bot_pageview:
+                        period["bot_pageviews"] += 1
+                        period["bot_page_ips"].add(ip)
+                if timestamp < selected_start:
+                    continue
+                status_counts[status] += 1
+                day_key = timestamp.strftime("%Y-%m-%d")
+                series_key = (
+                    timestamp.replace(minute=0, second=0, microsecond=0).strftime("%Y-%m-%dT%H:00Z")
+                    if series_granularity == "hour"
+                    else day_key
+                )
+                day = daily[day_key]
+                day["requests"] += 1
+                if is_bot:
+                    day["bot_requests"] += 1
+                if bot_pageview:
+                    bot_requests_filtered += 1
+                    day["bot_pageviews"] += 1
+                    day["bot_page_ips"].add(ip)
+                    page_series_bots[path_value][series_key] += 1
+                    page = top_pages_bots[path_value]
+                    page["hits"] += 1
+                    page["ips"].add(ip)
+                    page["page_type"] = page_type
+                    if iso_ts > page["last_seen"]:
+                        page["last_seen"] = iso_ts
+                    if referrer_host:
+                        top_referrers_bots[referrer_host] += 1
+                if not human_pageview:
+                    continue
+                day["pageviews"] += 1
+                day["page_ips"].add(ip)
+                page_series_humans[path_value][series_key] += 1
+                page = top_pages_humans[path_value]
+                page["hits"] += 1
+                page["ips"].add(ip)
+                page["page_type"] = page_type
+                if iso_ts > page["last_seen"]:
+                    page["last_seen"] = iso_ts
+                if referrer_host:
+                    top_referrers_humans[referrer_host] += 1
+        except OSError:
+            continue
+        if truncated:
+            break
+
+    if series_granularity == "hour":
+        bucket_key_name = "hour"
+        bucket_cursor = selected_start.replace(minute=0, second=0, microsecond=0)
+        bucket_end = now_utc.replace(minute=0, second=0, microsecond=0)
+        bucket_labels: list[str] = []
+        while bucket_cursor <= bucket_end:
+            bucket_labels.append(bucket_cursor.strftime("%Y-%m-%dT%H:00Z"))
+            bucket_cursor += timedelta(hours=1)
+    else:
+        bucket_key_name = "date"
+        bucket_cursor = selected_start.replace(hour=0, minute=0, second=0, microsecond=0)
+        bucket_end = now_utc.replace(hour=0, minute=0, second=0, microsecond=0)
+        bucket_labels = []
+        while bucket_cursor <= bucket_end:
+            bucket_labels.append(bucket_cursor.strftime("%Y-%m-%d"))
+            bucket_cursor += timedelta(days=1)
+
+    return {
+        "available": True,
+        "generated_at": utc_now_iso(),
+        "window_days": window_days,
+        "window_label": window_label,
+        "periods": {label: summarize(period) for label, period in periods.items()},
+        "series_granularity": series_granularity,
+        "top_pages": {
+            "humans": serialize_top_items(top_pages_humans, page_series_humans, bucket_labels, bucket_key_name, graph_limit),
+            "bots": serialize_top_items(top_pages_bots, page_series_bots, bucket_labels, bucket_key_name, graph_limit),
+        },
+        "pages": {
+            "humans": serialize_page_items(top_pages_humans),
+            "bots": serialize_page_items(top_pages_bots),
+        },
+        "top_referrers": {
+            "humans": [{"host": host, "hits": hits} for host, hits in top_referrers_humans.most_common(top_limit)],
+            "bots": [{"host": host, "hits": hits} for host, hits in top_referrers_bots.most_common(top_limit)],
+        },
+        "top_statuses": [{"status": str(code), "hits": hits} for code, hits in status_counts.most_common(8)],
+        "daily": [
+            {
+                "date": day,
+                "requests": info["requests"],
+                "pageviews": info["pageviews"],
+                "bot_pageviews": info["bot_pageviews"],
+                "bot_requests": info["bot_requests"],
+                "unique_page_ips": len(info["page_ips"]),
+                "unique_bot_ips": len(info["bot_page_ips"]),
+            }
+            for day, info in sorted(daily.items(), reverse=True)
+        ],
+        "source": {"configured_patterns": patterns, "matched_files": [str(path_item) for path_item in files], "lines_processed": lines_processed, "lines_parsed": lines_parsed, "ignored_lines": ignored_lines, "truncated": truncated, "bot_requests_filtered": bot_requests_filtered},
+    }
 
 def load_data() -> dict[str, Any]:
     if not DATA_FILE.exists():
@@ -228,6 +648,18 @@ def public_output_path_for_article(article: dict[str, Any]) -> Path:
     slug = str(article.get("id") or "untitled").strip() or "untitled"
     year = parse_publish_year_from_article(article)
     return PUBLIC_BUILD_ROOT / section / year / slug / "index.html"
+
+
+def internal_output_path_for_article(article: dict[str, Any]) -> Path:
+    section = str(article.get("section") or "news").strip() or "news"
+    slug = str(article.get("id") or "untitled").strip() or "untitled"
+    year = parse_publish_year_from_article(article)
+    return INTERNAL_BUILD_ROOT / section / year / slug / "index.html"
+
+
+def safe_download_name(value: str, fallback: str = "article") -> str:
+    name = slugify(str(value or "").strip()) or fallback
+    return f"{name}.pdf"
 
 
 def remove_public_output(article: dict[str, Any]) -> str:
@@ -1001,6 +1433,18 @@ def write_article(article_path: Path, article: dict[str, Any]) -> None:
     article_path.write_text(output, encoding="utf-8")
 
 
+def sync_asset_file_to_build(asset_path: Path) -> None:
+    try:
+        relative = asset_path.resolve().relative_to(ASSETS_ROOT.resolve())
+    except ValueError:
+        return
+
+    for build_root in (PUBLIC_BUILD_ROOT, APP_ROOT / "build" / "internal"):
+        target = build_root / "assets" / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(asset_path, target)
+
+
 def save_uploaded_image(article_id: str, image: Optional[UploadFile], current_src: str) -> str:
     image_ref = current_src
     if image and image.filename:
@@ -1010,6 +1454,7 @@ def save_uploaded_image(article_id: str, image: Optional[UploadFile], current_sr
         img_dest.parent.mkdir(parents=True, exist_ok=True)
         with open(img_dest, "wb") as buffer:
             shutil.copyfileobj(image.file, buffer)
+        sync_asset_file_to_build(img_dest)
         image_ref = f"/assets/images/{img_name}"
     return image_ref
 templates = Jinja2Templates(directory=str(APP_ROOT / "templates"))
@@ -1088,6 +1533,52 @@ async def get_article(request: Request, filepath: str) -> dict[str, Any]:
     verify_ip(request)
     published_state = load_published_state()
     return load_article(CONTENT_ROOT / filepath, published_state=published_state, include_details=True)
+
+
+@app.post("/admin/article-pdf")
+async def create_article_pdf(request: Request, filepath: str = Form(...)) -> FileResponse:
+    verify_ip(request)
+    published_state = load_published_state()
+    article_path = ensure_content_path(CONTENT_ROOT / filepath)
+    article = load_article(article_path, published_state=published_state, include_details=True)
+
+    try:
+        build_error = ""
+        try:
+            build_single_article(article_path, "internal")
+        except Exception as exc:
+            build_error = str(exc) or repr(exc)
+
+        html_path = internal_output_path_for_article(article)
+        if not html_path.exists():
+            detail = f"Internal build did not create {html_path}"
+            if build_error:
+                detail = f"{detail}. Build error: {build_error}"
+            raise RuntimeError(detail)
+
+        article_id = str(article.get("id") or article_path.stem).strip() or article_path.stem
+        output_path = PDF_OUTPUT_ROOT / f"{article_id}.pdf"
+        run_project_script(PDF_EXPORT_SCRIPT, str(html_path), "--out", str(output_path), "--theme", "immersive")
+        if not output_path.exists():
+            raise RuntimeError("PDF export completed without creating an output file.")
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc) or repr(exc)) from exc
+
+    return FileResponse(
+        output_path,
+        media_type="application/pdf",
+        filename=safe_download_name(str(article.get("title") or article.get("id") or article_path.stem)),
+    )
+
+
+@app.get("/admin/traffic")
+async def get_traffic_stats(
+    request: Request,
+    days: int = Query(DEFAULT_TRAFFIC_WINDOW_DAYS, ge=1, le=MAX_TRAFFIC_WINDOW_DAYS),
+    top: int = Query(DEFAULT_TRAFFIC_TOP_LIMIT, ge=1, le=MAX_TRAFFIC_TOP_LIMIT),
+) -> dict[str, Any]:
+    verify_ip(request)
+    return build_traffic_report(window_days=days, top_limit=top)
 
 
 @app.delete("/admin/articles/{filepath:path}")

@@ -1,0 +1,42 @@
+[
+  {
+    "timestamp": "2026-05-25T00:11:39Z",
+    "action": "announce_discord",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Discord announcement posted and crossposted from the admin panel."
+  },
+  {
+    "timestamp": "2026-05-25T00:10:46Z",
+    "action": "announce_discord",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Discord announcement was already posted and crossposted."
+  },
+  {
+    "timestamp": "2026-05-25T00:10:26Z",
+    "action": "announce_discord",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Discord announcement was already posted and crossposted."
+  },
+  {
+    "timestamp": "2026-05-25T00:08:06Z",
+    "action": "announce_discord",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Discord announcement posted and crossposted from the admin panel."
+  },
+  {
+    "timestamp": "2026-05-25T00:06:57Z",
+    "action": "publish_now",
+    "from_status": null,
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Article saved via publish_now. Live publish state updated. Public site rebuilt (16 article outputs, 0 stale outputs removed)."
+  }
+]

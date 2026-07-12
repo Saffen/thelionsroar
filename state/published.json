@@ -1,28 +1,678 @@
 {
+  "202603312250-healing-is-re-growth": {
+    "path": "2026/202603312250-healing-is-re-growth.md",
+    "title": "Healing is (re)growth",
+    "section": "news",
+    "publish_at": "31-03-2026 22:50",
+    "recorded_at": "2026-04-03T18:11:59Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1489688938116550657",
+        "starter_message_id": "1489688938116550657",
+        "posted_at": "2026-04-03T18:11:59Z"
+      },
+      "announce": {
+        "message_id": "1489688941333446686",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-04-03T18:11:59Z",
+        "crossposted_at": "2026-04-03T18:11:59Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-04-03T18:11:59Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-04-03T18:11:59Z"
+    }
+  },
   "202604012310-the-duskwood-duskwell": {
     "path": "2026/202604012310-the-duskwood-duskwell.md",
     "title": "The Duskwood Duskwell",
     "section": "news",
     "publish_at": "01-04-2026 23:10",
-    "recorded_at": "2026-04-02T23:09:50Z",
+    "recorded_at": "2026-04-03T18:12:20Z",
     "discord": {
       "forum": {
-        "thread_id": "1489401504212320459",
-        "starter_message_id": "1489401504212320459",
-        "posted_at": "2026-04-02T23:09:50Z"
+        "thread_id": "1489689026809168055",
+        "starter_message_id": "1489689026809168055",
+        "posted_at": "2026-04-03T18:12:20Z"
       },
       "announce": {
-        "message_id": "1489401505181339731",
-        "channel_id": "1489389644314312878",
-        "posted_at": "2026-04-02T23:09:50Z",
-        "crossposted_at": "2026-04-02T23:09:50Z",
+        "message_id": "1489689035235397754",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-04-03T18:12:20Z",
+        "crossposted_at": "2026-04-03T18:12:20Z",
         "crosspost_status": "crossposted",
-        "crosspost_attempted_at": "2026-04-02T23:09:50Z"
+        "crosspost_attempted_at": "2026-04-03T18:12:20Z"
       }
     },
     "discord_last_action": {
       "action": "announce_crosspost",
-      "at": "2026-04-02T23:09:50Z"
+      "at": "2026-04-03T18:12:20Z"
+    }
+  },
+  "202604032319-it-smiled-it-touched-it-popped": {
+    "path": "2026/202604032319-it-smiled-it-touched-it-popped.md",
+    "title": "It Smiled, It Touched, It Popped",
+    "section": "news",
+    "publish_at": "03-04-2026 23:19",
+    "recorded_at": "2026-04-03T22:24:31Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1489753133885296873",
+        "starter_message_id": "1489753133885296873",
+        "posted_at": "2026-04-03T22:27:05Z"
+      },
+      "announce": {
+        "message_id": "1489753150192881845",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-04-03T22:27:05Z",
+        "crossposted_at": "2026-04-03T22:27:05Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-04-03T22:27:05Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-04-03T22:27:05Z"
+    }
+  },
+  "202604041919-stormwind-ordered-quiet-evening-gets-explosion-instead": {
+    "path": "2026/202604041919-stormwind-ordered-quiet-evening-gets-explosion-instead.md",
+    "title": "Stormwind ordered Quiet Evening, Gets Explosion Instead",
+    "section": "news",
+    "publish_at": "04-04-2026 19:19",
+    "recorded_at": "2026-04-04T17:23:09Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1490039128967086272",
+        "starter_message_id": "1490039128967086272",
+        "posted_at": "2026-04-04T17:23:31Z"
+      },
+      "announce": {
+        "message_id": "1490039137464615084",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-04-04T17:23:31Z",
+        "crossposted_at": "2026-04-04T17:23:31Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-04-04T17:23:31Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-04-04T17:23:31Z"
+    }
+  },
+  "202604100130-of-owlcats-corruption-and-questionable-muffins": {
+    "path": "2026/202604100130-of-owlcats-corruption-and-questionable-muffins.md",
+    "title": "Of Owlcats, Corruption, and Questionable Muffins",
+    "section": "news",
+    "publish_at": "10-04-2026 01:30",
+    "recorded_at": "2026-04-10T01:01:29Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1491966392667345027",
+        "starter_message_id": "1491966392667345027",
+        "posted_at": "2026-04-10T01:01:47Z"
+      },
+      "announce": {
+        "message_id": "1491966400938639380",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-04-10T01:01:47Z",
+        "crossposted_at": "2026-04-10T01:01:47Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-04-10T01:01:47Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-04-10T01:01:47Z"
+    }
+  },
+  "202604241827-a-most-unfortunate-assignment-inside-boralus-cat-cafe": {
+    "path": "2026/202604241827-a-most-unfortunate-assignment-inside-boralus-cat-cafe.md",
+    "title": "A Most Unfortunate Assignment: Inside Boralus’ Cat Café",
+    "section": "news",
+    "publish_at": "24-04-2026 18:27",
+    "recorded_at": "2026-04-24T16:32:37Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1497278472635023482",
+        "starter_message_id": "1497278472635023482",
+        "posted_at": "2026-04-24T16:50:05Z"
+      },
+      "announce": {
+        "message_id": "1497278481325756446",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-04-24T16:50:05Z",
+        "crossposted_at": "2026-04-24T16:50:05Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-04-24T16:50:05Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-04-24T16:50:05Z"
+    }
+  },
+  "202604251805-when-the-law-cannot-act-others-did": {
+    "path": "2026/202604251805-when-the-law-cannot-act-others-did.md",
+    "title": "When the Law Cannot Act, Others Did",
+    "section": "news",
+    "publish_at": "25-04-2026 18:05",
+    "recorded_at": "2026-04-25T15:58:55Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1497628231283773520",
+        "starter_message_id": "1497628231283773520",
+        "posted_at": "2026-04-25T15:59:54Z"
+      },
+      "announce": {
+        "message_id": "1497628239550742670",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-04-25T15:59:54Z",
+        "crossposted_at": "2026-04-25T15:59:54Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-04-25T15:59:54Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-04-25T15:59:54Z"
+    }
+  },
+  "202604280136-ink-masks-and-misjudgement-a-violent-evening-behind-the-cathedral": {
+    "path": "2026/202604280136-ink-masks-and-misjudgement-a-violent-evening-behind-the-cathedral.md",
+    "title": "Ink, Masks, and Misjudgement: A Violent Evening Behind the Cathedral",
+    "section": "news",
+    "publish_at": "28-04-2026 01:36",
+    "recorded_at": "2026-04-27T23:52:01Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1498471869152624710",
+        "starter_message_id": "1498471869152624710",
+        "posted_at": "2026-04-27T23:52:13Z"
+      },
+      "announce": {
+        "message_id": "1498471878870958162",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-04-27T23:52:13Z",
+        "crossposted_at": "2026-04-27T23:52:13Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-04-27T23:52:13Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-04-27T23:52:13Z"
+    }
+  },
+  "202605022143-deadfest-day-one-loud-proud-and-quite-possibly-bad-for-the-furniture": {
+    "path": "2026/202605022143-deadfest-day-one-loud-proud-and-quite-possibly-bad-for-the-furniture.md",
+    "title": "Deadfest Day One: Loud, Proud, and Quite Possibly Bad for the Furniture",
+    "section": "news",
+    "publish_at": "02-05-2026 21:43",
+    "recorded_at": "2026-05-02T23:36:55Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1500280118067724289",
+        "starter_message_id": "1500280118067724289",
+        "posted_at": "2026-05-02T23:37:33Z"
+      },
+      "announce": {
+        "message_id": "1500280126661857423",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-05-02T23:37:33Z",
+        "crossposted_at": "2026-05-02T23:37:33Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-05-02T23:37:33Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-05-02T23:37:33Z"
+    }
+  },
+  "202605121831-masked-operatives-and-missing-warrants-chaos-at-the-pig-and-whistle": {
+    "path": "2026/202605121831-masked-operatives-and-missing-warrants-chaos-at-the-pig-and-whistle.md",
+    "title": "Masked Operatives and Missing Warrants: Chaos at the Pig and Whistle",
+    "section": "news",
+    "publish_at": "12-05-2026 18:31",
+    "recorded_at": "2026-05-12T16:37:38Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1503798380550422659",
+        "starter_message_id": "1503798380550422659",
+        "posted_at": "2026-05-12T16:37:52Z"
+      },
+      "announce": {
+        "message_id": "1503798388376735834",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-05-12T16:37:52Z",
+        "crossposted_at": "2026-05-12T16:37:52Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-05-12T16:37:52Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-05-12T16:37:52Z"
+    }
+  },
+  "202605132358-boralus-assembly-debates-stormwind-overreach-and-kul-tiran-defence": {
+    "path": "2026/202605132358-boralus-assembly-debates-stormwind-overreach-and-kul-tiran-defence.md",
+    "title": "Boralus Assembly Debates Stormwind Overreach and Kul Tiran Defence",
+    "section": "news",
+    "publish_at": "13-05-2026 23:58",
+    "recorded_at": "2026-05-13T22:16:51Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1504246143624810556",
+        "starter_message_id": "1504246143624810556",
+        "posted_at": "2026-05-13T22:17:07Z"
+      },
+      "announce": {
+        "message_id": "1504246151057113338",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-05-13T22:17:07Z",
+        "crossposted_at": "2026-05-13T22:17:07Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-05-13T22:17:07Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-05-13T22:17:07Z"
+    }
+  },
+  "202605162240-rockets-over-booty-bay-shelley-sparks-co-break-firework-record-in-explosive-celebration": {
+    "path": "2026/202605162240-rockets-over-booty-bay-shelley-sparks-co-break-firework-record-in-explosive-celebration.md",
+    "title": "Rockets Over Booty Bay: Shelley Sparks & Co Break Firework Record in Explosive Celebration",
+    "section": "news",
+    "publish_at": "16-05-2026 22:40",
+    "recorded_at": "2026-05-16T20:50:18Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1505311586741518458",
+        "starter_message_id": "1505311586741518458",
+        "posted_at": "2026-05-16T20:50:48Z"
+      },
+      "announce": {
+        "message_id": "1505311604164661321",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-05-16T20:50:48Z",
+        "crossposted_at": "2026-05-16T20:50:48Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-05-16T20:50:48Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-05-16T20:50:48Z"
+    }
+  },
+  "202605210930-masked-operatives-redacted-files-and-questions-without-answers": {
+    "path": "2026/202605210930-masked-operatives-redacted-files-and-questions-without-answers.md",
+    "title": "Masked Operatives, Redacted Files, and Questions Without Answers",
+    "section": "news",
+    "publish_at": "21-05-2026 09:30",
+    "recorded_at": "2026-05-21T07:31:05Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1506922429346349098",
+        "starter_message_id": "1506922429346349098",
+        "posted_at": "2026-05-21T07:31:44Z"
+      },
+      "announce": {
+        "message_id": "1506922436397105218",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-05-21T07:31:44Z",
+        "crossposted_at": "2026-05-21T07:31:44Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-05-21T07:31:44Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-05-21T07:31:44Z"
+    }
+  },
+  "202605222240-cathedral-square-hosts-this-weeks-mandatory-void-incident": {
+    "path": "2026/202605222240-cathedral-square-hosts-this-weeks-mandatory-void-incident.md",
+    "title": "Cathedral Square Hosts This Week’s Mandatory Void Incident",
+    "section": "news",
+    "publish_at": "22-05-2026 22:40",
+    "recorded_at": "2026-05-22T20:23:34Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1507479163030999141",
+        "starter_message_id": "1507479163030999141",
+        "posted_at": "2026-05-22T20:23:59Z"
+      },
+      "announce": {
+        "message_id": "1507479169473183885",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-05-22T20:23:59Z",
+        "crossposted_at": "2026-05-22T20:23:59Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-05-22T20:23:59Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-05-22T20:23:59Z"
+    }
+  },
+  "202605240120-stormwinds-shadow-war-cawker-howler-and-the-questions-around-bella-reed": {
+    "path": "2026/202605240120-stormwinds-shadow-war-cawker-howler-and-the-questions-around-bella-reed.md",
+    "title": "Stormwind’s Shadow War: Cawker, Howler, and the Questions Around Bella Reed",
+    "section": "news",
+    "publish_at": "24-05-2026 01:20",
+    "recorded_at": "2026-05-23T23:26:20Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1507887516303360245",
+        "starter_message_id": "1507887516303360245",
+        "posted_at": "2026-05-23T23:26:38Z"
+      },
+      "announce": {
+        "message_id": "1507887532493242428",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-05-23T23:26:38Z",
+        "crossposted_at": "2026-05-23T23:26:38Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-05-23T23:26:38Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-05-23T23:26:38Z"
+    }
+  },
+  "202605250200-another-night-in-stormwind-explosions-dwarves-and-togglecogs-chaos-at-the-shady-lady": {
+    "path": "2026/202605250200-another-night-in-stormwind-explosions-dwarves-and-togglecogs-chaos-at-the-shady-lady.md",
+    "title": "Another Night in Stormwind: Explosions, Dwarves and Togglecogs: Chaos at the Shady Lady",
+    "section": "news",
+    "publish_at": "25-05-2026 02:00",
+    "recorded_at": "2026-05-25T00:11:38Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1508261228542165022",
+        "starter_message_id": "1508261228542165022",
+        "posted_at": "2026-05-25T00:11:38Z"
+      },
+      "announce": {
+        "message_id": "1508261229720768542",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-05-25T00:11:38Z",
+        "crossposted_at": "2026-05-25T00:11:38Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-05-25T00:11:38Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-05-25T00:11:38Z"
+    }
+  },
+  "202605270123-hardhy-lester-survives-togglecog-suicide-bombing-outside-city-hall": {
+    "path": "2026/202605270123-hardhy-lester-survives-togglecog-suicide-bombing-outside-city-hall.md",
+    "title": "Hardhy Lester Survives Togglecog Suicide Bombing Outside City Hall",
+    "section": "news",
+    "publish_at": "27-05-2026 01:23",
+    "recorded_at": "2026-05-27T00:08:30Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1508985365887844605",
+        "starter_message_id": "1508985365887844605",
+        "posted_at": "2026-05-27T00:09:06Z"
+      },
+      "announce": {
+        "message_id": "1508985372871233537",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-05-27T00:09:06Z",
+        "crossposted_at": "2026-05-27T00:09:06Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-05-27T00:09:06Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-05-27T00:09:06Z"
+    }
+  },
+  "202605291527-from-pamphlets-to-bombs-inside-the-tirassian-nationalist-army-investigation": {
+    "path": "2026/202605291527-from-pamphlets-to-bombs-inside-the-tirassian-nationalist-army-investigation.md",
+    "title": "From Pamphlets to Bombs: Inside the Tirassian Nationalist Army Investigation",
+    "section": "news",
+    "publish_at": "29-05-2026 15:27",
+    "recorded_at": "2026-05-29T13:39:48Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1509914332706635838",
+        "starter_message_id": "1509914332706635838",
+        "posted_at": "2026-05-29T13:40:29Z"
+      },
+      "announce": {
+        "message_id": "1509914348267770026",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-05-29T13:40:29Z",
+        "crossposted_at": "2026-05-29T13:40:29Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-05-29T13:40:29Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-05-29T13:40:29Z"
+    }
+  },
+  "202606020048-when-the-law-leaves-the-room-sid-howler-bella-reed-and-stormwinds-due-process-problem": {
+    "path": "2026/202606020048-when-the-law-leaves-the-room-sid-howler-bella-reed-and-stormwinds-due-process-problem.md",
+    "title": "When the Law Leaves the Room: Sid Howler, Bella Reed, and Stormwind’s Due Process Problem",
+    "section": "news",
+    "publish_at": "02-06-2026 00:48",
+    "recorded_at": "2026-06-01T23:27:15Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1511149268965003436",
+        "starter_message_id": "1511149268965003436",
+        "posted_at": "2026-06-01T23:27:41Z"
+      },
+      "announce": {
+        "message_id": "1511149274778435805",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-06-01T23:27:41Z",
+        "crossposted_at": "2026-06-01T23:27:41Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-06-01T23:27:41Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-06-01T23:27:41Z"
+    }
+  },
+  "202606130148-plum-roses-can-wait-sid-howlers-trial-takes-another-troubling-turn": {
+    "path": "2026/202606130148-plum-roses-can-wait-sid-howlers-trial-takes-another-troubling-turn.md",
+    "title": "Plum Roses Can Wait: Sid Howler’s Trial Takes Another Troubling Turn",
+    "section": "news",
+    "publish_at": "13-06-2026 01:48",
+    "recorded_at": "2026-06-12T23:55:53Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1515142776407457942",
+        "starter_message_id": "1515142776407457942",
+        "posted_at": "2026-06-12T23:56:27Z"
+      },
+      "announce": {
+        "message_id": "1515142783902548169",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-06-12T23:56:27Z",
+        "crossposted_at": "2026-06-12T23:56:27Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-06-12T23:56:27Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-06-12T23:56:27Z"
+    }
+  },
+  "202606160050-tna-sentences-passed-west-executed-four-others-sent-to-stockades": {
+    "path": "2026/202606160050-tna-sentences-passed-west-executed-four-others-sent-to-stockades.md",
+    "title": "TNA Sentences Passed: West Executed, Four Others Sent to Stockades",
+    "section": "news",
+    "publish_at": "16-06-2026 00:50",
+    "recorded_at": "2026-06-15T22:45:16Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1516212209204723772",
+        "starter_message_id": "1516212209204723772",
+        "posted_at": "2026-06-15T22:46:00Z"
+      },
+      "announce": {
+        "message_id": "1516212218792906912",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-06-15T22:46:00Z",
+        "crossposted_at": "2026-06-15T22:46:00Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-06-15T22:46:00Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-06-15T22:46:00Z"
+    }
+  },
+  "202606170408-trial-1-sid-howler-found-guilty-of-leading-criminal-organisation-cleared-of-attempted-murder": {
+    "path": "2026/202606170408-trial-1-sid-howler-found-guilty-of-leading-criminal-organisation-cleared-of-attempted-murder.md",
+    "title": "Trial #1: Sid Howler Found Guilty of Leading Criminal Organisation, Cleared of Attempted Murder",
+    "section": "news",
+    "publish_at": "17-06-2026 04:08",
+    "recorded_at": "2026-06-17T02:08:54Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1516625907865882809",
+        "starter_message_id": "1516625907865882809",
+        "posted_at": "2026-06-17T02:09:53Z"
+      },
+      "announce": {
+        "message_id": "1516625916011483198",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-06-17T02:09:53Z",
+        "crossposted_at": "2026-06-17T02:09:53Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-06-17T02:09:53Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-06-17T02:09:53Z"
+    }
+  },
+  "202606172046-trial-2-tunnels-testimonies-and-chaotic-witnesses": {
+    "path": "2026/202606172046-trial-2-tunnels-testimonies-and-chaotic-witnesses.md",
+    "title": "# Trial #2: Tunnels, Testimonies, and chaotic witnesses",
+    "section": "news",
+    "publish_at": "17-06-2026 20:46",
+    "recorded_at": "2026-06-17T18:49:28Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1516877546409562192",
+        "starter_message_id": "1516877546409562192",
+        "posted_at": "2026-06-17T18:49:49Z"
+      },
+      "announce": {
+        "message_id": "1516877554177278062",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-06-17T18:49:49Z",
+        "crossposted_at": "2026-06-17T18:49:49Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-06-17T18:49:49Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-06-17T18:49:49Z"
+    }
+  },
+  "202606182215-trial-3-invalid-warrants-black-sites-and-the-trial-within-the-trial": {
+    "path": "2026/202606182215-trial-3-invalid-warrants-black-sites-and-the-trial-within-the-trial.md",
+    "title": "Trial #3: Invalid Warrants, Black Sites, and the Trial Within the Trial",
+    "section": "news",
+    "publish_at": "18-06-2026 22:15",
+    "recorded_at": "2026-06-18T20:14:31Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1517261402329583802",
+        "starter_message_id": "1517261402329583802",
+        "posted_at": "2026-06-18T20:15:07Z"
+      },
+      "announce": {
+        "message_id": "1517261411338944533",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-06-18T20:15:07Z",
+        "crossposted_at": "2026-06-18T20:15:07Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-06-18T20:15:07Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-06-18T20:15:07Z"
+    }
+  },
+  "202606192139-citizen-s-brigade-approved-at-second-assembly-of-houses-and-captains": {
+    "path": "2026/202606192139-citizen-s-brigade-approved-at-second-assembly-of-houses-and-captains.md",
+    "title": "Citizen's Brigade Approved at Second Assembly of Houses and Captains",
+    "section": "news",
+    "publish_at": "19-06-2026 21:39",
+    "recorded_at": "2026-06-19T19:37:12Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1517614731148394539",
+        "starter_message_id": "1517614731148394539",
+        "posted_at": "2026-06-19T19:39:07Z"
+      },
+      "announce": {
+        "message_id": "1517614739168039086",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-06-19T19:39:07Z",
+        "crossposted_at": "2026-06-19T19:39:07Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-06-19T19:39:07Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-06-19T19:39:07Z"
+    }
+  },
+  "202606232100-a-dream-with-room-for-paws-inside-the-skybreaker-animal-sanctuary": {
+    "path": "2026/202606232100-a-dream-with-room-for-paws-inside-the-skybreaker-animal-sanctuary.md",
+    "title": "A Dream With Room For Paws: Inside the Skybreaker Animal Sanctuary",
+    "section": "news",
+    "publish_at": "24-06-2026 17:26",
+    "recorded_at": "2026-06-24T15:26:54Z",
+    "discord": {
+      "forum": {
+        "thread_id": "1519365004153982977",
+        "starter_message_id": "1519365004153982977",
+        "posted_at": "2026-06-24T15:34:05Z"
+      },
+      "announce": {
+        "message_id": "1519365022575362340",
+        "channel_id": "736115275535220796",
+        "posted_at": "2026-06-24T15:34:05Z",
+        "crossposted_at": "2026-06-24T15:34:05Z",
+        "crosspost_status": "crossposted",
+        "crosspost_attempted_at": "2026-06-24T15:34:05Z"
+      }
+    },
+    "discord_last_action": {
+      "action": "announce_crosspost",
+      "at": "2026-06-24T15:34:05Z"
     }
   }
 }

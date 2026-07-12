@@ -1,0 +1,18 @@
+[
+  {
+    "timestamp": "2026-04-03T22:27:10Z",
+    "action": "announce_discord",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Discord announcement posted and crossposted from the admin panel."
+  },
+  {
+    "timestamp": "2026-04-03T22:24:31Z",
+    "action": "publish_now",
+    "from_status": null,
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Article saved via publish_now. Live publish state updated. Public site rebuilt (3 article outputs, 2 stale outputs removed)."
+  }
+]

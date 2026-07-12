@@ -7,10 +7,10 @@
   <link rel="stylesheet" href="/assets/css/newbase.css" />
 
   
-    <link rel="stylesheet" href="/assets/css/home.css" />
+    <link rel="stylesheet" href="https://thelionsroar.eu/assets/css/home.css" />
   
 
-<link rel="stylesheet" href="/assets/css/widgets.css" />
+<link rel="stylesheet" href="https://thelionsroar.eu/assets/css/widgets.css" />
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 
 </head>
@@ -38,7 +38,7 @@
       </div>
 
       <div class="masthead-center">
-        <a class="brand-link" href="/" aria-label="Go to the homepage">
+        <a class="brand-link" href="https://thelionsroar.eu/" aria-label="Go to the homepage">
           <div class="brand">
             <div class="brand-icon lion-icon"></div>
             <div class="brand-text">
@@ -86,9 +86,9 @@
 
         <ul class="nav-links">
           
-            <li><a href="/">Home</a></li>
+            <li><a href="https://thelionsroar.eu/">Home</a></li>
           
-            <li><a href="/games/">Games</a></li>
+            <li><a href="https://thelionsroar.eu/games/">Games</a></li>
           
         </ul>
 
@@ -115,14 +115,131 @@
     
       <article class="recent-article-card">
         
-          <a class="recent-article-thumb" href="/news/2026/202603312250-healing-is-re-growth/" aria-hidden="true" tabindex="-1">
-            <img src="/assets/images/202603312250-healing-is-re-growth.png" alt="" loading="lazy" />
+          <a class="recent-article-thumb" href="https://thelionsroar.eu/news/2026/202606192139-citizen-s-brigade-approved-at-second-assembly-of-houses-and-captains/" aria-hidden="true" tabindex="-1">
+            <img src="https://thelionsroar.eu/assets/images/202606192139-citizen-s-brigade-approved-at-second-assembly-of-houses-and-captains.jpg" alt="" loading="lazy" />
           </a>
         
 
         <div class="recent-article-copy">
-          <h3 class="recent-article-title"><a href="/news/2026/202603312250-healing-is-re-growth/">Healing is (re)growth</a></h3>
-          <div class="recent-article-meta">Hardhy Lester &middot; 31 March (2026)</div>
+          <h3 class="recent-article-title"><a href="https://thelionsroar.eu/news/2026/202606192139-citizen-s-brigade-approved-at-second-assembly-of-houses-and-captains/">Citizen&#39;s Brigade Approved at Second Assembly of Houses and Captains</a></h3>
+          <div class="recent-article-meta">Hardhy Lester &middot; 19 June (2026)</div>
+        </div>
+      </article>
+    
+      <article class="recent-article-card">
+        
+          <a class="recent-article-thumb" href="https://thelionsroar.eu/news/2026/202606182215-trial-3-invalid-warrants-black-sites-and-the-trial-within-the-trial/" aria-hidden="true" tabindex="-1">
+            <img src="https://thelionsroar.eu/assets/images/202606182215-trial-3-invalid-warrants-black-sites-and-the-trial-within-the-trial.png" alt="" loading="lazy" />
+          </a>
+        
+
+        <div class="recent-article-copy">
+          <h3 class="recent-article-title"><a href="https://thelionsroar.eu/news/2026/202606182215-trial-3-invalid-warrants-black-sites-and-the-trial-within-the-trial/">Trial #3: Invalid Warrants, Black Sites, and the Trial Within the Trial</a></h3>
+          <div class="recent-article-meta">Hardhy Lester &middot; 18 June (2026)</div>
+        </div>
+      </article>
+    
+      <article class="recent-article-card">
+        
+          <a class="recent-article-thumb" href="https://thelionsroar.eu/news/2026/202606172046-trial-2-tunnels-testimonies-and-chaotic-witnesses/" aria-hidden="true" tabindex="-1">
+            <img src="https://thelionsroar.eu/assets/images/202606172046-trial-2-tunnels-testimonies-and-chaotic-witnesses.png" alt="" loading="lazy" />
+          </a>
+        
+
+        <div class="recent-article-copy">
+          <h3 class="recent-article-title"><a href="https://thelionsroar.eu/news/2026/202606172046-trial-2-tunnels-testimonies-and-chaotic-witnesses/"># Trial #2: Tunnels, Testimonies, and chaotic witnesses</a></h3>
+          <div class="recent-article-meta">Hardhy Lester &middot; 17 June (2026)</div>
+        </div>
+      </article>
+    
+      <article class="recent-article-card">
+        
+          <a class="recent-article-thumb" href="https://thelionsroar.eu/news/2026/202606170408-trial-1-sid-howler-found-guilty-of-leading-criminal-organisation-cleared-of-attempted-murder/" aria-hidden="true" tabindex="-1">
+            <img src="https://thelionsroar.eu/assets/images/202606170408-trial-1-sid-howler-found-guilty-of-leading-criminal-organisation-cleared-of-attempted-murder.png" alt="" loading="lazy" />
+          </a>
+        
+
+        <div class="recent-article-copy">
+          <h3 class="recent-article-title"><a href="https://thelionsroar.eu/news/2026/202606170408-trial-1-sid-howler-found-guilty-of-leading-criminal-organisation-cleared-of-attempted-murder/">Trial #1: Sid Howler Found Guilty of Leading Criminal Organisation, Cleared of Attempted Murder</a></h3>
+          <div class="recent-article-meta">Hardhy Lester &middot; 17 June (2026)</div>
+        </div>
+      </article>
+    
+      <article class="recent-article-card">
+        
+          <a class="recent-article-thumb" href="https://thelionsroar.eu/news/2026/202606160050-tna-sentences-passed-west-executed-four-others-sent-to-stockades/" aria-hidden="true" tabindex="-1">
+            <img src="https://thelionsroar.eu/assets/images/202606160050-tna-sentences-passed-west-executed-four-others-sent-to-stockades.png" alt="" loading="lazy" />
+          </a>
+        
+
+        <div class="recent-article-copy">
+          <h3 class="recent-article-title"><a href="https://thelionsroar.eu/news/2026/202606160050-tna-sentences-passed-west-executed-four-others-sent-to-stockades/">TNA Sentences Passed: West Executed, Four Others Sent to Stockades</a></h3>
+          <div class="recent-article-meta">Hardhy Lester &middot; 16 June (2026)</div>
+        </div>
+      </article>
+    
+      <article class="recent-article-card">
+        
+          <a class="recent-article-thumb" href="https://thelionsroar.eu/news/2026/202606130148-plum-roses-can-wait-sid-howlers-trial-takes-another-troubling-turn/" aria-hidden="true" tabindex="-1">
+            <img src="https://thelionsroar.eu/assets/images/202606130148-plum-roses-can-wait-sid-howlers-trial-takes-another-troubling-turn.jpg" alt="" loading="lazy" />
+          </a>
+        
+
+        <div class="recent-article-copy">
+          <h3 class="recent-article-title"><a href="https://thelionsroar.eu/news/2026/202606130148-plum-roses-can-wait-sid-howlers-trial-takes-another-troubling-turn/">Plum Roses Can Wait: Sid Howler’s Trial Takes Another Troubling Turn</a></h3>
+          <div class="recent-article-meta">Hardhy Lester &middot; 13 June (2026)</div>
+        </div>
+      </article>
+    
+      <article class="recent-article-card">
+        
+          <a class="recent-article-thumb" href="https://thelionsroar.eu/news/2026/202606020048-when-the-law-leaves-the-room-sid-howler-bella-reed-and-stormwinds-due-process-problem/" aria-hidden="true" tabindex="-1">
+            <img src="https://thelionsroar.eu/assets/images/202606020048-when-the-law-leaves-the-room-sid-howler-bella-reed-and-stormwinds-due-process-problem.png" alt="" loading="lazy" />
+          </a>
+        
+
+        <div class="recent-article-copy">
+          <h3 class="recent-article-title"><a href="https://thelionsroar.eu/news/2026/202606020048-when-the-law-leaves-the-room-sid-howler-bella-reed-and-stormwinds-due-process-problem/">When the Law Leaves the Room: Sid Howler, Bella Reed, and Stormwind’s Due Process Problem</a></h3>
+          <div class="recent-article-meta">Hardhy Lester &middot; 02 June (2026)</div>
+        </div>
+      </article>
+    
+      <article class="recent-article-card">
+        
+          <a class="recent-article-thumb" href="https://thelionsroar.eu/news/2026/202605291527-from-pamphlets-to-bombs-inside-the-tirassian-nationalist-army-investigation/" aria-hidden="true" tabindex="-1">
+            <img src="https://thelionsroar.eu/assets/images/202605291527-from-pamphlets-to-bombs-inside-the-tirassian-nationalist-army-investigation.png" alt="" loading="lazy" />
+          </a>
+        
+
+        <div class="recent-article-copy">
+          <h3 class="recent-article-title"><a href="https://thelionsroar.eu/news/2026/202605291527-from-pamphlets-to-bombs-inside-the-tirassian-nationalist-army-investigation/">From Pamphlets to Bombs: Inside the Tirassian Nationalist Army Investigation</a></h3>
+          <div class="recent-article-meta">Hardhy Lester &middot; 29 May (2026)</div>
+        </div>
+      </article>
+    
+      <article class="recent-article-card">
+        
+          <a class="recent-article-thumb" href="https://thelionsroar.eu/news/2026/202605270123-hardhy-lester-survives-togglecog-suicide-bombing-outside-city-hall/" aria-hidden="true" tabindex="-1">
+            <img src="https://thelionsroar.eu/assets/images/202605270123-hardhy-lester-survives-togglecog-suicide-bombing-outside-city-hall.jpg" alt="" loading="lazy" />
+          </a>
+        
+
+        <div class="recent-article-copy">
+          <h3 class="recent-article-title"><a href="https://thelionsroar.eu/news/2026/202605270123-hardhy-lester-survives-togglecog-suicide-bombing-outside-city-hall/">Hardhy Lester Survives Togglecog Suicide Bombing Outside City Hall</a></h3>
+          <div class="recent-article-meta">Hardhy Lester &middot; 27 May (2026)</div>
+        </div>
+      </article>
+    
+      <article class="recent-article-card">
+        
+          <a class="recent-article-thumb" href="https://thelionsroar.eu/news/2026/202605250200-another-night-in-stormwind-explosions-dwarves-and-togglecogs-chaos-at-the-shady-lady/" aria-hidden="true" tabindex="-1">
+            <img src="https://thelionsroar.eu/assets/images/202605250200-another-night-in-stormwind-explosions-dwarves-and-togglecogs-chaos-at-the-shady-lady.png" alt="" loading="lazy" />
+          </a>
+        
+
+        <div class="recent-article-copy">
+          <h3 class="recent-article-title"><a href="https://thelionsroar.eu/news/2026/202605250200-another-night-in-stormwind-explosions-dwarves-and-togglecogs-chaos-at-the-shady-lady/">Another Night in Stormwind: Explosions, Dwarves and Togglecogs: Chaos at the Shady Lady</a></h3>
+          <div class="recent-article-meta">Hardhy Lester &middot; 25 May (2026)</div>
         </div>
       </article>
     
@@ -134,7 +251,7 @@
       <article class="feature">
         
           <div class="feature-media">
-            <img src="/assets/images/202604012310-the-duskwood-duskwell.png" alt="The Duskwood Duskwell preview" loading="lazy" />
+            <img src="https://thelionsroar.eu/assets/images/202606232100-a-dream-with-room-for-paws-inside-the-skybreaker-animal-sanctuary.gif" alt="A Dream With Room For Paws: Inside the Skybreaker Animal Sanctuary preview" loading="lazy" />
           </div>
         
 
@@ -145,12 +262,12 @@
 
           <h1 class="feature-title">
             
-              <a href="/news/2026/202604012310-the-duskwood-duskwell/">The Duskwood Duskwell</a>
+              <a href="https://thelionsroar.eu/news/2026/202606232100-a-dream-with-room-for-paws-inside-the-skybreaker-animal-sanctuary/">A Dream With Room For Paws: Inside the Skybreaker Animal Sanctuary</a>
             
           </h1>
 
           
-            <p class="feature-dek">Raven Hill claims local well spouts &#34;Invisible Light&#34; and &#34;Existential Dread&#34;</p>
+            <p class="feature-dek">Ahead of its grand opening, Vivian Skybreaker’s animal sanctuary stands ready to offer frightened creatures something precious: a second chance.</p>
           
 
           
@@ -160,19 +277,13 @@
               
               
                 <span class="byline-sep">&middot;</span>
-                <time class="byline-item" datetime="2026-04-01T23:10:00">01 April (2026)</time>
+                <time class="byline-item" datetime="2026-06-24T17:26:00">24 June (2026)</time>
               
             </div>
           
         </div>
       </article>
 
-      
-        <section class="section-block" aria-label="More stories">
-
-
-          
-        </section>
       
     </section>
 
@@ -201,6 +312,56 @@
   </section>
 
   
+    <hr class="rule" />
+
+    <section class="belowfold" aria-label="Earlier editions">
+      <section class="section-block">
+        <div class="section-head">
+          <h2 class="section-title">Earlier Editions</h2>
+        </div>
+
+        <div class="teaser-grid">
+          
+            <article class="teaser">
+              <h3 class="teaser-title"><a href="https://thelionsroar.eu/news/2026/202605240120-stormwinds-shadow-war-cawker-howler-and-the-questions-around-bella-reed/">Stormwind’s Shadow War: Cawker, Howler, and the Questions Around Bella Reed</a></h3>
+              <p class="teaser-text">The stories of Sid Howler and Danielle Cawker should not align as neatly as they do. Yet both independently describe a failed intelligence meeting, an alleged assassination attempt, and an increasingly questionable role played by Knight-Captain Bella Reed in the events leading up to the Pig and Whistle raid.</p>
+              <div class="teaser-meta">By Hardhy Lester &middot; 24 May (2026)</div>
+            </article>
+          
+            <article class="teaser">
+              <h3 class="teaser-title"><a href="https://thelionsroar.eu/news/2026/202605222240-cathedral-square-hosts-this-weeks-mandatory-void-incident/">Cathedral Square Hosts This Week’s Mandatory Void Incident</a></h3>
+              <p class="teaser-text">Between the whispers of doom and the smell of coffee, Cathedral Square once again proved that Stormwind residents have become deeply, profoundly numb to void attacks.</p>
+              <div class="teaser-meta">By Hardhy Lester &middot; 22 May (2026)</div>
+            </article>
+          
+            <article class="teaser">
+              <h3 class="teaser-title"><a href="https://thelionsroar.eu/news/2026/202605210930-masked-operatives-redacted-files-and-questions-without-answers/">Masked Operatives, Redacted Files, and Questions Without Answers</a></h3>
+              <p class="teaser-text">The story behind the Pig and Whistle raid grows darker. Leaked classified files obtained by The Lion’s Roar suggest covert surveillance, internal mistrust, questionable legal authority, and authorisation for “discreet lethal force” inside Stormwind itself.</p>
+              <div class="teaser-meta">By Hardhy Lester &middot; 21 May (2026)</div>
+            </article>
+          
+            <article class="teaser">
+              <h3 class="teaser-title"><a href="https://thelionsroar.eu/news/2026/202605162240-rockets-over-booty-bay-shelley-sparks-co-break-firework-record-in-explosive-celebration/">Rockets Over Booty Bay: Shelley Sparks &amp; Co Break Firework Record in Explosive Celebration</a></h3>
+              <p class="teaser-text">The lower docks of Booty Bay briefly resembled a military artillery line designed by festive gnomes Saturday night as Shelley Sparks &amp; Co launched over 4,600 fireworks in a successful record attempt.</p>
+              <div class="teaser-meta">By Hardhy Lester &middot; 16 May (2026)</div>
+            </article>
+          
+            <article class="teaser">
+              <h3 class="teaser-title"><a href="https://thelionsroar.eu/news/2026/202605132358-boralus-assembly-debates-stormwind-overreach-and-kul-tiran-defence/">Boralus Assembly Debates Stormwind Overreach and Kul Tiran Defence</a></h3>
+              <p class="teaser-text">Representatives from across Kul Tiras gathered in Boralus this week to debate cult activity, Stormwind overreach, the Tirasian Nationalist Army, and a controversial proposal for a new Citizen’s Brigade.</p>
+              <div class="teaser-meta">By Hardhy Lester &middot; 13 May (2026)</div>
+            </article>
+          
+            <article class="teaser">
+              <h3 class="teaser-title"><a href="https://thelionsroar.eu/news/2026/202605121831-masked-operatives-and-missing-warrants-chaos-at-the-pig-and-whistle/">Masked Operatives and Missing Warrants: Chaos at the Pig and Whistle</a></h3>
+              <p class="teaser-text">An attempted arrest in Old Town spiralled into gunfire, magical violence, and complete confusion Sunday night as guards, military personnel, civilians, and masked operatives clashed inside the Pig and Whistle. Questions now remain about who authorised the raid, who started the violence, and whether any of it was lawful to begin with.</p>
+              <div class="teaser-meta">By Hardhy Lester &middot; 12 May (2026)</div>
+            </article>
+          
+        </div>
+      </section>
+    </section>
+  
 
 
     <footer class="footer">
@@ -208,13 +369,13 @@
         <div>&copy; The Lion&#39;s Roar</div>
         <div class="footer-links">
           
-            <a href="/about/">About</a>
+            <a href="https://thelionsroar.eu/about/">About</a>
           
-            <a href="/contact/">Contact</a>
+            <a href="https://thelionsroar.eu/contact/">Contact</a>
           
-            <a href="/privacy/">Privacy</a>
+            <a href="https://thelionsroar.eu/privacy/">Privacy</a>
           
-            <a href="/jobs/">Jobs</a>
+            <a href="https://thelionsroar.eu/jobs/">Jobs</a>
           
         </div>
       </div>
@@ -277,7 +438,7 @@
 })();
 </script>
 
-<script src="/assets/js/widgets.js" defer></script>
+<script src="https://thelionsroar.eu/assets/js/widgets.js" defer></script>
 
 
 </body>

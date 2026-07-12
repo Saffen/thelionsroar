@@ -1,5 +1,13 @@
 [
   {
+    "timestamp": "2026-04-03T18:12:23Z",
+    "action": "announce_discord",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Discord announcement posted and crossposted from the admin panel."
+  },
+  {
     "timestamp": "2026-04-02T23:09:51Z",
     "action": "announce_discord",
     "from_status": "published",

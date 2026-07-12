@@ -80,9 +80,32 @@
         .small-list li:last-child { border-bottom: 0; }
         .empty-state { color: #666; padding: 14px 0; }
         .action-link { margin-right: 8px; }
+        .traffic-card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-top: 18px; }
+        .traffic-card { background: white; border: 1px solid #ddd; border-radius: 4px; padding: 14px; }
+        .traffic-label { font-size: 0.72rem; text-transform: uppercase; color: #666; font-weight: bold; }
+        .traffic-value { font-size: 1.8rem; font-weight: bold; color: #222; margin-top: 6px; }
+        .traffic-meta { margin-top: 4px; color: #666; font-size: 0.85rem; }
+        .system-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; margin-top: 20px; }
+        .stats-table { width: 100%; border-collapse: collapse; }
+        .stats-table th, .stats-table td { padding: 10px 8px; border-bottom: 1px solid #eee; text-align: left; vertical-align: top; }
+        .code-list { list-style: none; margin: 0; padding: 0; }
+        .code-list li { padding: 6px 0; border-bottom: 1px solid #eee; font-family: Consolas, monospace; font-size: 0.85rem; word-break: break-all; }
+        .code-list li:last-child { border-bottom: 0; }
+        .mono { font-family: Consolas, monospace; }
+        .traffic-row-button { display: block; width: 100%; background: transparent; border: 0; padding: 0; text-align: left; cursor: pointer; color: inherit; font: inherit; }
+        .traffic-row-button:hover .traffic-row-label { text-decoration: underline; }
+        .modal-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 2000; }
+        .modal-backdrop.is-open { display: flex; }
+        .modal-panel { background: #fff; width: min(880px, 100%); max-height: 90vh; overflow-y: auto; border-radius: 6px; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2); }
+        .modal-header { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; padding: 18px 20px 0; }
+        .modal-body { padding: 0 20px 20px; }
+        .graph-wrap { margin-top: 16px; border: 1px solid #ddd; border-radius: 4px; background: #fafafa; padding: 12px; }
+        .graph-svg { display: block; width: 100%; height: auto; }
+        .graph-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 16px; }
+        .graph-stat { border: 1px solid #ddd; border-radius: 4px; padding: 12px; background: #fff; }
 
         @media (max-width: 1000px) {
-            .admin-grid, .meta-grid { grid-template-columns: 1fr; }
+            .admin-grid, .meta-grid, .system-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -278,8 +301,70 @@
 
         <div id="tab-system" class="tab-content">
             <div class="form-section">
-                <h2>System Control</h2>
-                <p class="muted">The article CRUD flow is being stabilized first. Build and deployment controls can be added once the editorial loop is reliable.</p>
+                <div style="display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap;">
+                    <div>
+                        <h2 style="margin: 0;">Traffic Overview</h2>
+                        <p class="muted" style="margin: 6px 0 0;">Approximate site traffic from nginx access logs. Page-view metrics exclude common bots, and unique visitors are estimated by unique IPs.</p>
+                    </div>
+                    <button class="btn-secondary" type="button" onclick="loadTrafficStats(true)">Reload Traffic</button>
+                </div>
+                <div class="filter-group" style="margin: 18px 0 0;">
+                    <button type="button" class="btn-ghost filter-btn traffic-mode-btn active" data-traffic-mode="humans" onclick="setTrafficMode('humans')">Humans</button>
+                    <button type="button" class="btn-ghost filter-btn traffic-mode-btn" data-traffic-mode="bots" onclick="setTrafficMode('bots')">Bots</button>
+                </div>
+                <div class="filter-group" style="margin-top: 10px;">
+                    <button type="button" class="btn-ghost filter-btn traffic-page-type-btn active" data-traffic-page-type="all" onclick="setTrafficPageType('all')">All Pages</button>
+                    <button type="button" class="btn-ghost filter-btn traffic-page-type-btn" data-traffic-page-type="articles" onclick="setTrafficPageType('articles')">Articles</button>
+                    <button type="button" class="btn-ghost filter-btn traffic-page-type-btn" data-traffic-page-type="static" onclick="setTrafficPageType('static')">Static Pages</button>
+                    <button type="button" class="btn-ghost filter-btn traffic-page-type-btn" data-traffic-page-type="other" onclick="setTrafficPageType('other')">Other</button>
+                </div>
+                <div class="filter-group" style="margin-top: 10px;">
+                    <button type="button" class="btn-ghost filter-btn traffic-window-btn" data-traffic-window="1" onclick="setTrafficWindow(1)">24h</button>
+                    <button type="button" class="btn-ghost filter-btn traffic-window-btn" data-traffic-window="2" onclick="setTrafficWindow(2)">48h</button>
+                    <button type="button" class="btn-ghost filter-btn traffic-window-btn" data-traffic-window="7" onclick="setTrafficWindow(7)">7d</button>
+                    <button type="button" class="btn-ghost filter-btn traffic-window-btn active" data-traffic-window="30" onclick="setTrafficWindow(30)">30d</button>
+                    <button type="button" class="btn-ghost filter-btn traffic-window-btn" data-traffic-window="90" onclick="setTrafficWindow(90)">90d</button>
+                </div>
+                <div id="traffic-status" class="empty-state" style="padding-bottom: 0;">Traffic stats will load when you open this tab.</div>
+                <div id="traffic-cards" class="traffic-card-grid"></div>
+            </div>
+
+            <div class="system-grid">
+                <section class="panel">
+                    <h3 id="traffic-pages-heading">Pages</h3>
+                    <div id="traffic-pages" class="empty-state">No data loaded yet.</div>
+                </section>
+                <section class="panel">
+                    <h3>Top Referrers</h3>
+                    <div id="traffic-referrers" class="empty-state">No data loaded yet.</div>
+                </section>
+            </div>
+
+            <div class="system-grid">
+                <section class="panel">
+                    <h3>Daily Trend</h3>
+                    <div id="traffic-daily" class="empty-state">No data loaded yet.</div>
+                </section>
+                <section class="panel">
+                    <h3>Log Source</h3>
+                    <div id="traffic-source" class="empty-state">No data loaded yet.</div>
+                </section>
+            </div>
+        </div>
+
+        <div id="traffic-page-modal" class="modal-backdrop" onclick="closeTrafficPageModal(event)">
+            <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="traffic-page-modal-title" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <div>
+                        <h3 id="traffic-page-modal-title" style="margin: 0;">Page Traffic</h3>
+                        <p id="traffic-page-modal-subtitle" class="muted" style="margin: 6px 0 0;">Daily traffic trend for the selected page.</p>
+                    </div>
+                    <button type="button" class="btn-ghost" onclick="closeTrafficPageModal()">Close</button>
+                </div>
+                <div class="modal-body">
+                    <div id="traffic-page-modal-summary" class="graph-meta"></div>
+                    <div id="traffic-page-modal-graph" class="graph-wrap"></div>
+                </div>
             </div>
         </div>
 
@@ -290,6 +375,14 @@
             mode: 'new',
             currentFilter: 'active',
             currentArticle: null,
+            trafficLoaded: false,
+            trafficLoading: false,
+            trafficMode: 'humans',
+            trafficPageType: 'all',
+            trafficWindowDays: 30,
+            trafficTopLimit: 25,
+            trafficPayload: null,
+            activeTrafficPage: null,
         };
 
         const form = document.getElementById('publishForm');
@@ -324,6 +417,9 @@
             document.getElementById(`tab-link-${tabName}`).classList.add('active');
             if (tabName === 'library') {
                 loadLibrary(editorState.currentFilter);
+            }
+            if (tabName === 'system') {
+                loadTrafficStats();
             }
         }
 
@@ -470,12 +566,31 @@
         }
 
         function buildApiErrorMessage(payload, fallbackMessage) {
+            function stringifyApiMessage(value) {
+                if (!value) return '';
+                if (typeof value === 'string') return value;
+                if (Array.isArray(value)) {
+                    return value.map((item) => stringifyApiMessage(item)).filter(Boolean).join(' ');
+                }
+                if (typeof value === 'object') {
+                    const location = Array.isArray(value.loc) ? value.loc.join('.') : '';
+                    const message = value.msg || value.message || value.detail || '';
+                    if (location && message) return `${location}: ${message}.`;
+                    if (message) return stringifyApiMessage(message);
+                    try {
+                        return JSON.stringify(value);
+                    } catch (error) {
+                        return fallbackMessage;
+                    }
+                }
+                return String(value);
+            }
             const parts = [];
-            const baseMessage = payload?.message || payload?.detail || fallbackMessage;
+            const baseMessage = stringifyApiMessage(payload?.message || payload?.detail) || fallbackMessage;
             if (baseMessage) parts.push(baseMessage);
             if (payload?.failed_step) parts.push(`Step: ${payload.failed_step}.`);
             if (payload?.error_type && payload?.detail && payload.detail !== baseMessage) {
-                parts.push(`${payload.error_type}: ${payload.detail}.`);
+                parts.push(`${payload.error_type}: ${stringifyApiMessage(payload.detail)}.`);
             } else if (payload?.error_type && !payload?.detail) {
                 parts.push(`Error type: ${payload.error_type}.`);
             }
@@ -517,6 +632,346 @@
 
             const snippet = raw.replace(/\s+/g, ' ').trim().slice(0, 220);
             throw new Error(`${fallbackMessage} Server returned a non-JSON success response.${snippet ? ` Response starts with: ${snippet}` : ''}`);
+        }
+
+        function filenameFromDisposition(disposition, fallbackName) {
+            const utf8Match = String(disposition || '').match(/filename\*=UTF-8''([^;]+)/i);
+            if (utf8Match) {
+                try {
+                    return decodeURIComponent(utf8Match[1]);
+                } catch (error) {
+                    return utf8Match[1];
+                }
+            }
+            const nameMatch = String(disposition || '').match(/filename="?([^";]+)"?/i);
+            return nameMatch ? nameMatch[1] : fallbackName;
+        }
+
+        async function parseDownloadError(response, fallbackMessage) {
+            const raw = await response.text();
+            const contentType = response.headers.get('content-type') || '';
+            if (raw && contentType.includes('application/json')) {
+                try {
+                    return buildApiErrorMessage(JSON.parse(raw), fallbackMessage);
+                } catch (error) {
+                    return fallbackMessage;
+                }
+            }
+            const snippet = raw.replace(/\s+/g, ' ').trim().slice(0, 220);
+            return `${fallbackMessage}${snippet ? ` ${snippet}` : ''}`;
+        }
+
+        function formatNumber(value) {
+            return new Intl.NumberFormat().format(Number(value || 0));
+        }
+
+        function formatTrafficTimestamp(value) {
+            if (!value) return '?';
+            const parsed = new Date(value);
+            return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleString();
+        }
+
+        function formatTrafficWindowLabel(days) {
+            const value = Number(days) || 30;
+            if (value === 1) return '24h';
+            if (value === 2) return '48h';
+            return `${value}d`;
+        }
+
+        function formatTrafficPageTypeLabel(pageType) {
+            const labels = {
+                all: 'All pages',
+                articles: 'Articles',
+                static: 'Static pages',
+                other: 'Other pages',
+            };
+            return labels[pageType] || labels.all;
+        }
+
+        function inferTrafficPageType(item) {
+            if (['articles', 'static', 'other'].includes(item?.page_type)) {
+                return item.page_type;
+            }
+            const path = String(item?.path || '/');
+            if (/^\/[^/]+\/\d{4}\/[^/]+\/?$/.test(path)) {
+                return 'articles';
+            }
+            if (['/', '/about/', '/contact/', '/games/', '/jobs/', '/privacy/'].includes(path.endsWith('/') ? path : `${path}/`)) {
+                return 'static';
+            }
+            return 'other';
+        }
+
+        function clearTrafficPanels(message = 'No traffic data loaded yet.') {
+            document.getElementById('traffic-cards').innerHTML = '';
+            document.getElementById('traffic-pages-heading').textContent = 'Pages';
+            document.getElementById('traffic-pages').innerHTML = `<div class="empty-state">${escapeHtml(message)}</div>`;
+            document.getElementById('traffic-referrers').innerHTML = `<div class="empty-state">${escapeHtml(message)}</div>`;
+            document.getElementById('traffic-daily').innerHTML = `<div class="empty-state">${escapeHtml(message)}</div>`;
+            document.getElementById('traffic-source').innerHTML = `<div class="empty-state">${escapeHtml(message)}</div>`;
+        }
+
+        function buildTrafficSeries(series, granularity = 'day') {
+            return (series || []).map((item) => ({
+                label: item.hour || item.date || '',
+                hits: Number(item.hits || 0),
+                shortLabel: granularity === 'hour'
+                    ? String(item.hour || '').slice(11, 16)
+                    : String(item.date || '').slice(5),
+            }));
+        }
+
+        function renderTrafficGraph(points, granularity = 'day') {
+            if (!points.length) {
+                return '<div class="empty-state">No graph data available.</div>';
+            }
+            const width = 760;
+            const height = 260;
+            const padding = { top: 16, right: 16, bottom: 34, left: 42 };
+            const innerWidth = width - padding.left - padding.right;
+            const innerHeight = height - padding.top - padding.bottom;
+            const maxValue = Math.max(...points.map((point) => point.hits), 1);
+            const stepX = points.length > 1 ? innerWidth / (points.length - 1) : 0;
+            const coordinates = points.map((point, index) => {
+                const x = padding.left + (stepX * index);
+                const y = padding.top + innerHeight - ((point.hits / maxValue) * innerHeight);
+                return { x, y, point };
+            });
+            const pointString = coordinates.map((item) => `${item.x.toFixed(1)},${item.y.toFixed(1)}`).join(' ');
+            const circles = coordinates.map((item) => `<circle cx="${item.x.toFixed(1)}" cy="${item.y.toFixed(1)}" r="3" fill="#b3924e"><title>${escapeHtml(`${item.point.label}: ${formatNumber(item.point.hits)}`)}</title></circle>`).join('');
+            const horizontalGuides = [0, 0.5, 1].map((ratio) => {
+                const y = padding.top + (innerHeight * ratio);
+                return `<line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="#ddd" stroke-dasharray="4 4" />`;
+            }).join('');
+            const labels = [0, Math.round(maxValue / 2), maxValue].map((value, index) => {
+                const ratio = index / 2;
+                const y = padding.top + innerHeight - (innerHeight * ratio);
+                return `<text x="${padding.left - 8}" y="${(y + 4).toFixed(1)}" text-anchor="end" fill="#666" font-size="12">${escapeHtml(formatNumber(value))}</text>`;
+            }).join('');
+            const tickStep = points.length > 12 ? Math.ceil(points.length / 6) : 1;
+            const xTicks = coordinates.filter((item, index) => index % tickStep === 0 || index === coordinates.length - 1).map((item) => `
+                <text x="${item.x.toFixed(1)}" y="${height - 10}" text-anchor="middle" fill="#666" font-size="12">${escapeHtml(item.point.shortLabel || item.point.label)}</text>
+            `).join('');
+            return `
+                <svg viewBox="0 0 ${width} ${height}" class="graph-svg" aria-label="Traffic trend graph (${escapeHtml(granularity)})">
+                    ${horizontalGuides}
+                    <line x1="${padding.left}" y1="${(padding.top + innerHeight).toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${(padding.top + innerHeight).toFixed(1)}" stroke="#bbb" />
+                    <polyline fill="none" stroke="#b3924e" stroke-width="3" points="${pointString}" />
+                    ${circles}
+                    ${labels}
+                    ${xTicks}
+                </svg>
+            `;
+        }
+
+        function openTrafficPageModal(encodedPath) {
+            const mode = editorState.trafficMode === 'bots' ? 'bots' : 'humans';
+            const topPages = (editorState.trafficPayload?.top_pages && editorState.trafficPayload.top_pages[mode]) || [];
+            const path = decodeURIComponent(encodedPath);
+            const page = topPages.find((item) => item.path === path);
+            if (!page) {
+                closeTrafficPageModal();
+                return;
+            }
+            editorState.activeTrafficPage = page.path;
+            const modeLabel = mode === 'bots' ? 'Bot' : 'Human';
+            const granularity = editorState.trafficPayload?.series_granularity || 'day';
+            const points = buildTrafficSeries(page.series || [], granularity);
+            const totalViews = points.reduce((sum, point) => sum + point.hits, 0);
+            const peakViews = points.reduce((maxValue, point) => Math.max(maxValue, point.hits), 0);
+            const peakDay = points.find((point) => point.hits === peakViews)?.label || '?';
+            document.getElementById('traffic-page-modal-title').textContent = page.path || '/';
+            document.getElementById('traffic-page-modal-subtitle').textContent = `${modeLabel} page traffic over the selected ${formatTrafficWindowLabel(editorState.trafficWindowDays)} window.`;
+            document.getElementById('traffic-page-modal-summary').innerHTML = [
+                ['Total views', totalViews],
+                ['Unique IPs', page.unique_ips],
+                ['Peak day', peakDay],
+                ['Peak views', peakViews],
+            ].map((item) => `
+                <div class="graph-stat">
+                    <div class="traffic-label">${escapeHtml(item[0])}</div>
+                    <div class="traffic-value" style="font-size: 1.3rem;">${escapeHtml(String(item[1]))}</div>
+                </div>
+            `).join('');
+            document.getElementById('traffic-page-modal-graph').innerHTML = renderTrafficGraph(points, granularity);
+            document.getElementById('traffic-page-modal').classList.add('is-open');
+        }
+
+        function closeTrafficPageModal(event) {
+            if (event && event.target && event.target !== document.getElementById('traffic-page-modal')) {
+                return;
+            }
+            document.getElementById('traffic-page-modal').classList.remove('is-open');
+            editorState.activeTrafficPage = null;
+        }
+
+        function updateTrafficModeButtons() {
+            document.querySelectorAll('.traffic-mode-btn').forEach((button) => {
+                button.classList.toggle('active', button.dataset.trafficMode === editorState.trafficMode);
+            });
+        }
+
+        function updateTrafficPageTypeButtons() {
+            document.querySelectorAll('.traffic-page-type-btn').forEach((button) => {
+                button.classList.toggle('active', button.dataset.trafficPageType === editorState.trafficPageType);
+            });
+        }
+
+        function updateTrafficWindowButtons() {
+            document.querySelectorAll('.traffic-window-btn').forEach((button) => {
+                button.classList.toggle('active', Number(button.dataset.trafficWindow) === editorState.trafficWindowDays);
+            });
+        }
+
+        function setTrafficMode(mode) {
+            editorState.trafficMode = mode === 'bots' ? 'bots' : 'humans';
+            updateTrafficModeButtons();
+            if (editorState.trafficPayload) {
+                renderTrafficStats(editorState.trafficPayload);
+                if (editorState.activeTrafficPage) {
+                    openTrafficPageModal(encodeURIComponent(editorState.activeTrafficPage));
+                }
+            }
+        }
+
+        function setTrafficPageType(pageType) {
+            editorState.trafficPageType = ['all', 'articles', 'static', 'other'].includes(pageType) ? pageType : 'all';
+            updateTrafficPageTypeButtons();
+            if (editorState.trafficPayload) {
+                renderTrafficStats(editorState.trafficPayload);
+                if (editorState.activeTrafficPage) {
+                    openTrafficPageModal(encodeURIComponent(editorState.activeTrafficPage));
+                }
+            }
+        }
+
+        function setTrafficWindow(days) {
+            const nextDays = Number(days) || 30;
+            if (editorState.trafficWindowDays === nextDays && editorState.trafficLoaded) {
+                updateTrafficWindowButtons();
+                return;
+            }
+            editorState.trafficWindowDays = nextDays;
+            updateTrafficWindowButtons();
+            loadTrafficStats(true);
+        }
+
+        function renderTrafficStats(payload) {
+            const status = document.getElementById('traffic-status');
+            if (!payload.available) {
+                status.textContent = payload.message || 'Traffic stats are unavailable.';
+                clearTrafficPanels(payload.message || 'Traffic stats are unavailable.');
+                return;
+            }
+
+            const mode = editorState.trafficMode === 'bots' ? 'bots' : 'humans';
+            const modeLabel = mode === 'bots' ? 'Bot' : 'Human';
+            const periods = payload.periods || {};
+            const oneDay = periods['24h'] || {};
+            const sevenDay = periods['7d'] || {};
+            const windowKey = payload.window_label || `${payload.window_days || 30}d`;
+            const windowPeriod = periods[windowKey] || {};
+            const source = payload.source || {};
+            const pageviewKey = mode === 'bots' ? 'bot_pageviews' : 'pageviews';
+            const uniqueKey = mode === 'bots' ? 'unique_bot_ips' : 'unique_page_ips';
+            const detailPages = (payload.top_pages && payload.top_pages[mode]) || [];
+            const detailPagePaths = new Set(detailPages.map((item) => item.path));
+            const allPages = (payload.pages && payload.pages[mode]) || detailPages;
+            const pageType = ['all', 'articles', 'static', 'other'].includes(editorState.trafficPageType) ? editorState.trafficPageType : 'all';
+            const topPages = pageType === 'all' ? allPages : allPages.filter((item) => inferTrafficPageType(item) === pageType);
+            const topReferrers = (payload.top_referrers && payload.top_referrers[mode]) || [];
+            const latestModeCount = windowPeriod[pageviewKey] || 0;
+            const pageTypeLabel = formatTrafficPageTypeLabel(pageType);
+
+            status.textContent = `Showing ${windowKey} of traffic from ${formatNumber((source.matched_files || []).length)} log file(s). Display mode: ${modeLabel.toLowerCase()} page traffic, ${pageTypeLabel.toLowerCase()}. Latest request: ${formatTrafficTimestamp(windowPeriod.latest_request_at)}.`;
+            document.getElementById('traffic-cards').innerHTML = [
+                ['Requests (24h)', oneDay.requests, 'All nginx hits'],
+                [`${modeLabel} Page Views (24h)`, oneDay[pageviewKey], `Unique IPs: ${formatNumber(oneDay[uniqueKey])}`],
+                ['Requests (7d)', sevenDay.requests, 'All nginx hits'],
+                [`${modeLabel} Page Views (7d)`, sevenDay[pageviewKey], `Unique IPs: ${formatNumber(sevenDay[uniqueKey])}`],
+                [`${modeLabel} Page Views (${windowKey})`, latestModeCount, `Unique IPs: ${formatNumber(windowPeriod[uniqueKey])}`],
+                [`Request IPs (${windowKey})`, windowPeriod.unique_request_ips, 'Approximate all-request reach'],
+                [mode === 'bots' ? `Bot Requests (${windowKey})` : `Bots Filtered (${windowKey})`, windowPeriod.bot_requests, mode === 'bots' ? 'All bot-like nginx requests' : 'Excluded from human page-view metrics'],
+            ].map((card) => `
+                <div class="traffic-card">
+                    <div class="traffic-label">${escapeHtml(card[0])}</div>
+                    <div class="traffic-value">${escapeHtml(formatNumber(card[1]))}</div>
+                    <div class="traffic-meta">${escapeHtml(card[2])}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('traffic-pages-heading').textContent = `${pageTypeLabel} (${formatNumber(topPages.length)})`;
+            document.getElementById('traffic-pages').innerHTML = topPages.length ? `
+                <table class="stats-table"><thead><tr><th>Path</th><th>Type</th><th>${modeLabel} Views</th><th>Unique IPs</th><th>Last Seen</th></tr></thead>
+                <tbody>${topPages.map((item) => `
+                    <tr>
+                        <td class="mono">${detailPagePaths.has(item.path) ? `<button type="button" class="traffic-row-button" onclick="openTrafficPageModal('${encodeURIComponent(item.path || '/')}')"><span class="traffic-row-label">${escapeHtml(item.path || '/')}</span></button>` : escapeHtml(item.path || '/')}</td>
+                        <td>${escapeHtml(formatTrafficPageTypeLabel(inferTrafficPageType(item)).replace(' pages', '').replace('All ', ''))}</td>
+                        <td>${escapeHtml(formatNumber(item.hits))}</td>
+                        <td>${escapeHtml(formatNumber(item.unique_ips))}</td>
+                        <td>${escapeHtml(formatTrafficTimestamp(item.last_seen))}</td>
+                    </tr>`).join('')}</tbody></table>` : `<div class="empty-state">No ${modeLabel.toLowerCase()} ${pageTypeLabel.toLowerCase()} page-view data found for this window.</div>`;
+
+            document.getElementById('traffic-referrers').innerHTML = topReferrers.length ? `
+                <table class="stats-table"><thead><tr><th>Referrer</th><th>${modeLabel} Hits</th></tr></thead>
+                <tbody>${topReferrers.map((item) => `
+                    <tr>
+                        <td class="mono">${escapeHtml(item.host || 'direct')}</td>
+                        <td>${escapeHtml(formatNumber(item.hits))}</td>
+                    </tr>`).join('')}</tbody></table>` : `<div class="empty-state">No ${modeLabel.toLowerCase()} referrer data found yet.</div>`;
+
+            const daily = payload.daily || [];
+            document.getElementById('traffic-daily').innerHTML = daily.length ? `
+                <table class="stats-table"><thead><tr><th>Date</th><th>${modeLabel} Views</th><th>Unique IPs</th><th>Requests</th><th>Bots</th></tr></thead>
+                <tbody>${daily.map((item) => `
+                    <tr>
+                        <td>${escapeHtml(item.date)}</td>
+                        <td>${escapeHtml(formatNumber(item[pageviewKey]))}</td>
+                        <td>${escapeHtml(formatNumber(item[uniqueKey]))}</td>
+                        <td>${escapeHtml(formatNumber(item.requests))}</td>
+                        <td>${escapeHtml(formatNumber(item.bot_requests))}</td>
+                    </tr>`).join('')}</tbody></table>` : '<div class="empty-state">No dated traffic entries were found.</div>';
+
+            const files = (source.matched_files || []).map((item) => `<li>${escapeHtml(item)}</li>`).join('');
+            const patterns = (source.configured_patterns || []).map((item) => `<li>${escapeHtml(item)}</li>`).join('');
+            const statuses = (payload.top_statuses || []).map((item) => `<li><span class="mono">${escapeHtml(item.status)}</span>: ${escapeHtml(formatNumber(item.hits))}</li>`).join('');
+            document.getElementById('traffic-source').innerHTML = `
+                <p class="muted" style="margin-top: 0;">Parsed ${escapeHtml(formatNumber(source.lines_parsed))} recent lines from ${escapeHtml(formatNumber(source.lines_processed))} inspected. Filtered ${escapeHtml(formatNumber(source.bot_requests_filtered))} bot-like page-view requests.${source.truncated ? ' Hit the safety cap, so older lines may be omitted.' : ''}</p>
+                <p><strong>Configured patterns</strong></p>
+                ${patterns ? `<ul class="code-list">${patterns}</ul>` : '<div class="empty-state">No log patterns configured.</div>'}
+                <p><strong>Matched files</strong></p>
+                ${files ? `<ul class="code-list">${files}</ul>` : '<div class="empty-state">No log files matched the configured patterns.</div>'}
+                <p><strong>Status codes</strong></p>
+                ${statuses ? `<ul class="small-list">${statuses}</ul>` : '<div class="empty-state">No status data available.</div>'}
+            `;
+        }
+
+        async function loadTrafficStats(force = false) {
+            if (editorState.trafficLoading) return;
+            if (editorState.trafficLoaded && !force) return;
+            editorState.trafficLoading = true;
+            document.getElementById('traffic-status').textContent = 'Loading traffic statistics...';
+            if (!editorState.trafficLoaded) {
+                clearTrafficPanels('Loading traffic statistics...');
+            }
+            try {
+                const response = await fetch(`/api/admin/traffic?days=${encodeURIComponent(editorState.trafficWindowDays)}&top=${encodeURIComponent(editorState.trafficTopLimit)}`);
+                const payload = await parseApiResponse(response, 'Could not load traffic statistics.');
+                editorState.trafficPayload = payload;
+                updateTrafficModeButtons();
+                updateTrafficPageTypeButtons();
+                renderTrafficStats(payload);
+                if (editorState.activeTrafficPage) {
+                    openTrafficPageModal(encodeURIComponent(editorState.activeTrafficPage));
+                }
+                editorState.trafficLoaded = true;
+            } catch (error) {
+                const message = error.message || 'Could not load traffic statistics.';
+                document.getElementById('traffic-status').textContent = message;
+                clearTrafficPanels(message);
+            } finally {
+                editorState.trafficLoading = false;
+            }
         }
 
         async function submitArticleAction(action) {
@@ -581,6 +1036,40 @@
                 showNotice(error.message || 'Workflow action failed.', 'error');
             }
         }
+
+        async function downloadArticlePdf(encodedFilename) {
+            const filename = decodeURIComponent(encodedFilename);
+            const payload = new URLSearchParams({ filepath: filename });
+
+            try {
+                showNotice('Creating PDF...', 'info');
+                const response = await fetch('/api/admin/article-pdf', {
+                    method: 'POST',
+                    body: payload,
+                });
+                if (!response.ok) {
+                    throw new Error(await parseDownloadError(response, 'PDF export failed.'));
+                }
+
+                const blob = await response.blob();
+                const downloadName = filenameFromDisposition(
+                    response.headers.get('content-disposition'),
+                    `${filename.split('/').pop().replace(/\.md$/i, '') || 'article'}.pdf`
+                );
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = downloadName;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+                showNotice('PDF downloaded.', 'success');
+            } catch (error) {
+                showNotice(error.message || 'PDF export failed.', 'error');
+            }
+        }
+
         async function loadLibrary(filter = 'active') {
             editorState.currentFilter = filter;
             document.querySelectorAll('.filter-btn').forEach((button) => {
@@ -612,10 +1101,13 @@
                 const announceButton = article.is_live_public
                     ? `<button class="btn-ghost action-link" type="button" onclick="runLibraryWorkflow('${encodeURIComponent(article.filename)}', 'announce_discord')">${announceLabel}</button>`
                     : '';
+                const pdfButton = `<button class="btn-ghost action-link" type="button" onclick="downloadArticlePdf('${encodeURIComponent(article.filename)}')">PDF</button>`;
                 const actions = article.status === 'deleted'
                     ? `<button class="btn-secondary action-link" type="button" onclick="editArticle('${encodeURIComponent(article.filename)}')">View</button>
+                       ${pdfButton}
                        <button class="btn-ghost" type="button" onclick="restoreArticle('${encodeURIComponent(article.filename)}', '${escapeHtml(article.title)}')">Restore</button>`
                     : `<button class="btn-secondary action-link" type="button" onclick="editArticle('${encodeURIComponent(article.filename)}')">Edit</button>
+                       ${pdfButton}
                        ${announceButton}
                        <button class="btn-danger" type="button" onclick="deleteArticle('${encodeURIComponent(article.filename)}', '${escapeHtml(article.title)}')">Delete</button>`;
 
@@ -687,6 +1179,14 @@
 
         contentArea.addEventListener('input', updatePreview);
 
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeTrafficPageModal();
+            }
+        });
+        updateTrafficModeButtons();
+        updateTrafficPageTypeButtons();
+        updateTrafficWindowButtons();
         setDefaultDate();
         updatePreview();
         setEditorMode('new');

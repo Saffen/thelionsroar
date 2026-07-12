@@ -1,0 +1,936 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Roaring Days 9 Bingo | The Lion's Roar</title>
+  <meta
+    name="description"
+    content="A standalone bingo card for Roaring Days 9. Spot the chaos, mark your board, and share a seeded festival card."
+  />
+  <link rel="stylesheet" href="/assets/css/newbase.css" />
+  <link rel="stylesheet" href="https://thelionsroar.eu/assets/css/widgets.css" />
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+  <style>
+    .festival-bingo {
+      position: relative;
+      padding: 2rem 0 3rem;
+      isolation: isolate;
+    }
+
+    .festival-bingo::before,
+    .festival-bingo::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: -2;
+    }
+
+    .festival-bingo::before {
+      background:
+        radial-gradient(circle at top left, rgba(184, 134, 11, 0.18), transparent 34%),
+        radial-gradient(circle at top right, rgba(28, 28, 132, 0.14), transparent 32%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(241, 241, 234, 0.3));
+    }
+
+    .festival-bingo::after {
+      background-image:
+        linear-gradient(rgba(215, 215, 207, 0.18) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(215, 215, 207, 0.18) 1px, transparent 1px);
+      background-size: 26px 26px;
+      opacity: 0.55;
+      z-index: -1;
+    }
+
+    :root[data-theme="dark"] .festival-bingo::before {
+      background:
+        radial-gradient(circle at top left, rgba(255, 215, 0, 0.08), transparent 34%),
+        radial-gradient(circle at top right, rgba(123, 104, 238, 0.1), transparent 32%),
+        linear-gradient(180deg, rgba(18, 19, 21, 0.84), rgba(24, 26, 31, 0.55));
+    }
+
+    :root[data-theme="immersive"] .festival-bingo::before {
+      background:
+        radial-gradient(circle at top left, rgba(139, 69, 19, 0.14), transparent 34%),
+        radial-gradient(circle at top right, rgba(184, 134, 11, 0.16), transparent 32%),
+        linear-gradient(180deg, rgba(251, 247, 240, 0.9), rgba(242, 232, 213, 0.55));
+    }
+
+    .bingo-shell {
+      display: grid;
+      gap: 1.5rem;
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    .bingo-hero,
+    .bingo-panel {
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(241, 241, 234, 0.88));
+      box-shadow: 0 18px 44px rgba(17, 17, 17, 0.08);
+    }
+
+    :root[data-theme="dark"] .bingo-hero,
+    :root[data-theme="dark"] .bingo-panel {
+      background:
+        linear-gradient(145deg, rgba(24, 26, 31, 0.98), rgba(18, 19, 21, 0.92));
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.34);
+    }
+
+    :root[data-theme="immersive"] .bingo-hero,
+    :root[data-theme="immersive"] .bingo-panel {
+      background:
+        linear-gradient(145deg, rgba(251, 247, 240, 0.96), rgba(242, 232, 213, 0.9));
+    }
+
+    .bingo-hero {
+      padding: clamp(1.4rem, 3vw, 2.4rem);
+      overflow: hidden;
+    }
+
+    .bingo-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.8rem;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.72);
+      font-family: var(--sans);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    :root[data-theme="dark"] .bingo-kicker {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .bingo-title {
+      margin: 0.9rem 0 0.45rem;
+      font-size: clamp(2.2rem, 5vw, 4.4rem);
+      line-height: 0.98;
+    }
+
+    .bingo-subtitle,
+    .bingo-note,
+    .bingo-status,
+    .bingo-seed-row,
+    .bingo-help {
+      font-family: var(--sans);
+    }
+
+    .bingo-subtitle {
+      max-width: 52ch;
+      margin: 0;
+      font-size: clamp(1rem, 1.8vw, 1.15rem);
+      color: var(--muted);
+    }
+
+    .bingo-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-top: 1.2rem;
+    }
+
+    .meta-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.55rem 0.8rem;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.62);
+      color: var(--muted);
+    }
+
+    :root[data-theme="dark"] .meta-pill {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .bingo-panel {
+      padding: clamp(1rem, 2.6vw, 1.6rem);
+    }
+
+    .bingo-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .bingo-actions,
+    .bingo-share {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .bingo-button {
+      appearance: none;
+      border: 1px solid var(--line-strong);
+      background: var(--ink);
+      color: var(--paper);
+      padding: 0.78rem 1rem;
+      font: inherit;
+      font-family: var(--sans);
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 160ms ease, opacity 160ms ease, box-shadow 160ms ease;
+    }
+
+    .bingo-button:hover,
+    .bingo-button:focus-visible {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(17, 17, 17, 0.14);
+    }
+
+    .bingo-button:focus-visible {
+      outline: 2px solid var(--accent-gold);
+      outline-offset: 2px;
+    }
+
+    .bingo-button.is-secondary {
+      background: transparent;
+      color: var(--ink);
+    }
+
+    .bingo-seed-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      align-items: center;
+      color: var(--muted);
+    }
+
+    .bingo-seed {
+      display: inline-flex;
+      align-items: center;
+      min-height: 2.65rem;
+      padding: 0.4rem 0.75rem;
+      border: 1px dashed var(--line-strong);
+      background: rgba(255, 255, 255, 0.52);
+      color: var(--ink);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.96rem;
+      word-break: break-all;
+    }
+
+    :root[data-theme="dark"] .bingo-seed {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .bingo-status {
+      min-height: 1.5rem;
+      margin: 0 0 1rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .bingo-status.is-winning {
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    .bingo-board {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 0.7rem;
+    }
+
+    .bingo-tile {
+      appearance: none;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 106px;
+      padding: 0.9rem 0.75rem;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(241, 241, 234, 0.92));
+      color: var(--ink);
+      text-align: center;
+      font: inherit;
+      font-family: var(--sans);
+      font-size: 0.94rem;
+      line-height: 1.22;
+      cursor: pointer;
+      transition:
+        transform 140ms ease,
+        border-color 140ms ease,
+        background 140ms ease,
+        box-shadow 140ms ease;
+    }
+
+    :root[data-theme="dark"] .bingo-tile {
+      background:
+        linear-gradient(180deg, rgba(29, 31, 37, 0.96), rgba(18, 19, 21, 0.96));
+    }
+
+    :root[data-theme="immersive"] .bingo-tile {
+      background:
+        linear-gradient(180deg, rgba(255, 250, 243, 0.95), rgba(246, 236, 220, 0.95));
+    }
+
+    .bingo-tile:hover,
+    .bingo-tile:focus-visible {
+      transform: translateY(-2px);
+      border-color: var(--line-strong);
+      box-shadow: 0 10px 24px rgba(17, 17, 17, 0.12);
+    }
+
+    .bingo-tile:focus-visible {
+      outline: 2px solid var(--accent-gold);
+      outline-offset: 2px;
+    }
+
+    .bingo-tile::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 140ms ease;
+      background:
+        linear-gradient(135deg, rgba(184, 134, 11, 0.22), rgba(28, 28, 132, 0.12));
+    }
+
+    .bingo-tile[aria-pressed="true"] {
+      border-color: var(--line-strong);
+      background:
+        linear-gradient(180deg, rgba(255, 239, 201, 0.95), rgba(238, 220, 174, 0.98));
+      box-shadow: inset 0 0 0 1px rgba(184, 134, 11, 0.2);
+    }
+
+    :root[data-theme="dark"] .bingo-tile[aria-pressed="true"] {
+      background:
+        linear-gradient(180deg, rgba(82, 64, 14, 0.94), rgba(55, 43, 12, 0.98));
+      color: #fff4d2;
+    }
+
+    :root[data-theme="immersive"] .bingo-tile[aria-pressed="true"] {
+      background:
+        linear-gradient(180deg, rgba(240, 216, 176, 0.98), rgba(230, 197, 145, 0.98));
+    }
+
+    .bingo-tile[aria-pressed="true"]::before,
+    .bingo-tile.is-winning::before {
+      opacity: 1;
+    }
+
+    .bingo-tile.is-free {
+      font-weight: 700;
+    }
+
+    .bingo-tile.is-winning {
+      border-color: var(--accent-gold);
+      box-shadow:
+        inset 0 0 0 1px rgba(184, 134, 11, 0.34),
+        0 0 0 2px rgba(184, 134, 11, 0.18);
+    }
+
+    .bingo-help {
+      margin: 1rem 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 920px) {
+      .bingo-board {
+        gap: 0.55rem;
+      }
+
+      .bingo-tile {
+        min-height: 96px;
+        font-size: 0.86rem;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .festival-bingo {
+        padding-top: 1.2rem;
+      }
+
+      .bingo-controls {
+        align-items: stretch;
+      }
+
+      .bingo-actions,
+      .bingo-share {
+        width: 100%;
+      }
+
+      .bingo-button {
+        flex: 1 1 180px;
+        justify-content: center;
+      }
+
+      .bingo-panel {
+        overflow-x: auto;
+      }
+
+      .bingo-board {
+        min-width: 480px;
+      }
+
+      .bingo-tile {
+        min-height: 110px;
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .bingo-board {
+        gap: 0.45rem;
+      }
+
+      .bingo-tile {
+        min-height: 98px;
+        padding: 0.7rem 0.5rem;
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="masthead">
+    <div class="masthead-top container">
+      <div class="masthead-left">
+        <div class="mini-meta"></div>
+        <div class="social-dots" aria-label="Social links">
+          <a
+            class="social-link"
+            href="https://discord.gg/AzC8KjnuFv"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Join The Lion's Roar on Discord"
+            title="Join The Lion's Roar on Discord"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path fill="currentColor" d="M20.32 4.37a16.4 16.4 0 0 0-4.09-1.29l-.2.4a15.2 15.2 0 0 1 3.74 1.23 12.9 12.9 0 0 0-7.55-1.94 12.9 12.9 0 0 0-7.55 1.94 15.2 15.2 0 0 1 3.74-1.23l-.2-.4a16.4 16.4 0 0 0-4.09 1.29C1.54 8.31.35 12.15.78 15.93a16.6 16.6 0 0 0 5.02 2.53l.4-.65a10.8 10.8 0 0 1-1.64-.79l.39-.28c3.16 1.48 6.59 1.48 9.71 0l.39.28c-.52.3-1.07.57-1.64.79l.4.65a16.6 16.6 0 0 0 5.02-2.53c.5-4.38-.85-8.18-3.11-11.56ZM8.68 13.62c-.95 0-1.72-.88-1.72-1.96 0-1.08.76-1.96 1.72-1.96.97 0 1.74.89 1.72 1.96 0 1.08-.76 1.96-1.72 1.96Zm6.64 0c-.95 0-1.72-.88-1.72-1.96 0-1.08.76-1.96 1.72-1.96.97 0 1.74.89 1.72 1.96 0 1.08-.76 1.96-1.72 1.96Z"/>
+            </svg>
+            <span>Discord</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="masthead-center">
+        <a class="brand-link" href="https://thelionsroar.eu/" aria-label="Go to the homepage">
+          <div class="brand">
+            <div class="brand-icon lion-icon"></div>
+            <div class="brand-text">
+              <svg viewBox="0 0 500 82" xmlns="http://www.w3.org/2000/svg">
+                <line x1="40" y1="20" x2="460" y2="20" stroke="currentColor" stroke-width="2" />
+                <text
+                  x="50%"
+                  y="45"
+                  text-anchor="middle"
+                  font-family="'EB Garamond', serif"
+                  dominant-baseline="central"
+                  font-weight="800"
+                  letter-spacing="2"
+                  fill="currentColor"
+                  style="text-transform: uppercase;"
+                >
+                  The Lion's Roar
+                </text>
+                <line x1="40" y1="70" x2="460" y2="70" stroke="currentColor" stroke-width="2" />
+              </svg>
+              <div class="tagline">An Independent source of news for the discerning reader of Azeroth.</div>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <div class="masthead-right">
+        <div class="mini-meta"></div>
+        <button class="theme-toggle" type="button" aria-label="Toggle theme">
+          <div class="toggle-track">
+            <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <svg class="news-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>
+            <div class="toggle-thumb"></div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <nav class="nav-bar" aria-label="Primary">
+      <div class="container nav-inner">
+        <button class="nav-toggle" aria-label="Menu" aria-expanded="false" type="button">
+          <span class="nav-toggle-label">Menu</span>
+          <span class="nav-toggle-icon" aria-hidden="true">&#9776;</span>
+        </button>
+
+        <ul class="nav-links">
+          <li><a href="https://thelionsroar.eu/">Home</a></li>
+          <li><a href="https://thelionsroar.eu/games/">Games</a></li>
+        </ul>
+
+        <div class="nav-meta"></div>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main" class="container">
+    <section class="festival-bingo" aria-labelledby="page-title">
+      <div class="bingo-shell">
+        <section class="bingo-hero" aria-label="Roaring Days bingo introduction">
+          <div class="bingo-kicker"></div>
+          <h1 id="page-title" class="bingo-title">Roaring Days 9 Bingo</h1>
+          <div class="bingo-meta" aria-label="Festival notes">
+
+          </div>
+        </section>
+
+        <section class="bingo-panel" aria-label="Roaring Days bingo board">
+          <div class="bingo-controls">
+            <div class="bingo-actions">
+              <button id="generate-button" class="bingo-button" type="button">Generate New Card</button>
+              <button id="clear-button" class="bingo-button is-secondary" type="button">Clear Board</button>
+            </div>
+            <div class="bingo-share">
+              <div class="bingo-seed-row">
+                <span>Seed</span>
+                <code id="seed-display" class="bingo-seed">loading...</code>
+              </div>
+              <button id="share-button" class="bingo-button is-secondary" type="button">Copy Share Link</button>
+            </div>
+          </div>
+
+          <p id="bingo-status" class="bingo-status" aria-live="polite">
+            
+          </p>
+
+          <div id="bingo-board" class="bingo-board" role="grid" aria-label="Roaring Days 9 bingo board"></div>
+          <p class="bingo-help">Tap a square to mark it. Reloading the same seeded card keeps your progress on this device.</p>
+          <p class="visually-hidden" id="board-help">Each bingo square is a toggle button that can be marked or cleared.</p>
+        </section>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <div>&copy; The Lion's Roar</div>
+        <div class="footer-links">
+          <a href="https://thelionsroar.eu/about/">About</a>
+          <a href="https://thelionsroar.eu/contact/">Contact</a>
+          <a href="https://thelionsroar.eu/privacy/">Privacy</a>
+          <a href="https://thelionsroar.eu/jobs/">Jobs</a>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      const btn = document.querySelector(".nav-toggle");
+      const links = document.querySelector(".nav-links");
+      if (!btn || !links) return;
+
+      btn.addEventListener("click", () => {
+        const open = links.classList.toggle("is-open");
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+
+      links.addEventListener("click", () => {
+        links.classList.remove("is-open");
+        btn.setAttribute("aria-expanded", "false");
+      });
+
+      document.addEventListener("click", (event) => {
+        if (!links.classList.contains("is-open")) return;
+        if (btn.contains(event.target) || links.contains(event.target)) return;
+        links.classList.remove("is-open");
+        btn.setAttribute("aria-expanded", "false");
+      });
+    })();
+  </script>
+  <script>
+    (function () {
+      const root = document.documentElement;
+      const key = "lr-theme";
+
+      function apply(theme) {
+        if (theme) root.setAttribute("data-theme", theme);
+        else root.removeAttribute("data-theme");
+      }
+
+      const saved = localStorage.getItem(key);
+      if (saved === "dark" || saved === "light" || saved === "immersive") {
+        apply(saved);
+      } else {
+        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        apply(prefersDark ? "dark" : "light");
+      }
+
+      const btn = document.querySelector(".theme-toggle");
+      if (!btn) return;
+
+      btn.addEventListener("click", () => {
+        const themes = ["light", "dark", "immersive"];
+        const current = root.getAttribute("data-theme") || "light";
+        const next = themes[(themes.indexOf(current) + 1) % themes.length];
+        apply(next);
+        localStorage.setItem(key, next);
+      });
+    })();
+  </script>
+  <script>
+    (function () {
+      const BOARD_SIZE = 5;
+      const TOTAL_TILES = BOARD_SIZE * BOARD_SIZE;
+      const FREE_INDEX = 12;
+      const FREE_TEXT = "ENJOY THE MUSIC";
+      const STORAGE_PREFIX = "rd9-bingo-v1:";
+      const SHARE_PARAM = "seed";
+
+      // Prompt pool for seeded board generation. Keep entries short enough for the tiles.
+      const PROMPTS = [
+        "Someone plays metal",
+        "Someone shouts \"encore!\"",
+        "Vivian starts a conga line",
+        "There is a line to the outhouse",
+        "Outhouse incident referenced",
+        "Someone forgets lyrics",
+        "Someone plugs another event",
+        "Someone references Roaring Days 8",
+        "Someone yells for mosh pit",
+        "Blinding beam of multiple spotlights",
+        "Someone creating a rainbow!",
+		    "Leejing wishes someone a good roaring day!",
+        "Crowd sings along on a chorus",
+		    "Mazzy mentions her undercarriage",
+        "More than 20 tents in the campground",
+        "Someone fishing in the lake",
+        "A dancing dwarf!",
+        "People form an actual circle",
+		    "Someone sits on the stage",
+        "Bertel being constipated",
+        "A giraffe",
+        "Hamfist screaming",
+        "A mount blocks the view",
+        "More than 10 people jump at the same time",
+        "A drum solo appears",
+        "Someone bows too much",
+		    "Barovar hits on someone's wife",
+        "A gaggle of more than five gnomes form",
+        "Someone leans against a lamppost",
+        "Someone needs a translator to understand Vivian",
+        "A large bird dances!",
+        "It starts raining",
+        "The Ham is hoisted!",
+        "Hardhy downplays his work",
+        "Backstage panic energy",
+        "Someone tries crowd surfing",
+        "Vivian sells all her pet rocks!",
+        "A draenei says \"Darlink\""
+        ];
+
+      const boardElement = document.getElementById("bingo-board");
+      const statusElement = document.getElementById("bingo-status");
+      const seedDisplayElement = document.getElementById("seed-display");
+      const generateButton = document.getElementById("generate-button");
+      const clearButton = document.getElementById("clear-button");
+      const shareButton = document.getElementById("share-button");
+
+      let currentSeed = "";
+      let currentBoard = [];
+      let markedTiles = [];
+
+      // Seed helpers keep cards repeatable when a shared URL is used.
+      function createSeed() {
+        if (window.crypto && window.crypto.getRandomValues) {
+          const values = new Uint32Array(2);
+          window.crypto.getRandomValues(values);
+          return Array.from(values, (value) => value.toString(36)).join("-").slice(0, 16);
+        }
+
+        return Math.random().toString(36).slice(2, 10);
+      }
+
+      function cyrb128(input) {
+        let h1 = 1779033703;
+        let h2 = 3144134277;
+        let h3 = 1013904242;
+        let h4 = 2773480762;
+
+        for (let index = 0; index < input.length; index += 1) {
+          const code = input.charCodeAt(index);
+          h1 = h2 ^ Math.imul(h1 ^ code, 597399067);
+          h2 = h3 ^ Math.imul(h2 ^ code, 2869860233);
+          h3 = h4 ^ Math.imul(h3 ^ code, 951274213);
+          h4 = h1 ^ Math.imul(h4 ^ code, 2716044179);
+        }
+
+        h1 = Math.imul(h3 ^ (h1 >>> 18), 597399067);
+        h2 = Math.imul(h4 ^ (h2 >>> 22), 2869860233);
+        h3 = Math.imul(h1 ^ (h3 >>> 17), 951274213);
+        h4 = Math.imul(h2 ^ (h4 >>> 19), 2716044179);
+
+        return [(h1 ^ h2 ^ h3 ^ h4) >>> 0, (h2 ^ h1) >>> 0, (h3 ^ h1) >>> 0, (h4 ^ h1) >>> 0];
+      }
+
+      function sfc32(a, b, c, d) {
+        return function random() {
+          a >>>= 0;
+          b >>>= 0;
+          c >>>= 0;
+          d >>>= 0;
+          const result = (a + b + d) >>> 0;
+          d = (d + 1) >>> 0;
+          a = b ^ (b >>> 9);
+          b = (c + (c << 3)) >>> 0;
+          c = ((c << 21) | (c >>> 11)) >>> 0;
+          c = (c + result) >>> 0;
+          return result / 4294967296;
+        };
+      }
+
+      function seededRandom(seed) {
+        return sfc32.apply(null, cyrb128(seed));
+      }
+
+      function shuffle(items, random) {
+        const copy = items.slice();
+
+        for (let index = copy.length - 1; index > 0; index -= 1) {
+          const swapIndex = Math.floor(random() * (index + 1));
+          const temp = copy[index];
+          copy[index] = copy[swapIndex];
+          copy[swapIndex] = temp;
+        }
+
+        return copy;
+      }
+
+      // Build a 6x6 board with one reserved free space and no duplicate prompts.
+      function generateBoard(seed) {
+        const random = seededRandom(seed);
+        const selectedPrompts = shuffle(PROMPTS, random).slice(0, TOTAL_TILES - 1);
+        const board = [];
+        let promptIndex = 0;
+
+        for (let index = 0; index < TOTAL_TILES; index += 1) {
+          if (index === FREE_INDEX) {
+            board.push(FREE_TEXT);
+            continue;
+          }
+
+          board.push(selectedPrompts[promptIndex]);
+          promptIndex += 1;
+        }
+
+        return board;
+      }
+
+      // Save marks per-seed so a shared card can be resumed later on this device.
+      function getStorageKey(seed) {
+        return STORAGE_PREFIX + seed;
+      }
+
+      function saveState() {
+        localStorage.setItem(
+          getStorageKey(currentSeed),
+          JSON.stringify({
+            marks: markedTiles
+          })
+        );
+      }
+
+      function loadState(seed) {
+        const fallback = Array.from({ length: TOTAL_TILES }, (_, index) => index === FREE_INDEX);
+        const savedValue = localStorage.getItem(getStorageKey(seed));
+        if (!savedValue) return fallback;
+
+        try {
+          const parsed = JSON.parse(savedValue);
+          if (!parsed || !Array.isArray(parsed.marks) || parsed.marks.length !== TOTAL_TILES) {
+            return fallback;
+          }
+
+          return parsed.marks.map(Boolean);
+        } catch (error) {
+          return fallback;
+        }
+      }
+
+      // Rows, columns, and both diagonals count as bingo lines.
+      function getWinningLines(marks) {
+        const lines = [];
+
+        for (let row = 0; row < BOARD_SIZE; row += 1) {
+          const line = [];
+          for (let column = 0; column < BOARD_SIZE; column += 1) {
+            line.push((row * BOARD_SIZE) + column);
+          }
+          lines.push(line);
+        }
+
+        for (let column = 0; column < BOARD_SIZE; column += 1) {
+          const line = [];
+          for (let row = 0; row < BOARD_SIZE; row += 1) {
+            line.push((row * BOARD_SIZE) + column);
+          }
+          lines.push(line);
+        }
+
+        const diagonalA = [];
+        const diagonalB = [];
+
+        for (let index = 0; index < BOARD_SIZE; index += 1) {
+          diagonalA.push((index * BOARD_SIZE) + index);
+          diagonalB.push((index * BOARD_SIZE) + (BOARD_SIZE - 1 - index));
+        }
+
+        lines.push(diagonalA, diagonalB);
+
+        return lines.filter((line) => line.every((tileIndex) => marks[tileIndex]));
+      }
+
+      function updateStatus(winningLines) {
+        if (winningLines.length === 0) {
+          statusElement.textContent = "";
+          statusElement.classList.remove("is-winning");
+          return;
+        }
+
+        const lineLabel = winningLines.length === 1 ? "line" : "lines";
+        statusElement.textContent = "Bingo! You have " + winningLines.length + " roaring " + lineLabel + ".";
+        statusElement.classList.add("is-winning");
+      }
+
+      function createTile(text, index, winningIndexes) {
+        const tile = document.createElement("button");
+        const isMarked = Boolean(markedTiles[index]);
+        const isWinning = winningIndexes.has(index);
+        const isFree = index === FREE_INDEX;
+
+        tile.type = "button";
+        tile.className = "bingo-tile";
+        tile.setAttribute("role", "gridcell");
+        tile.setAttribute("aria-pressed", isMarked ? "true" : "false");
+        tile.setAttribute("aria-describedby", "board-help");
+        tile.dataset.index = String(index);
+        tile.textContent = text;
+
+        if (isFree) {
+          tile.classList.add("is-free");
+        }
+
+        if (isWinning) {
+          tile.classList.add("is-winning");
+        }
+
+        tile.addEventListener("click", () => {
+          markedTiles[index] = !markedTiles[index];
+          renderBoard();
+          saveState();
+        });
+
+        return tile;
+      }
+
+      // Re-render after every interaction so winning lines and saved marks stay in sync.
+      function renderBoard() {
+        const winningLines = getWinningLines(markedTiles);
+        const winningIndexes = new Set(winningLines.flat());
+
+        boardElement.innerHTML = "";
+        currentBoard.forEach((text, index) => {
+          boardElement.appendChild(createTile(text, index, winningIndexes));
+        });
+
+        updateStatus(winningLines);
+      }
+
+      function buildShareUrl(seed) {
+        const url = new URL(window.location.href);
+        url.searchParams.set(SHARE_PARAM, seed);
+        return url.toString();
+      }
+
+      function syncUrl(seed) {
+        const shareUrl = buildShareUrl(seed);
+        window.history.replaceState({}, "", shareUrl);
+      }
+
+      function setSeed(seed) {
+        currentSeed = seed;
+        currentBoard = generateBoard(seed);
+        markedTiles = loadState(seed);
+        seedDisplayElement.textContent = seed;
+        syncUrl(seed);
+        renderBoard();
+        saveState();
+      }
+
+      function clearBoard() {
+        markedTiles = Array.from({ length: TOTAL_TILES }, () => false);
+        renderBoard();
+        saveState();
+      }
+
+      async function copyShareLink() {
+        const shareUrl = buildShareUrl(currentSeed);
+
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+          statusElement.textContent = "Share link copied. Now you can inflict this exact chaos on someone else.";
+          statusElement.classList.remove("is-winning");
+        } catch (error) {
+          const helper = document.createElement("input");
+          helper.type = "text";
+          helper.value = shareUrl;
+          helper.setAttribute("readonly", "");
+          helper.style.position = "absolute";
+          helper.style.left = "-9999px";
+          document.body.appendChild(helper);
+          helper.select();
+          document.execCommand("copy");
+          document.body.removeChild(helper);
+          statusElement.textContent = "Share link copied. Now you can inflict this exact chaos on someone else.";
+          statusElement.classList.remove("is-winning");
+        }
+      }
+
+      generateButton.addEventListener("click", () => {
+        setSeed(createSeed());
+      });
+
+      clearButton.addEventListener("click", () => {
+        clearBoard();
+      });
+
+      shareButton.addEventListener("click", () => {
+        copyShareLink();
+      });
+
+      const url = new URL(window.location.href);
+      const requestedSeed = url.searchParams.get(SHARE_PARAM);
+      setSeed(requestedSeed || createSeed());
+    })();
+  </script>
+  <script src="https://thelionsroar.eu/assets/js/widgets.js" defer></script>
+</body>
+</html>
+
+

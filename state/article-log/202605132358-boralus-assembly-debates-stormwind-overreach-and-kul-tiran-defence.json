@@ -1,0 +1,26 @@
+[
+  {
+    "timestamp": "2026-05-14T21:15:29Z",
+    "action": "update_published",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": true,
+    "summary": "Article saved via update_published. Public site rebuilt (11 article outputs, 0 stale outputs removed)."
+  },
+  {
+    "timestamp": "2026-05-13T22:17:11Z",
+    "action": "announce_discord",
+    "from_status": "published",
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Discord announcement posted and crossposted from the admin panel."
+  },
+  {
+    "timestamp": "2026-05-13T22:16:51Z",
+    "action": "publish_now",
+    "from_status": null,
+    "to_status": "published",
+    "version_snapshot_created": false,
+    "summary": "Article saved via publish_now. Live publish state updated. Public site rebuilt (11 article outputs, 0 stale outputs removed)."
+  }
+]
